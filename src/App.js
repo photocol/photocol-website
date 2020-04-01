@@ -1,15 +1,14 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import store from './store';
+import Store from './services/Store';
 import Authenticator from './components/Authenticator/Authenticator';
+import TopBar from './components/TopBar/TopBar';
 import './App.css';
 
-function App() {
-  return (
-    <Provider className="App" store={store}>
-      <Authenticator />
-    </Provider>
-  );
-}
-
+const App = () => (
+  <Provider className="App" store={Store}>
+    <TopBar />
+    <Authenticator />
+  </Provider>
+);
 export default App;

@@ -3,10 +3,14 @@ import { createStore, combineReducers } from 'redux';
 
 // reducers
 const userReducer = (state=0, action) => {
-  if(action.type === 'signin') {
-    return { username: 'signed in' };
+  switch(action.type) {
+    case 'signin':
+      return { username: 'signed in' };
+    case 'signout':
+      return { username: 'not signed in' };
+    default:
+      return state;
   }
-  return state;
 };
 const rootReducer = combineReducers({
   user: userReducer
@@ -20,5 +24,5 @@ const initialState = {
 };
 
 // global store
-const store = createStore(rootReducer, initialState);
-export default store;
+const Store = createStore(rootReducer, initialState);
+export default Store;
