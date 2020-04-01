@@ -1,3 +1,5 @@
+import Store from './Store';
+
 // make this into an environment variable later
 const BASEURL = 'http://localhost:4567';
 
@@ -14,11 +16,7 @@ class ApiConnectionManager {
         method: 'POST',
         credentials: 'include',
         ...options
-      }).then(async res => {
-        resolve(await res.json());
-      }).catch(err => {
-        reject(err);
-      });
+      }).then(async res => resolve(await res.json())).catch(reject);
     });
   }
    
@@ -28,7 +26,23 @@ class ApiConnectionManager {
         username: username,
         passwordHash: password
       })
-    }).then(res => console.log(res));
+    }).then(res => {
+      if(res.status === 'STATUS_OK') {
+        Store.dispatch({type: 'signin'});
+      }
+    }).catch(err => {
+      console.error(err);
+    });
+  }
+  
+  signOut() {
+    this.request('/logout', {
+      method: 'GET'
+    }).then(res => {
+      console.log(res);
+    }).catch(err => {
+      console.error(err);
+    });
   }
   
 }

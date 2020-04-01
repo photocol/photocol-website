@@ -3,15 +3,23 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import './TopBar.css';
 
-const TopBar = props => (
-  <div className="TopBar">
-    <span>Currently signed-in user: {props.username}</span>
-    {props.username==='not signed in'
-      ? <button onClick={props.signIn}>Sign in</button>
-      : <button onClick={props.signOut}>Sign out</button>
-    }
-  </div>
-);
+class TopBar extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  
+  render() {
+    return (
+      <div className="TopBar">
+          <span>Currently signed-in user: {this.props.username}</span>
+        {this.props.username==='not signed in'
+          ? <button onClick={this.props.signIn}>Sign in</button>
+        : <button onClick={this.props.signOut}>Sign out</button>
+        }
+      </div>
+    );
+  }
+}
 
 // props
 TopBar.propTypes = {};

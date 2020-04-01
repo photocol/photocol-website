@@ -5,10 +5,15 @@ import Authenticator from './components/Authenticator/Authenticator';
 import TopBar from './components/TopBar/TopBar';
 import './App.css';
 
-const App = () => (
-  <Provider className="App" store={Store}>
-    <TopBar />
-    <Authenticator />
-  </Provider>
-);
+class App extends React.Component {
+  render() {
+    return (
+      <Provider className="App" store={Store}>
+      <TopBar />
+      <Authenticator />
+      </Provider>
+    );
+  }
+}
+
 export default App;
