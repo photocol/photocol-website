@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import './Authenticator.css';
-import ACM from '../../services/ApiConnectionManager';
+import LoginManager from '../../util/LoginManager';
 
 class Authenticator extends React.Component {
   constructor(props) {
@@ -10,6 +10,15 @@ class Authenticator extends React.Component {
       username: 'tiff',
       password: 'password'
     };
+    this.lm = new LoginManager();
+    
+    // bind "this" to functions (necessary for ES6 class syntax)
+    this.logIn = this.logIn.bind(this);
+  }
+  
+  logIn() {
+    this.lm.logIn(this.state.username, this.state.password)
+      .catch(err => console.error(err));
   }
   
   render() {
@@ -23,7 +32,7 @@ class Authenticator extends React.Component {
             Password <input type='password'
                             value={this.state.password}
                             onChange={evt => this.setState({password: evt.target.value})}/><br/>
-            <button onClick={() => ACM.signIn(this.state.username, this.state.password)}>Sign in</button>
+            <button onClick={this.logIn}>Log in</button>
           </div>
           {this.props.username}
       </div>
@@ -34,8 +43,5 @@ class Authenticator extends React.Component {
 const mapStateToProps = state => ({
   username: state.user.username
 });
-const mapDispatchToProps = dispatch => ({
-  signIn: () => dispatch({type: 'signin'})
-});
 
-export default connect(mapStateToProps, mapDispatchToProps)(Authenticator);
+export default connect(mapStateToProps)(Authenticator);

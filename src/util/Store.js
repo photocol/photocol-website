@@ -2,12 +2,12 @@
 import { createStore, combineReducers } from 'redux';
 
 // reducers
-const userReducer = (state=0, action) => {
+const userReducer = (state=null, action) => {
   switch(action.type) {
-    case 'signin':
-      return { username: 'signed in' };
-    case 'signout':
-      return { username: 'not signed in' };
+    case 'login':
+      return { username: action.username };
+    case 'logout':
+      return { username: 'not logged in' };
     default:
       return state;
   }
@@ -19,10 +19,10 @@ const rootReducer = combineReducers({
 // initial state
 const initialState = {
   user: {
-    username: 'not signed in'
+    username: 'not logged in'
   }
 };
 
 // global store
-const Store = createStore(rootReducer, initialState);
-export default Store;
+const store = createStore(rootReducer, initialState);
+export default store;

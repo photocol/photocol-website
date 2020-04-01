@@ -1,6 +1,6 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import Store from './services/Store';
+import store from './util/Store';
 import Authenticator from './components/Authenticator/Authenticator';
 import TopBar from './components/TopBar/TopBar';
 import './App.css';
@@ -8,9 +8,9 @@ import './App.css';
 class App extends React.Component {
   render() {
     return (
-      <Provider className="App" store={Store}>
-      <TopBar />
-      <Authenticator />
+      <Provider className="App" store={store}>
+        <TopBar />
+        <Authenticator />
       </Provider>
     );
   }

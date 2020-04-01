@@ -1,37 +1,32 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import LoginManager from '../../util/LoginManager';
 import './TopBar.css';
 
 class TopBar extends React.Component {
   constructor(props) {
     super(props);
+    this.lm = new LoginManager();
+    
+    this.lm.checkIsLoggedIn();
   }
   
   render() {
     return (
       <div className="TopBar">
           <span>Currently signed-in user: {this.props.username}</span>
-        {this.props.username==='not signed in'
-          ? <button onClick={this.props.signIn}>Sign in</button>
-        : <button onClick={this.props.signOut}>Sign out</button>
+        {this.props.username==='not logged in'
+          ? <button onClick={this.lm.logIn}>Sign in</button>
+          : <button onClick={this.lm.logOut}>Sign out</button>
         }
       </div>
     );
   }
 }
 
-// props
-TopBar.propTypes = {};
-TopBar.defaultProps = {};
-
 const mapStateToProps = state => ({
   username: state.user.username
 });
-const mapDispatchToProps = dispatch => ({
-  signIn: () => dispatch({type: 'signin'}),
-  signOut: () => dispatch({type: 'signout'}),
-});
 
 // redux props
-export default connect(mapStateToProps, mapDispatchToProps)(TopBar);
+export default connect(mapStateToProps)(TopBar);
