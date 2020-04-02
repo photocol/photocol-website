@@ -5,6 +5,7 @@ import Authenticator from './components/Authenticator/Authenticator';
 import LoginManager from './util/LoginManager';
 import TopBar from './components/TopBar/TopBar';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import Home from './components/Home/Home';
 import Profile from './components/Profile/Profile';
 import Collection from './components/Collection/Collection';
 import Collections from './components/Collections/Collections';
@@ -25,12 +26,18 @@ class App extends React.Component {
           <TopBar />
           <Switch>
             <Route exact path='/'>
+              <Home />
+            </Route>
+            <Route exact path='/profile'>
+              <Profile />
+            </Route>
+            <Route path='/profile/:username'>
               <Profile />
             </Route>
             <Route exact path='/collection'>
               <Collections />
             </Route>
-            <Route path='/collection/:collectionuri'>
+            <Route path='/collection/:username/:collectionuri'>
               <Collection />
             </Route>
             <Route exact path='/photo'>

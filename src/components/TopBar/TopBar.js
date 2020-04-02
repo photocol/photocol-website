@@ -14,7 +14,8 @@ class TopBar extends React.Component {
     return (
       <div className="TopBar">
         <nav>
-          <Link to='/'>Profile</Link>
+          <Link to='/'>Home</Link>
+          <Link to='/profile'>Profile</Link>
           <Link to='/collection'>Collections</Link>
           <Link to='/photo'>Photos</Link>
         </nav>
