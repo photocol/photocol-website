@@ -8,16 +8,10 @@ class Authenticator extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: 'tiff',
-      password: 'password'
+      username: '',
+      password: ''
     };
     this.lm = new LoginManager();
-
-    // if logged in and at route /authenticate, redirect away
-    // console.log(props.location.pathname==='/authenticate', props.username);
-    // if(props.location.pathname==='/authenticate' && props.username!=='not logged in') {
-    //   console.log('testing');
-    // }
 
     // bind "this" to functions (necessary for ES6 class syntax)
     this.logIn = this.logIn.bind(this);
@@ -31,7 +25,8 @@ class Authenticator extends React.Component {
   render() {
     return (
       <div className="Authenticator">
-      {this.props.location.pathname==='/authenticate' && this.props.username!=='not logged in'
+        {/* if on /authenticate route and logged in, redirect to homepage */
+          this.props.location.pathname==='/authenticate' && this.props.username!=='not logged in'
           && <Redirect to='/' />}
         <div>
           <h1>Log in</h1>
