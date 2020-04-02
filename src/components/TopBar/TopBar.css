@@ -1,1 +1,4 @@
-.TopBar {}
+.TopBar {
+    /* to make it distinguishable */
+    background-color: lightgrey;
+}

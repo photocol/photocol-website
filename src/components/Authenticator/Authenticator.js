@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { withRouter, Redirect } from 'react-router-dom';
 import './Authenticator.css';
 import LoginManager from '../../util/LoginManager';
 
@@ -11,7 +12,13 @@ class Authenticator extends React.Component {
       password: 'password'
     };
     this.lm = new LoginManager();
-    
+
+    // if logged in and at route /authenticate, redirect away
+    // console.log(props.location.pathname==='/authenticate', props.username);
+    // if(props.location.pathname==='/authenticate' && props.username!=='not logged in') {
+    //   console.log('testing');
+    // }
+
     // bind "this" to functions (necessary for ES6 class syntax)
     this.logIn = this.logIn.bind(this);
   }
@@ -24,6 +31,8 @@ class Authenticator extends React.Component {
   render() {
     return (
       <div className="Authenticator">
+      {this.props.location.pathname==='/authenticate' && this.props.username!=='not logged in'
+          && <Redirect to='/' />}
         <div>
           <h1>Log in</h1>
             Username <input type='text'
@@ -44,4 +53,4 @@ const mapStateToProps = state => ({
   username: state.user.username
 });
 
-export default connect(mapStateToProps)(Authenticator);
+export default withRouter(connect(mapStateToProps)(Authenticator));
