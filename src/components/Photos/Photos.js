@@ -66,6 +66,10 @@ class Photos extends React.Component {
     });
   };
 
+  /* TODO: make the upload button a separate component
+     TODO: add an actual upload button and not automatically upload
+   */
+
   uploadPhoto = (evt) => {
     console.log(evt.target.files);
     Array.from(evt.target.files).forEach(file => {
