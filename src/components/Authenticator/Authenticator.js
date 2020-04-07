@@ -14,14 +14,22 @@ class Authenticator extends React.Component {
     this.lm = new LoginManager();
 
     // bind "this" to functions (necessary for ES6 class syntax)
-    this.logIn = this.logIn.bind(this);
+    //this.logIn = this.logIn.bind(this);
   }
   
-  logIn() {
+  logIn = () => {
     this.lm.logIn(this.state.username, this.state.password)
       .catch(err => console.error(err));
-  }
-  
+  };
+
+  onEnter = (evt) => {
+    if(evt.key === 'Enter') {
+      this.logIn();
+    }
+  };
+
+  //onEnter = evt => evt.key === 'Enter' && this.logIn();
+
   render() {
     return (
       <div className="Authenticator">
@@ -35,7 +43,7 @@ class Authenticator extends React.Component {
                             onChange={evt => this.setState({username: evt.target.value})}/><br/>
             Password <input type='password'
                             value={this.state.password}
-                            onChange={evt => this.setState({password: evt.target.value})}/><br/>
+                            onChange={evt => this.setState({password: evt.target.value})} onKeyDown={this.onEnter}/><br/>
             <button onClick={this.logIn}>Log in</button>
           </div>
           {this.props.username}
