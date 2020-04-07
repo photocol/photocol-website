@@ -16,8 +16,8 @@ class TopBar extends React.Component {
         <nav>
           <Link to='/'>Home</Link>
           <Link to='/profile'>Profile</Link>
-          <Link to='/collection'>Collections</Link>
-          <Link to='/photo'>Photos</Link>
+          <Link to='/collections'>Collections</Link>
+          <Link to='/photos'>Photos</Link>
         </nav>
       
         <span>Currently signed-in user: {this.props.username}</span>

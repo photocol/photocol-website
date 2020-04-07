@@ -34,16 +34,16 @@ class App extends React.Component {
             <Route path='/profile/:username'>
               <Profile />
             </Route>
-            <Route exact path='/collection'>
+            <Route exact path='/collections'>
               <Collections />
             </Route>
-            <Route path='/collection/:username/:collectionuri'>
+            <Route path='/collections/:username/:collectionuri'>
               <Collection />
             </Route>
-            <Route exact path='/photo'>
+            <Route exact path='/photos'>
               <Photos />
             </Route>
-            <Route path='/photo/:photouti'>
+            <Route path='/photos/:photouri'>
               <Photo />
             </Route>
             <Route path='/authenticate'>
