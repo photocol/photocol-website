@@ -13,18 +13,18 @@ class TopBar extends React.Component {
   render() {
     return (
       <div className="TopBar">
-        <nav>
+        <nav className="TopSpace">
           <Link to='/'>Home</Link>
           <Link to='/profile'>Profile</Link>
           <Link to='/collections'>Collections</Link>
           <Link to='/photos'>Photos</Link>
+
+          <span>Currently signed-in user: {this.props.username}<br/></span>
+            {this.props.username==='not logged in'
+              ? <Link to='/authenticate'>Sign in</Link>
+              : <button onClick={this.lm.logOut}>Sign out</button>
+          }
         </nav>
-      
-        <span>Currently signed-in user: {this.props.username}</span>
-        {this.props.username==='not logged in'
-          ? <Link to='/authenticate'>Sign in</Link>
-          : <button onClick={this.lm.logOut}>Sign out</button>
-        }
       </div>
     );
   }
