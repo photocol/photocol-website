@@ -2,16 +2,13 @@
     background-color: aliceblue;
 }
 
-button {
-    background-color: aqua;
-}
-
 .Buttons {
     background-color: chartreuse;
 }
 
 .photo {
-    max-width: 200px;
+    max-height: 200px;
+    margin-right: 6px;
 }
 
 .row {

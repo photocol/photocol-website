@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import './Photos.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import store from "../../util/Store";
+import {Link} from "react-router-dom"
 
 /*
 const Photos = () => (
@@ -36,12 +37,16 @@ class Photos extends React.Component {
              type="file"
              onChange={this.uploadPhoto}
              multiple
-      />
+      /><br/>
       {this.state.photoList.map(photo => (
-          <img key={photo.uri}
+        <a href={"http://localhost:4567/image/" + photo.uri}
+           target="_blank"
+        >
+        <img key={photo.uri}
                className="photo"
                src={"http://localhost:4567/image/" + photo.uri}
           />
+        </a>
         )
       )
       }
