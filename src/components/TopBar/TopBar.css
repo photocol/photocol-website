@@ -1,4 +1,17 @@
 .TopBar {
     /* to make it distinguishable */
-    background-color: lightgrey;
+    background-color: darkblue;
+}
+
+.TopBar a {
+    color: white;
+}
+.TopBar span {
+    float: right;
+    color: white;
+}
+
+.TopSpace {
+    display: flex;
+    justify-content: space-between;
 }
