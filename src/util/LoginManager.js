@@ -18,7 +18,8 @@ class LoginManager {
     if(res.status!=='STATUS_OK' || !res.payload) {
       return false;
     }
-    store.dispatch({type: 'login', username: 'logged in'});
+
+    store.dispatch({type: 'login', username: res.payload});
     return true;
   }
   
