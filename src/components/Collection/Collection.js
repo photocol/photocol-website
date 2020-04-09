@@ -28,7 +28,7 @@ class Collection extends React.Component {
   render() {
     const photosJsx = this.state.photos.map(photo =>
       <div className='collection-photo-container' key={photo.uri}>
-        <img src={`http://localhost:4567/image/${photo.uri}`} />
+        <img src={`http://localhost:4567/photo/${photo.uri}`} />
         <p>{photo.description}</p>
         <p>Uploaded on {photo.uploadDate}</p>
       </div>
