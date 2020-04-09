@@ -39,14 +39,12 @@ class Photos extends React.Component {
              multiple
       /><br/>
       {this.state.photoList.map(photo => (
-        <a href={"http://localhost:4567/image/" + photo.uri}
-           target="_blank"
-        >
+        <Link to={"/photo/" + photo.uri}>
         <img key={photo.uri}
                className="photo"
-               src={"http://localhost:4567/image/" + photo.uri}
+               src={"http://localhost:4567/photo/" + photo.uri}
           />
-        </a>
+        </Link>
         )
       )
       }
@@ -65,6 +63,7 @@ class Photos extends React.Component {
   getPhotoList = () => {
     this.acm.request('/userphotos').then(res => {
       console.log(res);
+      if(res.status != 'STATUS_OK') return;
       this.setState({photoList: res.payload});
     }).catch(err => {
       console.log(err);
@@ -79,7 +78,7 @@ class Photos extends React.Component {
     console.log(evt.target.files);
     Array.from(evt.target.files).forEach(file => {
       console.log(file.stream());
-        this.acm.request(`/image/${file.name}/upload`, {
+        this.acm.request(`/photo/${file.name}/upload`, {
           method: 'PUT',
           mode: 'cors',
           body: file,
