@@ -19,12 +19,15 @@ class TopBar extends React.Component {
           <Link to='/collections'>Collections</Link>
           <Link to='/photos'>Photos</Link>
 
-          <span>Currently signed-in user: {this.props.username}<br/></span>
-            {this.props.username==='not logged in'
-              ? <Link to='/authenticate'>Sign in</Link>
-              : <button onClick={this.lm.logOut}>Sign out</button>
-          }
+          <span>Currently signed-in user: {this.props.username}</span>
         </nav>
+        <div className="TopButton">
+        {this.props.username==='not logged in'
+          ? <Link to='/authenticate'><button>Sign in</button></Link>
+          : <button onClick={this.lm.logOut}>Sign out</button>
+        }
+        </div>
+
       </div>
     );
   }
