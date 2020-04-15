@@ -1,8 +1,6 @@
 // this helper class simply makes requests to the API
 // higher-level logic and store manipulation is implemented in other classes, e.g. LoginManager
-
-// make this into an environment variable later
-const BASEURL = 'http://localhost:4567';
+import { env } from "./Environment";
 
 // make requests to the API
 class ApiConnectionManager {
@@ -13,7 +11,7 @@ class ApiConnectionManager {
    */
   request(uri, options) {
     return new Promise((resolve, reject) => {
-      fetch(BASEURL + uri, {
+      fetch(env.serverUrl + uri, {
         credentials: 'include',
         ...options
       }).then(async res => resolve(await res.json())).catch(reject);

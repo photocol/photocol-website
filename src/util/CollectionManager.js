@@ -9,7 +9,7 @@ class CollectionManager {
   }
   
   getCollectionPhotos() {
-    return this.acm.request(`/collection/${this.username}/${this.uri}`);
+    return this.acm.request(`/collection/${this.username}/${this.uri}/`);
   }
 }
 

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import CollectionManager from '../../util/CollectionManager';
 import './Collection.css';
+import { env } from "../../util/Environment";
 
 class Collection extends React.Component {
   constructor(props) {
@@ -28,7 +29,7 @@ class Collection extends React.Component {
   render() {
     const photosJsx = this.state.photos.map(photo =>
       <div className='collection-photo-container' key={photo.uri}>
-        <img src={`http://localhost:4567/photo/${photo.uri}`} />
+        <img src={`${env.serverUrl}/perma/${photo.uri}`} />
         <p>{photo.description}</p>
         <p>Uploaded on {photo.uploadDate}</p>
       </div>

@@ -17,7 +17,7 @@ class Collections extends React.Component {
   }
 
   componentDidMount = () => {
-    this.acm.request('/usercollections')
+    this.acm.request('/collection/currentuser')
       .then(res => {this.setState({
         ...this.state,
         collections: res.payload
@@ -28,7 +28,7 @@ class Collections extends React.Component {
   render = () => (
     <div className='Collections'>
       {this.state.collections.map(collection => (
-        <div>
+        <div key={collection.uri}>
           <Link to={`/collection/${collection.aclList.find(aclEntry => aclEntry.role==='ROLE_OWNER').username}/${collection.uri}`}>
             Collection: {collection.name}<br/>
             Role: {collection.aclList.find(aclEntry => aclEntry.username===this.props.username).role}

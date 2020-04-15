@@ -3,18 +3,8 @@ import PropTypes from 'prop-types';
 import './Photos.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import store from "../../util/Store";
-import {Link} from "react-router-dom"
-
-/*
-const Photos = () => (
-  <div className="Photos">
-    Photos Component
-    <button className="Buttons">
-      Upload
-    </button>
-  </div>
-);
-*/
+import { Link } from "react-router-dom"
+import { env } from "../../util/Environment";
 
 class Photos extends React.Component {
   constructor(props) {
@@ -39,29 +29,16 @@ class Photos extends React.Component {
              multiple
       /><br/>
       {this.state.photoList.map(photo => (
-        <Link to={"/photo/" + photo.uri}>
-        <img key={photo.uri}
-               className="photo"
-               src={"http://localhost:4567/photo/" + photo.uri}
-          />
+        <Link to={"/photo/" + photo.uri} key={photo.uri}>
+          <img className="photo"
+               src={`${env.serverUrl}/perma/${photo.uri}`} />
         </Link>
-        )
-      )
-      }
+      ))}
     </div>
   );
 
-  // renderImage = () => {
-  //   return (
-  //     this.photoList().map(image => {
-  //
-  //       }
-  //     )
-  //   )
-  // };
-
   getPhotoList = () => {
-    this.acm.request('/userphotos').then(res => {
+    this.acm.request('/photo/currentuser').then(res => {
       console.log(res);
       if(res.status != 'STATUS_OK') return;
       this.setState({photoList: res.payload});
@@ -82,10 +59,7 @@ class Photos extends React.Component {
           method: 'PUT',
           mode: 'cors',
           body: file,
-          headers: new Headers({
-            //'Content-Type':'image/jpg',
-            'Access-Control-Request-Method': 'PUT'
-          })
+          headers: { 'Access-Control-Request-Method': 'PUT' }
         }).then(res => {
           console.log(res);
           this.getPhotoList();

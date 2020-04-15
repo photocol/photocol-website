@@ -14,7 +14,7 @@ class LoginManager {
   
   // check if logged in
   async checkIsLoggedIn() {
-    const res = await this.acm.request('/userdetails');
+    const res = await this.acm.request('/user/details');
     if(res.status!=='STATUS_OK' || !res.payload) {
       return false;
     }
@@ -26,7 +26,7 @@ class LoginManager {
   // login; update store on success
   logIn(username, password) {
     return new Promise((resolve, reject) => {
-      this.acm.request('/login', {
+      this.acm.request('/user/login', {
         method: 'POST',
         body: JSON.stringify({
           username: username,
@@ -47,7 +47,7 @@ class LoginManager {
   // logout; update store on success
   logOut() {
     return new Promise((resolve, reject) => {
-      this.acm.request('/logout')
+      this.acm.request('/user/logout')
         .then(res => {
           if(res.status !== 'STATUS_OK') {
             return reject(res);
