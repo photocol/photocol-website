@@ -5,7 +5,8 @@ import { env } from "./Environment";
 // make requests to the API
 class ApiConnectionManager {
   /**
-   * Generic request helper
+   * Generic request helper. 400+ status codes are sent to reject. Response (and error)
+   * objects are forwarded, with the body attribute set to the response body.
    * @param uri       uri to send a request to
    * @param options   properties to add to/override in options
    */
@@ -14,7 +15,13 @@ class ApiConnectionManager {
       fetch(env.serverUrl + uri, {
         credentials: 'include',
         ...options
-      }).then(async res => resolve(await res.json())).catch(reject);
+      }).then(async res => {
+        res.response = res.ok ? await res.json() : await res.text();
+        res.ok ? resolve(res) : reject(res);
+      }).catch(async err => {
+        err.response = await err.text();
+        reject(err);
+      });
     });
   }
 }

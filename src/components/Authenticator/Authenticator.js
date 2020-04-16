@@ -19,6 +19,7 @@ class Authenticator extends React.Component {
   
   logIn = () => {
     this.lm.logIn(this.state.username, this.state.password)
+      .then(res => console.log(res))
       .catch(err => console.error(err));
   };
 

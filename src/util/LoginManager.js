@@ -14,12 +14,12 @@ class LoginManager {
   
   // check if logged in
   async checkIsLoggedIn() {
-    const res = await this.acm.request('/user/details');
-    if(res.status!=='STATUS_OK' || !res.payload) {
-      return false;
-    }
+    const res = (await this.acm.request('/user/details')).response;
 
-    store.dispatch({type: 'login', username: res.payload});
+    if(res===null)
+      return;
+
+    store.dispatch({type: 'login', username: res});
     return true;
   }
   
@@ -33,14 +33,10 @@ class LoginManager {
           passwordHash: password
         })
       }).then(res => {
-        if(res.status !== 'STATUS_OK') {
-          return reject(res);
-        }
-
         // update store
         store.dispatch({type: 'login', username: username});
-        resolve(res);
-      }).catch(reject);
+        resolve(res.response);
+      }).catch(err => reject(err.response));
     });
   }
 
@@ -49,14 +45,10 @@ class LoginManager {
     return new Promise((resolve, reject) => {
       this.acm.request('/user/logout')
         .then(res => {
-          if(res.status !== 'STATUS_OK') {
-            return reject(res);
-          }
-          
           // update store
           store.dispatch({type: 'logout'});
-          resolve(res);
-        }).catch(reject);
+          resolve(res.response);
+        }).catch(err => reject(err.response));
     });
   }
 }
