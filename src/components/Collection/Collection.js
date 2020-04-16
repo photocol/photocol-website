@@ -22,7 +22,7 @@ class Collection extends React.Component {
   // putting this in componentDidMount() hook to be able to call setState properly
   componentDidMount() {
     this.collectionManager.getCollectionPhotos()
-      .then(res => this.setState({...this.state, photos: res.payload}))
+      .then(res => this.setState({...this.state, photos: res.response.payload}))
       .catch(err => console.error(err));
   }
 

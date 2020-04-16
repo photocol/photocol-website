@@ -39,11 +39,9 @@ class Photos extends React.Component {
 
   getPhotoList = () => {
     this.acm.request('/photo/currentuser').then(res => {
-      console.log(res);
-      if(res.status != 'STATUS_OK') return;
-      this.setState({photoList: res.payload});
+      this.setState({ photoList: res.response });
     }).catch(err => {
-      console.log(err);
+      console.error(err);
     });
   };
 
@@ -52,21 +50,17 @@ class Photos extends React.Component {
    */
 
   uploadPhoto = (evt) => {
-    console.log(evt.target.files);
-    Array.from(evt.target.files).forEach(file => {
-      console.log(file.stream());
-        this.acm.request(`/photo/${file.name}/upload`, {
-          method: 'PUT',
-          mode: 'cors',
-          body: file,
-          headers: { 'Access-Control-Request-Method': 'PUT' }
-        }).then(res => {
-          console.log(res);
-          this.getPhotoList();
-        }).catch(err => {
-          console.log(err)
-        });
-    })
+    Array.from(evt.target.files).forEach(file =>
+      this.acm.request(`/photo/${file.name}/upload`, {
+        method: 'PUT',
+        mode: 'cors',
+        body: file,
+        headers: { 'Access-Control-Request-Method': 'PUT' }
+      }).then(res => {
+        this.getPhotoList();
+      }).catch(err => {
+        console.log(err)
+      }));
   };
 }
 

@@ -20,7 +20,7 @@ class Collections extends React.Component {
     this.acm.request('/collection/currentuser')
       .then(res => {this.setState({
         ...this.state,
-        collections: res.payload
+        collections: res.response.payload
       }); console.log(res)})
       .catch(err => console.error(err));
   };
