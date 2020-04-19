@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import CollectionManager from '../../util/CollectionManager';
 import './Collection.css';
+import ApiConnectionManager from "../../util/ApiConnectionManager";
 import { env } from "../../util/Environment";
 
 class Collection extends React.Component {
@@ -15,13 +15,13 @@ class Collection extends React.Component {
       username, collectionuri,
       photos: []
     };
-    
-    this.collectionManager = new CollectionManager(username, collectionuri);
+
+    this.acm = new ApiConnectionManager();
   }
   
   // putting this in componentDidMount() hook to be able to call setState properly
   componentDidMount() {
-    this.collectionManager.getCollectionPhotos()
+    this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}`)
       .then(res => this.setState({...this.state, photos: res.response}))
       .catch(err => console.error(err));
   }
