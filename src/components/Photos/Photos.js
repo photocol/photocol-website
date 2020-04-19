@@ -51,7 +51,7 @@ class Photos extends React.Component {
 
   uploadPhoto = (evt) => {
     Array.from(evt.target.files).forEach(file =>
-      this.acm.request(`/photo/${file.name}/upload`, {
+      this.acm.request(`/photo/${file.name}`, {
         method: 'PUT',
         mode: 'cors',
         body: file,
