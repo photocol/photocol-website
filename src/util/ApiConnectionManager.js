@@ -16,12 +16,9 @@ class ApiConnectionManager {
         credentials: 'include',
         ...options
       }).then(async res => {
-        res.response = res.ok ? await res.json() : await res.text();
-        res.ok ? resolve(res) : reject(res);
-      }).catch(async err => {
-        err.response = await err.text();
-        reject(err);
-      });
+        res.response = await res.json();
+        (res.ok ? resolve : reject)(res);
+      }).catch(reject);
     });
   }
 }

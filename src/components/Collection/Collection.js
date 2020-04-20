@@ -22,7 +22,7 @@ class Collection extends React.Component {
   // putting this in componentDidMount() hook to be able to call setState properly
   componentDidMount() {
     this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}`)
-      .then(res => this.setState({...this.state, photos: res.response}))
+      .then(res => this.setState({...this.state, photos: res.response.photos}))
       .catch(err => console.error(err));
   }
 

@@ -29,11 +29,14 @@ class Photos extends React.Component {
              multiple
       /><br/>
       {this.state.photoList.map(photo => (
-        <Link to={"/photo/" + photo.uri} key={photo.uri}>
-          <img className="photo"
-               src={`${env.serverUrl}/perma/${photo.uri}`} />
-        </Link>
-      ))}
+        <div key={photo.uri}>
+          <Link to={"/photo/" + photo.uri}>
+            <img className="photo"
+                 src={`${env.serverUrl}/perma/${photo.uri}`} />
+          </Link>
+          <button onClick={() => this.deletePhoto(photo.uri)}>Delete</button>
+        </div>
+        ))}
     </div>
   );
 
@@ -43,6 +46,15 @@ class Photos extends React.Component {
     }).catch(err => {
       console.error(err);
     });
+  };
+
+  deletePhoto = uri => {
+    console.log(uri);
+    this.acm.request("/photo/" + uri, {
+      method: 'DELETE'
+    })
+      .then(res => console.log(res))
+      .catch(res => console.error(res));
   };
 
   /* TODO: make the upload button a separate component
