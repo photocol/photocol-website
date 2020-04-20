@@ -53,7 +53,7 @@ class Photos extends React.Component {
     this.acm.request("/photo/" + uri, {
       method: 'DELETE'
     })
-      .then(res => console.log(res))
+      .then(res => this.getPhotoList())
       .catch(res => console.error(res));
   };
 
