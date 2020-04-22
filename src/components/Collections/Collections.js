@@ -18,7 +18,11 @@ class Collections extends React.Component {
       collectionName: ''
     };
   }
-
+  onEnter = (evt) => {
+    if(evt.key === 'Enter') {
+      this.createCollection();
+    }
+  };
   updateCollections = () => {
     this.acm.request('/collection/currentuser')
       .then(res => {
@@ -41,15 +45,16 @@ class Collections extends React.Component {
         isPublic: false,
         name: this.state.collectionName
       })
-    }) .then(res => {console.log(res)})
+    }) .then(res => {
+      this.updateCollections();})
       .catch(err => console.error(err));
   };
 
-  deleteCollection = uri => {
-    this.acm.request('/collection/currentuser' + uri , {
+  deleteCollection = (username, uri) => {
+    this.acm.request(`/collection/${username}/${uri}/delete`, {
       method: 'POST'
     })
-      .then(res => this.getCollectionList())
+      .then(res => this.updateCollections())
       .catch(res => console.error(res));
   };
 
@@ -77,6 +82,7 @@ class Collections extends React.Component {
                 Collection: {collection.name}<br/>
                 Role: {currentUserRole}
               </Link>
+              <button onClick={() => this.deleteCollection(collectionOwner, collection.uri)}>Delete</button>
             </div>
           );
         })}
