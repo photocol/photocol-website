@@ -22,11 +22,11 @@
     /*padding: 0 4px;*/
 }
 
-ul {
+.Photos ul {
     list-style-type: none;
 }
 
-li {
+.Photos li {
     display: inline-block;
 }
 

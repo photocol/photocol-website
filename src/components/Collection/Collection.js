@@ -13,7 +13,12 @@ class Collection extends React.Component {
     const { username, collectionuri } = props.match.params;
     this.state = {
       username, collectionuri,
-      photos: [],
+      collection: {
+        name: '',
+        uri: '',
+        photos: [],
+        aclList: []
+      },
       errorMsg: ''
     };
 
@@ -23,10 +28,12 @@ class Collection extends React.Component {
   // putting this in componentDidMount() hook to be able to call setState properly
   componentDidMount() {
     this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}`)
-      .then(res => this.setState({
-        errorMsg: '',
-        photos: res.response.photos
-      }))
+      .then(res => {
+        this.setState({
+          errorMsg: '',
+          collection: res.response
+        })
+      })
       .catch(err => {
         if(!err.response)
           return;
@@ -34,6 +41,8 @@ class Collection extends React.Component {
         this.setState({errorMsg: err.response.error});
       });
   }
+
+  getOwner = () => (this.state.collection.aclList.find(acl => acl.role==='ROLE_OWNER') || {username:''}).username;
 
   render = () => {
     // FIXME: negative EQ error handling
@@ -45,7 +54,7 @@ class Collection extends React.Component {
         </div>
       );
 
-    const photosJsx = this.state.photos.map(photo =>
+    const photosJsx = this.state.collection.photos.map(photo =>
       <div className='collection-photo-container' key={photo.uri}>
         <img src={`${env.serverUrl}/perma/${photo.uri}`} />
         <p>{photo.description}</p>
@@ -53,10 +62,22 @@ class Collection extends React.Component {
       </div>
     );
 
+    const aclListJsx = (
+      <ul>
+        {
+          this.state.collection.aclList.map(aclEntry =>
+            <li key={aclEntry.username}>{aclEntry.username} ({aclEntry.role})</li>
+          )
+        }
+      </ul>
+    );
+
     return (
       <div className='Collection'>
-        <h1>Collection {this.state.collectionuri}</h1>
-        <h2>By {this.state.username}</h2>
+        <h1>Collection {this.state.collection.name}</h1>
+        <h2>By {this.getOwner()}</h2>
+        <h2>ACL List:</h2>
+        {aclListJsx}
         <Link to='/collections'>Return to list of collections.</Link>
         {photosJsx}
       </div>
