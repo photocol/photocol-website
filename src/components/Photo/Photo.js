@@ -3,17 +3,6 @@ import PropTypes from 'prop-types';
 import './Photo.css';
 import {Link, withRouter} from 'react-router-dom';
 import {env} from "../../util/Environment";
-//import CollectionManager from "../../util/CollectionManager";
-
-/*
-const Photo = () => (
-
-    <div className="Photo">
-      Photo Component
-    </div>
-);
-*/
-
 
 class Photo extends React.Component {
   constructor(props) {
@@ -23,10 +12,6 @@ class Photo extends React.Component {
     this.state = {
       photouri,
     };
-  }
-
-  // putting this in componentDidMount() hook to be able to call setState properly
-  componentDidMount() {
   }
 
   render = () => {
