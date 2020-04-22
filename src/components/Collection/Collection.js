@@ -190,7 +190,6 @@ class Collection extends React.Component {
           {uploadOrCollection}
         </div>
         <Link to='/collections'>Return to list of collections.</Link>
-        {photosJsx}
       </div>
     );
   }
