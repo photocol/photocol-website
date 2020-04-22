@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import './Photos.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import store from "../../util/Store";
-import { Link } from "react-router-dom"
+import {Link, withRouter} from "react-router-dom"
 import { env } from "../../util/Environment";
 import {connect} from "react-redux";
 import Authenticator from "../Authenticator/Authenticator";
@@ -17,9 +17,11 @@ class Photos extends React.Component {
       isSelected: false,
     };
 
+    this.history = props.history;
+
     // if used as selection component
     // state.isSelected is used as temporary select (if component), isSelect is used if only used for selecting photos
-    this.isSelect = props.select !== null;
+    this.isSelect = props.onSelect !== null;
     this.isSelect && (this.onSelect = props.onSelect);
   }
 
@@ -35,29 +37,29 @@ class Photos extends React.Component {
     if(this.props.username==='not logged in')
       return (<Authenticator onUserAction={this.getPhotoList}/>);
 
-    const selectPhotos = (photo, index) => (
-        <li key={photo.uri}>
-          <input type="checkbox" id={"ph" + index}
-                 checked={photo.selected}
-                 onChange={
-                   (evt) => this.setState({
-                     photoList : this.state.photoList.map((p,i) =>
-                       i!==index ? p : {...p, selected:evt.target.checked}
-                     )
-                   })
-                 }/>
-          <label for={"ph" + index}>
-            <img className="photos" src={`${env.serverUrl}/perma/${photo.uri}`}/>
-          </label>
-        </li>
-    );
-
-    const notSelectPhotos = (photo) => (
-      <span key={photo.uri}>
-          <Link to={"/photo/" + photo.uri}>
-            <img className="photos" src={`${env.serverUrl}/perma/${photo.uri}`}/>
-          </Link>
-      </span>
+    // how to show an image
+    const photoJsx = (photo, index) => (
+      <li key={photo.uri}>
+        <input type="checkbox" id={"ph" + index}
+               checked={photo.selected}
+               onChange={evt => {
+                 // act like checkbox in select mode
+                 this.setState({
+                   photoList: this.state.photoList.map((p, i) =>
+                     i !== index ? p : {...p, selected: evt.target.checked}
+                   )
+                 });
+               }}
+               disabled={!this.isSelect && !this.state.isSelected}/>
+        <label htmlFor={"ph" + index}
+               onClick={() => {
+                 // act like link in non-select mode
+                 if(!this.isSelect && !this.state.isSelected)
+                   this.history.push(`/photo/${photo.uri}`)
+               }}>
+          <img className="photos" src={`${env.serverUrl}/perma/${photo.uri}`}/>
+        </label>
+      </li>
     );
 
     return (
@@ -81,9 +83,7 @@ class Photos extends React.Component {
 
         {
           // listing images
-          this.state.photoList.map((photo, index) =>
-            this.isSelect || this.state.isSelected? selectPhotos(photo, index) : notSelectPhotos(photo)
-          )
+          this.state.photoList.map((photo, index) => photoJsx(photo, index))
         }
         {
           // for when used as selection component
@@ -152,4 +152,4 @@ Photos.defaultProps = {
 const mapStateToProps = state => ({
   username: state.user.username
 });
-export default connect(mapStateToProps)(Photos);
+export default withRouter(connect(mapStateToProps)(Photos));

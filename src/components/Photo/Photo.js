@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './Photo.css';
-import { withRouter } from 'react-router-dom';
+import {Link, withRouter} from 'react-router-dom';
 import {env} from "../../util/Environment";
 //import CollectionManager from "../../util/CollectionManager";
 
@@ -30,7 +30,10 @@ class Photo extends React.Component {
   }
 
   render = () => {
-    return (<img className="photo" src={`${env.serverUrl}/perma/${this.state.photouri}`}/>);
+    return (<div>
+      <Link to='/photos'>Return to list of photos.</Link>
+      <img className="photo" src={`${env.serverUrl}/perma/${this.state.photouri}`}/>
+    </div>);
   }
 };
 
