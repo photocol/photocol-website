@@ -24,9 +24,15 @@ class Photos extends React.Component {
   render = () => {
 
     const selectPhotos = (photo, index) => (
-        <li><input type="checkbox" id={"ph" + index} />
+        <li><input type="checkbox" id={"ph" + index}
+                   checked={photo.selected}
+                   onChange={(evt) => this.setState({
+                     photoList : this.state.photoList.map((p,i) =>
+                       i!=index ? p : {...p,selected:evt.target.checked}
+                     )
+                   })} />
           <label for={"ph" + index}>
-            <img className="photo" src={`${env.serverUrl}/perma/${photo.uri}`}/>
+            <img className="photos" src={`${env.serverUrl}/perma/${photo.uri}`}/>
           </label>
         </li>
     );
@@ -34,7 +40,7 @@ class Photos extends React.Component {
     const notSelectPhotos = (photo) => (
       <span key={photo.uri}>
           <Link to={"/photo/" + photo.uri}>
-            <img className="photo" src={`${env.serverUrl}/perma/${photo.uri}`}/>
+            <img className="photos" src={`${env.serverUrl}/perma/${photo.uri}`}/>
           </Link>
       </span>
     );
@@ -47,10 +53,16 @@ class Photos extends React.Component {
              multiple
       />
       <button
-        onClick={() => {this.setState({isSelected: !this.state.isSelected})} }
+        onClick={() => {
+          if(this.state.isSelected === true) {
+            this.state.photoList.forEach((photo) => photo.selected = false)
+          }
+          this.setState({isSelected: !this.state.isSelected});
+        }}
         className={this.state.isSelected && "ButtonOn"}>
         Select Photos
       </button>
+      {this.state.isSelected && <button onClick={this.deleteSelectedPhotos}>Delete Photos</button>}
       <br/>
 
       {this.state.photoList.map((photo, index) =>
@@ -68,6 +80,14 @@ class Photos extends React.Component {
     }).catch(err => {
       console.error(err);
     });
+  };
+
+  deleteSelectedPhotos = () => {
+    this.state.photoList.forEach((photo) => {
+      if (photo.selected == true) {
+        this.deletePhoto(photo.uri);
+      }
+    })
   };
 
   deletePhoto = uri => {
