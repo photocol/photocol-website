@@ -5,6 +5,8 @@ import ApiConnectionManager from "../../util/ApiConnectionManager";
 import store from "../../util/Store";
 import { Link } from "react-router-dom"
 import { env } from "../../util/Environment";
+import {connect} from "react-redux";
+import Authenticator from "../Authenticator/Authenticator";
 
 class Photos extends React.Component {
   constructor(props) {
@@ -17,7 +19,7 @@ class Photos extends React.Component {
 
     // if used as selection component
     // state.isSelected is used as temporary select (if component), isSelect is used if only used for selecting photos
-    this.isSelect = typeof props.onSelect === 'function';
+    this.isSelect = props.select !== null;
     this.isSelect && (this.onSelect = props.onSelect);
   }
 
@@ -30,6 +32,8 @@ class Photos extends React.Component {
   };
 
   render = () => {
+    if(this.props.username==='not logged in')
+      return (<Authenticator onUserAction={this.getPhotoList}/>);
 
     const selectPhotos = (photo, index) => (
         <li key={photo.uri}>
@@ -63,7 +67,7 @@ class Photos extends React.Component {
                type="file"
                onChange={this.uploadPhoto}
                multiple />
-        <button className={this.state.isSelected && "ButtonOn"}
+        <button className={this.state.isSelected ? "ButtonOn" : ''}
                 onClick={
                   () => {
                     this.state.isSelected && this.state.photoList.forEach((photo) => photo.selected = false);
@@ -142,7 +146,10 @@ Photos.propTypes = {
 };
 
 Photos.defaultProps = {
-  onSelect: false
+  onSelect: null
 };
 
-export default Photos;
+const mapStateToProps = state => ({
+  username: state.user.username
+});
+export default connect(mapStateToProps)(Photos);

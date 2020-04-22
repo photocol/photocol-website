@@ -4,7 +4,9 @@ import './Home.css';
 
 const Home = () => (
   <div className="Home">
-    Home Component
+    <h1>Welcome to Photocol!</h1>
+    <p>A work in progress</p>
+    <p>by JLRLTYVZ</p>
   </div>
 );
 
