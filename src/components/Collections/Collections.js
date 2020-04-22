@@ -86,20 +86,20 @@ class Collections extends React.Component {
             const currentUserRole = collection.aclList.find(aclEntry => aclEntry.username === this.props.username).role;
             const collectionOwner = collection.aclList.find(aclEntry => aclEntry.role === 'ROLE_OWNER').username;
             return (
-                <div key={collection.uri}>
+                <div key={collectionOwner + collection.uri}>
                   <Menu>
                     <MenuButton>
                       Collection: {collection.name}<br/>
                       Role: {currentUserRole}
                     </MenuButton>
                     <MenuList>
-                      <MenuItem>
+                      <MenuItem onSelect={() => {}}>
                         <Link to={`/collection/${collectionOwner}/${collection.uri}`}>Collection</Link>
                       </MenuItem>
                       {
                         collectionOwner === this.props.username &&
                           (
-                            <MenuItem onClick={() => this.deleteCollection(collectionOwner, collection.uri)}>Delete</MenuItem>
+                            <MenuItem onSelect={() => this.deleteCollection(collectionOwner, collection.uri)}>Delete</MenuItem>
                           )
                       }
                     </MenuList>

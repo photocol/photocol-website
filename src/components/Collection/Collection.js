@@ -4,6 +4,7 @@ import {Link, withRouter} from 'react-router-dom';
 import './Collection.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import { env } from "../../util/Environment";
+import UserSearch from "../UserSearch/UserSearch";
 
 class Collection extends React.Component {
   constructor(props) {
@@ -19,30 +20,99 @@ class Collection extends React.Component {
         photos: [],
         aclList: []
       },
+      lastLoadedCollection: {}, // for use when updating component
       errorMsg: ''
     };
 
     this.acm = new ApiConnectionManager();
+    this.userSearchRef = React.createRef();
   }
   
   // putting this in componentDidMount() hook to be able to call setState properly
   componentDidMount() {
+    this.getCollection();
+  }
+
+  getCollection = () => {
     this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}`)
       .then(res => {
         this.setState({
           errorMsg: '',
-          collection: res.response
-        })
+          collection: res.response,
+          lastLoadedCollection: JSON.parse(JSON.stringify(res.response))  // simple clone for checking against later
+        });
       })
       .catch(err => {
         if(!err.response)
           return;
-
         this.setState({errorMsg: err.response.error});
       });
-  }
+  };
 
-  getOwner = () => (this.state.collection.aclList.find(acl => acl.role==='ROLE_OWNER') || {username:''}).username;
+  getOwner = () =>
+    (this.state.collection.aclList.find(acl => acl.role==='ROLE_OWNER') || {username:''}).username;
+
+  addUserToAcl = (username) => {
+    this.setState({
+      collection: {
+        ...this.state.collection,
+        aclList: this.state.collection.aclList.concat({
+          username: username,
+          role: 'ROLE_VIEWER'
+        })
+      }
+    }, this.userSearchRef.current.refilter);
+  };
+
+  userNotInAcl = username =>
+    !this.state.collection.aclList.find(aclEntry => username===aclEntry.username);
+
+  saveChanges = () => {
+    const current = this.state.collection;
+    const previous = this.state.lastLoadedCollection;
+
+    // get changes in acl
+    const newEntries = current.aclList.filter(aclEntry =>
+      !previous.aclList.find(pAclEntry => aclEntry.username===pAclEntry.username && aclEntry.role===pAclEntry.role));
+    const removedEntries = previous.aclList.filter(aclEntry =>
+      !current.aclList.find(cAclEntry => aclEntry.username===cAclEntry.username))
+      .map(aclEntry => ({...aclEntry, role: 'ROLE_NONE'}));
+    const aclListDiff = newEntries.concat(removedEntries);
+
+    // TODO: do something if owner changes
+
+    this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}/update`, {
+      method: 'POST',
+      body: JSON.stringify({
+        aclList: aclListDiff
+      })
+    })
+      .then(res => console.log(res))
+      .catch(err => {
+        console.error(err)
+      });
+  };
+
+  updateAclEntryRole = (index, newRole) => {
+    this.setState({
+      collection: {
+        ...this.state.collection,
+        aclList: this.state.collection.aclList.map((aclEntry, i) =>
+          i!==index
+            ? aclEntry
+            : {...aclEntry, role: newRole}
+        )
+      }
+    });
+  };
+
+  removeAclEntry = index =>
+    this.setState({
+      collection: {
+        ...this.state.collection,
+        aclList: this.state.collection.aclList.filter((_, i) => i!==index)
+      }
+    });
 
   render = () => {
     // FIXME: negative EQ error handling
@@ -65,8 +135,17 @@ class Collection extends React.Component {
     const aclListJsx = (
       <ul>
         {
-          this.state.collection.aclList.map(aclEntry =>
-            <li key={aclEntry.username}>{aclEntry.username} ({aclEntry.role})</li>
+          this.state.collection.aclList.map((aclEntry, index) =>
+            <li key={aclEntry.username}>
+              <select value={aclEntry.role}
+                      onChange={evt => this.updateAclEntryRole(index, evt.target.value)}>
+                <option value="ROLE_OWNER">Owner</option>
+                <option value="ROLE_EDITOR">Editor</option>
+                <option value="ROLE_VIEWER">Viewer</option>
+              </select>
+              <button onClick={() => this.removeAclEntry(index)}>Remove</button>
+              {aclEntry.username}
+            </li>
           )
         }
       </ul>
@@ -78,6 +157,13 @@ class Collection extends React.Component {
         <h2>By {this.getOwner()}</h2>
         <h2>ACL List:</h2>
         {aclListJsx}
+        <h2>Add user</h2>
+        <UserSearch selectText='Add to collection'
+                    onUserSelect={this.addUserToAcl}
+                    userFilter={this.userNotInAcl}
+                    ref={this.userSearchRef} />
+        <button onClick={this.saveChanges}>Save changes</button>
+        <button onClick={this.getCollection}>Undo changes and reload</button>
         <Link to='/collections'>Return to list of collections.</Link>
         {photosJsx}
       </div>
