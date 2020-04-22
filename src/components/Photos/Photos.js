@@ -98,7 +98,7 @@ class Photos extends React.Component {
       this.setState({
         photoList: res.response.map(photo => ({
           ...photo,
-          selected:false,
+          selected: false,
         }))
       });
     }).catch(err => {

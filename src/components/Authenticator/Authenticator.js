@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withRouter, Redirect } from 'react-router-dom';
 import './Authenticator.css';
@@ -16,14 +17,14 @@ class Authenticator extends React.Component {
     };
     this.lm = new LoginManager();
 
-    const nf = (() => {});    // null function
-    this.onUserAction = props.onUserAction || nf;
+    this.onUserAction = props.onUserAction;
   }
   
   logIn = () => {
     this.lm.logIn(this.state.username, this.state.password)
       .then(res => {
         console.log(res);
+        this.onUserAction();
       })
       .catch(err => console.error(err));
   };
@@ -32,7 +33,7 @@ class Authenticator extends React.Component {
     this.lm.signUp(this.state.username, this.state.password, this.state.email)
       .then(res => {
         console.log(res);
-        this.setup();
+        this.onUserAction();
       })
       .catch(err => console.error(err));
   };
@@ -87,6 +88,14 @@ class Authenticator extends React.Component {
     );
   };
 }
+
+Authenticator.propTypes = {
+  onUserAction: PropTypes.func
+};
+
+Authenticator.defaultProps = {
+  onUserAction: () => {}
+};
 
 const mapStateToProps = state => ({
   username: state.user.username
