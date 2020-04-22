@@ -1,0 +1,9 @@
+.Collection {}
+
+.collection-photo-container {
+    background-color: lightgrey;
+}
+.collection-photo-container > img {
+    max-width: 500px;
+    max-height: 500px;
+}
