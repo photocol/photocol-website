@@ -96,7 +96,12 @@ class Collections extends React.Component {
                       <MenuItem>
                         <Link to={`/collection/${collectionOwner}/${collection.uri}`}>Collection</Link>
                       </MenuItem>
-                      <MenuItem onClick={() => this.deleteCollection(collectionOwner, collection.uri)}>Delete</MenuItem>
+                      {
+                        collectionOwner === this.props.username &&
+                          (
+                            <MenuItem onClick={() => this.deleteCollection(collectionOwner, collection.uri)}>Delete</MenuItem>
+                          )
+                      }
                     </MenuList>
                   </Menu>
                 </div>
