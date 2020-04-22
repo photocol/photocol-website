@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import './Collections.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
+import Authenticator from "../Authenticator/Authenticator";
 
 class Collections extends React.Component {
   constructor(props) {
@@ -16,31 +17,42 @@ class Collections extends React.Component {
     };
   }
 
-  componentDidMount = () => {
+  updateCollections = () => {
     this.acm.request('/collection/currentuser')
       .then(res => {
         console.log(res);
         this.setState({
-          ...this.state,
           collections: res.response
         })
       })
       .catch(err => console.error(err));
+  }
+
+  componentDidMount = () => {
+    this.updateCollections();
   };
 
-  render = () => (
-    <div className='Collections'>
-      {this.state.collections.map(collection => (
-        <div key={collection.uri}>
-          <Link to={`/collection/${collection.aclList.find(aclEntry => aclEntry.role==='ROLE_OWNER').username}/${collection.uri}`}>
-            Collection: {collection.name}<br/>
-            {/*Role: {collection.aclList.find(aclEntry => aclEntry.username===this.props.username).role}*/}
-            {collection.aclList.map(acl => (<div>{acl.username} {acl.role}</div>))}
-          </Link>
-        </div>
-      ))}
-    </div>
-  );
+  render = () => {
+    if(this.props.username==='not logged in')
+      return (<Authenticator onUserAction={this.updateCollections}/>);
+
+    return (
+      <div className='Collections'>
+        {this.state.collections.map(collection => {
+          const currentUserRole = collection.aclList.find(aclEntry => aclEntry.username === this.props.username).role;
+          const collectionOwner = collection.aclList.find(aclEntry => aclEntry.role === 'ROLE_OWNER').username;
+          return (
+            <div key={collection.uri}>
+              <Link to={`/collection/${collectionOwner}/${collection.uri}`}>
+                Collection: {collection.name}<br/>
+                Role: {currentUserRole}
+              </Link>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 }
 
 const mapStateToProps = state => ({
