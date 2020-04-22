@@ -34,6 +34,17 @@ class Collections extends React.Component {
     this.updateCollections();
   };
 
+  createCollection = () => {
+    this.acm.request('/collection/new', {
+      method: 'POST',
+      body: JSON.stringify({
+        isPublic: false,
+        name: this.state.collectionName
+      })
+    }) .then(res => {console.log(res)})
+      .catch(err => console.error(err));
+  };
+
   deleteCollection = uri => {
     this.acm.request('/collection/currentuser' + uri , {
       method: 'POST'
@@ -48,6 +59,15 @@ class Collections extends React.Component {
 
     return (
       <div className='Collections'>
+
+        <div>
+          <h1>Create Collection</h1>
+          Collection <input type='text'
+                            value={this.state.collectionName}
+                            onChange={evt => this.setState({collectionName: evt.target.value})} onKeyDown={this.onEnter}/><br/>
+          <button onClick={this.createCollection}>Create Collection</button>
+        </div>
+
         {this.state.collections.map(collection => {
           const currentUserRole = collection.aclList.find(aclEntry => aclEntry.username === this.props.username).role;
           const collectionOwner = collection.aclList.find(aclEntry => aclEntry.role === 'ROLE_OWNER').username;
