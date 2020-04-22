@@ -18,10 +18,13 @@ class Collections extends React.Component {
 
   componentDidMount = () => {
     this.acm.request('/collection/currentuser')
-      .then(res => {this.setState({
-        ...this.state,
-        collections: res.response
-      }); console.log(res)})
+      .then(res => {
+        console.log(res);
+        this.setState({
+          ...this.state,
+          collections: res.response
+        })
+      })
       .catch(err => console.error(err));
   };
 
@@ -31,7 +34,8 @@ class Collections extends React.Component {
         <div key={collection.uri}>
           <Link to={`/collection/${collection.aclList.find(aclEntry => aclEntry.role==='ROLE_OWNER').username}/${collection.uri}`}>
             Collection: {collection.name}<br/>
-            Role: {collection.aclList.find(aclEntry => aclEntry.username===this.props.username).role}
+            {/*Role: {collection.aclList.find(aclEntry => aclEntry.username===this.props.username).role}*/}
+            {collection.aclList.map(acl => (<div>{acl.username} {acl.role}</div>))}
           </Link>
         </div>
       ))}

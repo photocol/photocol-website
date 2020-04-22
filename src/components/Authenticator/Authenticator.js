@@ -7,18 +7,24 @@ import LoginManager from '../../util/LoginManager';
 class Authenticator extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = {
       username: '',
-      password: ''
+      password: '',
+      email: '',
+      isLogin: true   // true if login, false if signup
     };
     this.lm = new LoginManager();
-
-    // bind "this" to functions (necessary for ES6 class syntax)
-    //this.logIn = this.logIn.bind(this);
   }
   
   logIn = () => {
     this.lm.logIn(this.state.username, this.state.password)
+      .then(res => console.log(res))
+      .catch(err => console.error(err));
+  };
+
+  signUp = () => {
+    this.lm.signUp(this.state.username, this.state.password, this.state.email)
       .then(res => console.log(res))
       .catch(err => console.error(err));
   };
@@ -29,28 +35,40 @@ class Authenticator extends React.Component {
     }
   };
 
-  //onEnter = evt => evt.key === 'Enter' && this.logIn();
-
-  render() {
-    return (
+  render = () => (
       <div className="Authenticator">
         {/* if on /authenticate route and logged in, redirect to homepage */
           this.props.location.pathname==='/authenticate' && this.props.username!=='not logged in'
           && <Redirect to='/' />}
         <div>
-          <h1>Log in</h1>
-            Username <input type='text'
-                            value={this.state.username}
-                            onChange={evt => this.setState({username: evt.target.value})}/><br/>
-            Password <input type='password'
-                            value={this.state.password}
-                            onChange={evt => this.setState({password: evt.target.value})} onKeyDown={this.onEnter}/><br/>
-            <button onClick={this.logIn}>Log in</button>
-          </div>
-          {this.props.username}
+          {this.state.isLogin
+            ? (<div>
+                <h1>Log in</h1>
+                Username <input type='text'
+                                value={this.state.username}
+                                onChange={evt => this.setState({username: evt.target.value})}/><br/>
+                Password <input type='password'
+                                value={this.state.password}
+                                onChange={evt => this.setState({password: evt.target.value})} onKeyDown={this.onEnter}/><br/>
+                <button onClick={this.logIn}>Log in</button>
+              </div>)
+            : (<div>
+                <h1>Sign up</h1>
+                Username <input type='text'
+                                value={this.state.username}
+                                onChange={evt => this.setState({username: evt.target.value})}/><br/>
+                Password <input type='password'
+                                value={this.state.password}
+                                onChange={evt => this.setState({password: evt.target.value})}/><br/>
+                Email <input type='email'
+                             value={this.state.email}
+                             onChange={evt => this.setState({email: evt.target.value})}/><br/>
+                 <button onClick={this.signUp}>Sign up</button>
+              </div>)}
+          <button onClick={() => this.setState({isLogin: !this.state.isLogin})}>Toggle sign up/log in</button>
+        </div>
       </div>
-    );
-  }
+  );
 }
 
 const mapStateToProps = state => ({

@@ -40,6 +40,23 @@ class LoginManager {
     });
   }
 
+  // sign up
+  signUp(username, password, email) {
+    return new Promise((resolve, reject) => {
+      this.acm.request('/user/signup', {
+        method: 'POST',
+        body: JSON.stringify({
+          username: username,
+          passwordHash: password,
+          email: email
+        })
+      }).then(res => {
+        store.dispatch({type: 'login', username: username});
+        resolve(res.response);
+      }).catch(err => reject(err.response));
+    });
+  }
+
   // logout; update store on success
   logOut() {
     return new Promise((resolve, reject) => {
