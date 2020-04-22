@@ -13,7 +13,6 @@ class Photos extends React.Component {
     this.state = {
       photoList: [],
     };
-
   }
 
   componentDidMount() {
@@ -31,8 +30,7 @@ class Photos extends React.Component {
       {this.state.photoList.map(photo => (
         <div key={photo.uri}>
           <Link to={"/photo/" + photo.uri}>
-            <img className="photo"
-                 src={`${env.serverUrl}/perma/${photo.uri}`} />
+            <img className="photo" src={`${env.serverUrl}/perma/${photo.uri}`} />
           </Link>
           <button onClick={() => this.deletePhoto(photo.uri)}>Delete</button>
         </div>
@@ -49,7 +47,6 @@ class Photos extends React.Component {
   };
 
   deletePhoto = uri => {
-    console.log(uri);
     this.acm.request("/photo/" + uri, {
       method: 'DELETE'
     })
@@ -75,7 +72,6 @@ class Photos extends React.Component {
       }));
   };
 }
-
 
 Photos.propTypes = {};
 
