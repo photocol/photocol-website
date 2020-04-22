@@ -67,6 +67,7 @@ class Collections extends React.Component {
         .catch(res => console.error(res));
   };
 
+
   render = () => {
     if(this.props.username==='not logged in')
       return (<Authenticator onUserAction={this.updateCollections}/>);
@@ -96,7 +97,11 @@ class Collections extends React.Component {
                       <MenuItem>
                         <Link to={`/collection/${collectionOwner}/${collection.uri}`}>Collection</Link>
                       </MenuItem>
-                      <MenuItem onClick={() => this.deleteCollection(collectionOwner, collection.uri)}>Delete</MenuItem>
+                      {
+                        collectionOwner === this.props.username && (
+                        <MenuItem onClick={() => this.deleteCollection(collectionOwner, collection.uri)}>Delete</MenuItem>
+                        )
+                      }
                     </MenuList>
                   </Menu>
                 </div>
