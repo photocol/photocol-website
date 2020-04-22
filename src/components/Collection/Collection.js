@@ -24,7 +24,7 @@ class Collection extends React.Component {
       },
       lastLoadedCollection: {}, // for use when updating component
       errorMsg: '',
-      uploadPressed: true
+      uploadPressed: false
     };
 
     this.acm = new ApiConnectionManager();
@@ -127,6 +127,18 @@ class Collection extends React.Component {
         .then(res => this.getCollection())
         .catch(res => console.error(res));
   };
+
+  deletePhoto = uri => {
+    this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}/removephoto`, {
+      method: 'POST',
+      body: JSON.stringify({
+        uri: uri
+      })
+    })
+      .then(res => this.getCollection())
+      .catch(res => console.error(res));
+  };
+
   render = () => {
     // FIXME: negative EQ error handling
     if(this.state.errorMsg)
@@ -142,6 +154,7 @@ class Collection extends React.Component {
         <img src={`${env.serverUrl}/perma/${photo.uri}`} />
         <p>{photo.description}</p>
         <p>Uploaded on {photo.uploadDate}</p>
+        <button onClick={() => this.deletePhoto(photo.uri)}>Delete</button>
       </div>
     );
 
