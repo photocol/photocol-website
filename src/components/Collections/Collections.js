@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import './Collections.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import Authenticator from "../Authenticator/Authenticator";
+import {env} from "../../util/Environment";
 
 class Collections extends React.Component {
   constructor(props) {
@@ -13,7 +14,8 @@ class Collections extends React.Component {
     this.acm = new ApiConnectionManager();
 
     this.state = {
-      collections: []
+      collections: [],
+      collectionName: ''
     };
   }
 
@@ -30,6 +32,14 @@ class Collections extends React.Component {
 
   componentDidMount = () => {
     this.updateCollections();
+  };
+
+  deleteCollection = uri => {
+    this.acm.request('/collection/currentuser' + uri , {
+      method: 'POST'
+    })
+      .then(res => this.getCollectionList())
+      .catch(res => console.error(res));
   };
 
   render = () => {
