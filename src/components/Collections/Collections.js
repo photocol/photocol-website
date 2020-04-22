@@ -67,6 +67,7 @@ class Collections extends React.Component {
         .catch(res => console.error(res));
   };
 
+
   render = () => {
     if(this.props.username==='not logged in')
       return (<Authenticator onUserAction={this.updateCollections}/>);

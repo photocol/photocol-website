@@ -1,3 +1,4 @@
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import {Link, withRouter} from 'react-router-dom';
@@ -5,10 +6,11 @@ import './Collection.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import { env } from "../../util/Environment";
 import UserSearch from "../UserSearch/UserSearch";
+import Photos from "../Photos/Photos";
 
 class Collection extends React.Component {
-  constructor(props) {
-    super(props);
+    constructor(props) {
+        super(props);
 
     // get params from uri
     const { username, collectionuri } = props.match.params;
@@ -21,7 +23,8 @@ class Collection extends React.Component {
         aclList: []
       },
       lastLoadedCollection: {}, // for use when updating component
-      errorMsg: ''
+      errorMsg: '',
+      uploadPressed: true
     };
 
     this.acm = new ApiConnectionManager();
@@ -114,13 +117,23 @@ class Collection extends React.Component {
       }
     });
 
+  addPhoto = (uri) => {
+    this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}/addphoto`, {
+        method: 'POST',
+        body: JSON.stringify({
+            uri: uri
+        })
+    })
+        .then(res => this.getCollection())
+        .catch(res => console.error(res));
+  };
   render = () => {
     // FIXME: negative EQ error handling
     if(this.state.errorMsg)
       return (
         <div>
           Received error from server: {this.state.errorMsg}.<br/>
-        <Link to='/collections'>Return to collections</Link>
+          <Link to='/collections'>Return to collections</Link>
         </div>
       );
 
@@ -131,6 +144,14 @@ class Collection extends React.Component {
         <p>Uploaded on {photo.uploadDate}</p>
       </div>
     );
+
+    const uploadJsx = (
+      <div>
+        <Photos onSelect = {photos => photos.forEach(photo => this.addPhoto(photo.uri))}>
+        </Photos>
+      </div>
+    );
+    const uploadOrCollection = this.state.uploadPressed ? uploadJsx: photosJsx ;
 
     const aclListJsx = (
       <ul>
@@ -164,6 +185,10 @@ class Collection extends React.Component {
                     ref={this.userSearchRef} />
         <button onClick={this.saveChanges}>Save changes</button>
         <button onClick={this.getCollection}>Undo changes and reload</button>
+        <div>
+          <button onClick={() => this.setState({uploadPressed: !this.state.uploadPressed})}>Upload/See photos</button>
+          {uploadOrCollection}
+        </div>
         <Link to='/collections'>Return to list of collections.</Link>
         {photosJsx}
       </div>
