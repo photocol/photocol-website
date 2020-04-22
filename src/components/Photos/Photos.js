@@ -12,6 +12,7 @@ class Photos extends React.Component {
     this.acm = new ApiConnectionManager();
     this.state = {
       photoList: [],
+      isSelected: false,
     };
 
   }
@@ -20,29 +21,50 @@ class Photos extends React.Component {
     this.getPhotoList();
   }
 
-  render = () => (
-    <div className="Photos">
+  render = () => {
+
+    const selectPhotos = (photo, index) => (
+        <li><input type="checkbox" id={"ph" + index} />
+          <label for={"ph" + index}>
+            <img className="photo" src={`${env.serverUrl}/perma/${photo.uri}`}/>
+          </label>
+        </li>
+    );
+
+    const notSelectPhotos = (photo) => (
+      <span key={photo.uri}>
+          <Link to={"/photo/" + photo.uri}>
+            <img className="photo" src={`${env.serverUrl}/perma/${photo.uri}`}/>
+          </Link>
+      </span>
+    );
+
+    return (<div className="Photos">
       Photos Component
       <input className="Buttons"
              type="file"
              onChange={this.uploadPhoto}
              multiple
-      /><br/>
-      {this.state.photoList.map(photo => (
-        <div key={photo.uri}>
-          <Link to={"/photo/" + photo.uri}>
-            <img className="photo"
-                 src={`${env.serverUrl}/perma/${photo.uri}`} />
-          </Link>
-          <button onClick={() => this.deletePhoto(photo.uri)}>Delete</button>
-        </div>
-        ))}
+      />
+      <button
+        onClick={() => {this.setState({isSelected: !this.state.isSelected})} }
+        className={this.state.isSelected && "ButtonOn"}>
+        Select Photos
+      </button>
+      <br/>
+
+      {this.state.photoList.map((photo, index) =>
+        this.state.isSelected === true ? selectPhotos(photo, index) : notSelectPhotos(photo)
+      )}
     </div>
-  );
+    );
+  };
 
   getPhotoList = () => {
     this.acm.request('/photo/currentuser').then(res => {
-      this.setState({ photoList: res.response });
+      this.setState({ photoList: res.response.map(photo => ({
+        ...photo,selected:false,
+      }) ) });
     }).catch(err => {
       console.error(err);
     });
