@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import './Collections.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
+import Authenticator from "../Authenticator/Authenticator";
+import {env} from "../../util/Environment";
 
 class Collections extends React.Component {
   constructor(props) {
@@ -12,31 +14,55 @@ class Collections extends React.Component {
     this.acm = new ApiConnectionManager();
 
     this.state = {
-      collections: []
+      collections: [],
+      collectionName: ''
     };
   }
 
-  componentDidMount = () => {
+  updateCollections = () => {
     this.acm.request('/collection/currentuser')
-      .then(res => {this.setState({
-        ...this.state,
-        collections: res.response
-      }); console.log(res)})
+      .then(res => {
+        console.log(res);
+        this.setState({
+          collections: res.response
+        })
+      })
       .catch(err => console.error(err));
+  }
+
+  componentDidMount = () => {
+    this.updateCollections();
   };
 
-  render = () => (
-    <div className='Collections'>
-      {this.state.collections.map(collection => (
-        <div key={collection.uri}>
-          <Link to={`/collection/${collection.aclList.find(aclEntry => aclEntry.role==='ROLE_OWNER').username}/${collection.uri}`}>
-            Collection: {collection.name}<br/>
-            Role: {collection.aclList.find(aclEntry => aclEntry.username===this.props.username).role}
-          </Link>
-        </div>
-      ))}
-    </div>
-  );
+  deleteCollection = uri => {
+    this.acm.request('/collection/currentuser' + uri , {
+      method: 'POST'
+    })
+      .then(res => this.getCollectionList())
+      .catch(res => console.error(res));
+  };
+
+  render = () => {
+    if(this.props.username==='not logged in')
+      return (<Authenticator onUserAction={this.updateCollections}/>);
+
+    return (
+      <div className='Collections'>
+        {this.state.collections.map(collection => {
+          const currentUserRole = collection.aclList.find(aclEntry => aclEntry.username === this.props.username).role;
+          const collectionOwner = collection.aclList.find(aclEntry => aclEntry.role === 'ROLE_OWNER').username;
+          return (
+            <div key={collection.uri}>
+              <Link to={`/collection/${collectionOwner}/${collection.uri}`}>
+                Collection: {collection.name}<br/>
+                Role: {currentUserRole}
+              </Link>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 }
 
 const mapStateToProps = state => ({
