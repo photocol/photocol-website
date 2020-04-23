@@ -17,7 +17,7 @@ class Photo extends React.Component {
   render = () => {
     return (<div>
       <Link to='/photos'>Return to list of photos.</Link>
-      <img className="photo" src={`${env.serverUrl}/perma/${this.state.photouri}`}/>
+      <div class='fill-screen'><img className="photo333" src={`${env.serverUrl}/perma/${this.state.photouri}`}/></div>
     </div>);
   }
 };
