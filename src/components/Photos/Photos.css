@@ -1,7 +1,9 @@
 .Photos {
     background-color: aliceblue;
 }
-
+.select {
+    padding-top: 10px;
+}
 .Buttons {
     background-color: chartreuse;
 }

@@ -4,6 +4,8 @@ import { connect } from 'react-redux';
 import { withRouter, Redirect } from 'react-router-dom';
 import './Authenticator.css';
 import LoginManager from '../../util/LoginManager';
+import { CardBody, CardImg, CardTitle, Button, CardText, Row, Col, Form, FormGroup, Label, Input, Jumbotron, Container, Card } from 'reactstrap';
+
 
 class Authenticator extends React.Component {
   constructor(props) {
@@ -19,7 +21,7 @@ class Authenticator extends React.Component {
 
     this.onUserAction = props.onUserAction;
   }
-  
+
   logIn = () => {
     this.lm.logIn(this.state.username, this.state.password)
       .then(res => {
@@ -43,48 +45,87 @@ class Authenticator extends React.Component {
       this.logIn();
     }
   };
-
+  onEnter2 = (evt) => {
+    if(evt.key === 'Enter') {
+      this.signUp();
+      this.setState({isLogin: !this.state.isLogin});
+    }
+  };
   render = () => {
     const loginJsx = (
-      <div>
-        <h1>Log in</h1>
-        Username <input type='text'
-                        value={this.state.username}
-                        onChange={evt => this.setState({username: evt.target.value})}/><br/>
-        Password <input type='password'
-                        value={this.state.password}
-                        onChange={evt => this.setState({password: evt.target.value})} onKeyDown={this.onEnter}/><br/>
-        <button onClick={this.logIn}>Log in</button>
-      </div>
+
+      <Card className="body-center" >
+        <CardBody>
+          <Form>
+            <FormGroup>
+              <Label htmlFor="form-username" >Username</Label>
+              <Input type="text" id="form-username"
+                     value={this.state.username}
+                     onChange={evt => this.setState({username: evt.target.value})} />
+            </FormGroup>
+            <FormGroup>
+              <Label htmlFor="form-password">Password</Label>
+              <Input type="password" class="form-control"  id="inputPassword" placeholder="Password"
+                     value={this.state.password}
+                     onChange={evt => this.setState({password: evt.target.value})} onKeyDown={this.onEnter}/>
+            </FormGroup>
+            <Col className="text-center">
+              <FormGroup>
+                <br/>
+                <Button color='success' onClick={this.logIn}>Log in</Button>
+                <a1 onClick={() => this.setState({isLogin: !this.state.isLogin})}>Sign up</a1>
+              </FormGroup>
+            </Col>
+          </Form>
+        </CardBody>
+      </Card>
+
     );
     const signupJsx = (
-      <div>
-        <h1>Sign up</h1>
-        Username <input type='text'
-                        value={this.state.username}
-                        onChange={evt => this.setState({username: evt.target.value})}/><br/>
-        Password <input type='password'
-                        value={this.state.password}
-                        onChange={evt => this.setState({password: evt.target.value})}/><br/>
-        Email <input type='email'
+      <Card  className='movedown'>
+        <CardBody>
+          <Form>
+            <FormGroup>
+              <Label htmlFor="form-username" >Username</Label>
+              <Input type="text" id="form-username"
+                     value={this.state.username}
+                     onChange={evt => this.setState({username: evt.target.value})} />
+            </FormGroup>
+            <FormGroup>
+              <Label htmlFor="form-password">Password</Label>
+              <Input type="password" class="form-control"  id="inputPassword" placeholder="Password"
+                     value={this.state.password}
+                     onChange={evt => this.setState({password: evt.target.value})} />
+            </FormGroup>
+            <FormGroup>
+              <Label htmlFor="form-email">Email</Label>
+              <Input type="text" id="form-email"
                      value={this.state.email}
-                     onChange={evt => this.setState({email: evt.target.value})}/><br/>
-        <button onClick={this.signUp}>Sign up</button>
-      </div>
+                     onChange={evt => this.setState({email: evt.target.value})} onKeyDown={this.onEnter2}/>
+            </FormGroup>
+            <Col className="text-center">
+              <FormGroup>
+                <Button color='success' onClick={this.signUp} onClick={() => this.setState({isLogin: !this.state.isLogin})}>Sign up</Button>
+              </FormGroup>
+            </Col>
+          </Form>
+        </CardBody>
+      </Card>
     );
 
     const loginOrSignup = this.state.isLogin ? loginJsx : signupJsx;
 
     return (
-      <div className="Authenticator">
-        {/* if on /authenticate route and logged in, redirect to homepage */
-          this.props.location.pathname==='/authenticate' && this.props.username!=='not logged in'
-          && <Redirect to='/' />}
-        <div>
-          {loginOrSignup}
-          <button onClick={() => this.setState({isLogin: !this.state.isLogin})}>Toggle sign up/log in</button>
-        </div>
-      </div>
+        <Container>
+          <div className="Authenticator">
+            {/* if on /authenticate route and logged in, redirect to homepage */
+              this.props.location.pathname==='/authenticate' && this.props.username!=='not logged in'
+              && <Redirect to='/' />}
+            <div>
+              {loginOrSignup}
+            </div>
+          </div>
+        </Container>
     );
   };
 }

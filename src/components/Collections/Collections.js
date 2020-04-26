@@ -89,7 +89,7 @@ class Collections extends React.Component {
             return (
                 <div key={collectionOwner + collection.uri}>
                   <Menu>
-                    <MenuButton>
+                    <MenuButton >
                       Collection: {collection.name}<br/>
                       Role: {currentUserRole}
                     </MenuButton>

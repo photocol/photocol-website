@@ -7,149 +7,165 @@ import {Link, withRouter} from "react-router-dom"
 import { env } from "../../util/Environment";
 import {connect} from "react-redux";
 import Authenticator from "../Authenticator/Authenticator";
+import { CardBody, CardImg, CardTitle, Button, CardText, Row, Col, Form, FormGroup, Label, Input, Jumbotron, Container, Card } from 'reactstrap';
 
 class Photos extends React.Component {
-  constructor(props) {
-    super(props);
-    this.acm = new ApiConnectionManager();
-    this.state = {
-      photoList: [],
-      isSelected: false,
+    constructor(props) {
+        super(props);
+        this.acm = new ApiConnectionManager();
+        this.state = {
+            photoList: [],
+            isSelected: false,
+        };
+
+        this.history = props.history;
+
+        // if used as selection component
+        // state.isSelected is used as temporary select (if component), isSelect is used if only used for selecting photos
+        this.isSelect = props.onSelect !== null;
+        this.isSelect && (this.onSelect = props.onSelect);
+    }
+
+    componentDidMount() {
+        this.getPhotoList();
+    }
+
+    confirmPhotoSelection = () => {
+        this.onSelect(this.state.photoList.filter(photo => photo.selected));
     };
 
-    this.history = props.history;
+    render = () => {
+        if(this.props.username==='not logged in')
+            return (<Authenticator onUserAction={this.getPhotoList}/>);
 
-    // if used as selection component
-    // state.isSelected is used as temporary select (if component), isSelect is used if only used for selecting photos
-    this.isSelect = props.onSelect !== null;
-    this.isSelect && (this.onSelect = props.onSelect);
-  }
+        // how to show an image
+        const photoJsx = (photo, index) => (
+            <li key={photo.uri}>
+                <input type="checkbox" id={"ph" + index}
+                       checked={photo.selected}
+                       onChange={evt => {
+                           // act like checkbox in select mode
+                           this.setState({
+                               photoList: this.state.photoList.map((p, i) =>
+                                   i !== index ? p : {...p, selected: evt.target.checked}
+                               )
+                           });
+                       }}
+                       disabled={!this.isSelect && !this.state.isSelected}/>
+                <label htmlFor={"ph" + index}
+                       onClick={() => {
+                           // act like link in non-select mode
+                           if(!this.isSelect && !this.state.isSelected)
+                               this.history.push(`/photo/${photo.uri}`)
+                       }}>
+                    <img className="photos" src={`${env.serverUrl}/perma/${photo.uri}`}/>
+                </label>
+            </li>
+        );
 
-  componentDidMount() {
-    this.getPhotoList();
-  }
+        return (
+            <div className="Photos">
+                <Container>
+                    <Row>
+                        <Col>
+                            <div className ="select">
+                                <Button color="success" className={this.state.isSelected ? "ButtonOn" : ''}
+                                        onClick={
+                                            () => {
+                                                this.state.isSelected && this.state.photoList.forEach((photo) => photo.selected = false);
+                                                this.setState({isSelected: !this.state.isSelected});
+                                            }
+                                        }>
+                                    Select Photos
+                                </Button>  &nbsp; &nbsp; &nbsp;
+                                {!this.isSelect && this.state.isSelected &&
+                                <Button color="success" onClick={this.deleteSelectedPhotos}>Delete Photos</Button>}
 
-  confirmPhotoSelection = () => {
-    this.onSelect(this.state.photoList.filter(photo => photo.selected));
-  };
+                            </div>
 
-  render = () => {
-    if(this.props.username==='not logged in')
-      return (<Authenticator onUserAction={this.getPhotoList}/>);
+                        </Col>
+                        <Col>
+                            <div className="custom-file">
+                                <input className="custom-file-input"
+                                       id="customFile"
+                                       type="file"
+                                       onChange={this.uploadPhoto}
+                                       multiple/>
+                                <label className="custom-file-label" htmlFor="customFile">Upload file</label>
+                            </div>
+                        </Col>
+                    </Row>
+                    <br/>
+                </Container>
+                {
+                    // listing images
+                    this.state.photoList.map((photo, index) => photoJsx(photo, index))
+                }
+                {
+                    // for when used as selection component
+                    this.isSelect && (<button onClick={this.confirmPhotoSelection}>Select these photos</button>)
+                }
+            </div>
+        );
+    };
 
-    // how to show an image
-    const photoJsx = (photo, index) => (
-      <li key={photo.uri}>
-        <input type="checkbox" id={"ph" + index}
-               checked={photo.selected}
-               onChange={evt => {
-                 // act like checkbox in select mode
-                 this.setState({
-                   photoList: this.state.photoList.map((p, i) =>
-                     i !== index ? p : {...p, selected: evt.target.checked}
-                   )
-                 });
-               }}
-               disabled={!this.isSelect && !this.state.isSelected}/>
-        <label htmlFor={"ph" + index}
-               onClick={() => {
-                 // act like link in non-select mode
-                 if(!this.isSelect && !this.state.isSelected)
-                   this.history.push(`/photo/${photo.uri}`)
-               }}>
-          <img className="photos" src={`${env.serverUrl}/perma/${photo.uri}`}/>
-        </label>
-      </li>
-    );
+    getPhotoList = () => {
+        this.acm.request('/photo/currentuser').then(res => {
+            this.setState({
+                photoList: res.response.map(photo => ({
+                    ...photo,
+                    selected: false,
+                }))
+            });
+        }).catch(err => {
+            console.error(err);
+        });
+    };
 
-    return (
-      <div className="Photos">
-        Photos Component
-        <input className="Buttons"
-               type="file"
-               onChange={this.uploadPhoto}
-               multiple />
-        <button className={this.state.isSelected ? "ButtonOn" : ''}
-                onClick={
-                  () => {
-                    this.state.isSelected && this.state.photoList.forEach((photo) => photo.selected = false);
-                    this.setState({isSelected: !this.state.isSelected});
-                  }
-                }>
-          Select Photos
-        </button>
-        {!this.isSelect && this.state.isSelected && <button onClick={this.deleteSelectedPhotos}>Delete Photos</button>}
-        <br/>
+    deleteSelectedPhotos = () => {
+        this.state.photoList.forEach((photo) => {
+            photo.selected && this.deletePhoto(photo.uri);
+        })
+    };
 
-        {
-          // listing images
-          this.state.photoList.map((photo, index) => photoJsx(photo, index))
-        }
-        {
-          // for when used as selection component
-          this.isSelect && (<button onClick={this.confirmPhotoSelection}>Select these photos</button>)
-        }
-      </div>
-    );
-  };
+    deletePhoto = uri => {
+        console.log(uri);
+        this.acm.request("/photo/" + uri, {
+            method: 'DELETE'
+        })
+            .then(res => this.getPhotoList())
+            .catch(res => console.error(res));
+    };
 
-  getPhotoList = () => {
-    this.acm.request('/photo/currentuser').then(res => {
-      this.setState({
-        photoList: res.response.map(photo => ({
-          ...photo,
-          selected: false,
-        }))
-      });
-    }).catch(err => {
-      console.error(err);
-    });
-  };
+    /* TODO: make the upload button a separate component
+       TODO: add an actual upload button and not automatically upload
+     */
 
-  deleteSelectedPhotos = () => {
-    this.state.photoList.forEach((photo) => {
-      photo.selected && this.deletePhoto(photo.uri);
-    })
-  };
-
-  deletePhoto = uri => {
-    console.log(uri);
-    this.acm.request("/photo/" + uri, {
-      method: 'DELETE'
-    })
-      .then(res => this.getPhotoList())
-      .catch(res => console.error(res));
-  };
-
-  /* TODO: make the upload button a separate component
-     TODO: add an actual upload button and not automatically upload
-   */
-
-  uploadPhoto = (evt) => {
-    Array.from(evt.target.files).forEach(file =>
-      this.acm.request(`/photo/${file.name}`, {
-        method: 'PUT',
-        mode: 'cors',
-        body: file,
-        headers: { 'Access-Control-Request-Method': 'PUT' }
-      }).then(res => {
-        this.getPhotoList();
-      }).catch(err => {
-        console.log(err)
-      }));
-  };
+    uploadPhoto = (evt) => {
+        Array.from(evt.target.files).forEach(file =>
+            this.acm.request(`/photo/${file.name}`, {
+                method: 'PUT',
+                mode: 'cors',
+                body: file,
+                headers: { 'Access-Control-Request-Method': 'PUT' }
+            }).then(res => {
+                this.getPhotoList();
+            }).catch(err => {
+                console.log(err)
+            }));
+    };
 }
 
 
 Photos.propTypes = {
-  onSelect: PropTypes.func
+    onSelect: PropTypes.func
 };
 
 Photos.defaultProps = {
-  onSelect: null
+    onSelect: null
 };
 
 const mapStateToProps = state => ({
-  username: state.user.username
+    username: state.user.username
 });
 export default withRouter(connect(mapStateToProps)(Photos));
