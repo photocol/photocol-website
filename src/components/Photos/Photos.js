@@ -69,31 +69,23 @@ class Photos extends React.Component {
                     <Row>
                         <Col>
                             <div className ="select">
-                                <Row>
-                                    <Col sm={6}>
-                                        <Button color="success" className={this.state.isSelected ? "ButtonOn" : ''}
-                                                onClick={
-                                                    () => {
-                                                        this.state.isSelected && this.state.photoList.forEach((photo) => photo.selected = false);
-                                                        this.setState({isSelected: !this.state.isSelected});
-                                                    }
-                                                }>
-                                            Select Photos
-                                        </Button>
-                                    </Col>
-                                    <Col sm={6}>
-                                        {
-                                            // for when used as selection component
-                                            this.isSelect && (<Button color="success" onClick={this.confirmPhotoSelection}>Upload</Button>)
-                                        }
-                                    </Col>
-                                </Row>
+                                <Button color="success" className={this.state.isSelected ? "ButtonOn" : ''}
+                                        onClick={
+                                            () => {
+                                                this.state.isSelected && this.state.photoList.forEach((photo) => photo.selected = false);
+                                                this.setState({isSelected: !this.state.isSelected});
+                                            }
+                                        }>
+                                    Select Photos
+                                </Button> &nbsp;&nbsp; &nbsp;
 
                                 {!this.isSelect && this.state.isSelected &&
                                 <Button color="success" onClick={this.deleteSelectedPhotos}>Delete Photos</Button>}
-
+                                {
+                                    // for when used as selection component
+                                    this.isSelect && (<Button color="success" onClick={this.confirmPhotoSelection}>Upload</Button>)
+                                }
                             </div>
-
                         </Col>
                         <Col>
                             <div className="custom-file">
@@ -108,10 +100,13 @@ class Photos extends React.Component {
                     </Row>
                     <br/>
                 </Container>
+
+
                 {
                     // listing images
                     this.state.photoList.map((photo, index) => photoJsx(photo, index))
                 }
+
 
             </div>
         );
