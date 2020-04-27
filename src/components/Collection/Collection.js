@@ -257,6 +257,7 @@ class Collection extends React.Component {
                     {uploadOrCollection}
 
                 </div>
+                <br/>
                 <Link to='/collections'>Return to list of collections.</Link>
             </div>
         </Container>

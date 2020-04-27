@@ -16,6 +16,8 @@ import {
   Col,
   Form,
   FormGroup,
+  Table,
+  Tbody,
   Label,
   Input,
   Jumbotron,
@@ -127,38 +129,49 @@ class Collections extends React.Component {
               </div>
             </Row>
           </Container>
+          <Container>
+            <Row>
+              {this.state.collections.map(collection => {
+                const currentUserRole = collection.aclList.find(aclEntry => aclEntry.username === this.props.username).role;
+                const collectionOwner = collection.aclList.find(aclEntry => aclEntry.role === 'ROLE_OWNER').username;
 
-          {this.state.collections.map(collection => {
-            const currentUserRole = collection.aclList.find(aclEntry => aclEntry.username === this.props.username).role;
-            const collectionOwner = collection.aclList.find(aclEntry => aclEntry.role === 'ROLE_OWNER').username;
-            return (
-                <Container>
-                  <div key={collectionOwner + collection.uri}>
-                    <Dropdown
-                        isOpen={this.state.dropdownOpen === collection.name} size="lg"
-                        onClick = {() => this.dropdownClick(collection.name)}>
-                      <DropdownToggle>
-                        Collection: {collection.name}<br/>
-                        Role: {currentUserRole}
-                      </DropdownToggle>
-                      <DropdownMenu>
-                        <DropdownItem onClick={() => {}}>
-                          <Link to={`/collection/${collectionOwner}/${collection.uri}`}>Collection</Link>
-                        </DropdownItem>
-                        {
-                          collectionOwner === this.props.username &&
-                          (
-                              <DropdownItem onClick={() => this.deleteCollection(collectionOwner, collection.uri)}>Delete</DropdownItem>
-                          )
-                        }
-                      </DropdownMenu>
+                return (
 
-                    </Dropdown>
-                    <br/>
-                  </div>
-                </Container>
-          );
-          })}
+                        <div key={collectionOwner + collection.uri}>
+                          <Col>
+                            <Dropdown
+                                isOpen={this.state.dropdownOpen === collection.name} size="lg"
+                                onClick = {() => this.dropdownClick(collection.name)}>
+                              <DropdownToggle color="dark">
+                                Collection: {collection.name}<br/>
+                                Role: {currentUserRole}
+                              </DropdownToggle>
+                              <DropdownMenu>
+                                <DropdownItem onClick={() => {}}>
+                                  <Link to={`/collection/${collectionOwner}/${collection.uri}`}>Collection</Link>
+                                </DropdownItem>
+                                {
+                                  collectionOwner === this.props.username &&
+                                  (
+                                      <DropdownItem onClick={() => this.deleteCollection(collectionOwner, collection.uri)}>Delete</DropdownItem>
+                                  )
+                                }
+                              </DropdownMenu>
+                            </Dropdown>
+                          </Col>
+
+                          <br/>
+                        </div>
+
+
+
+                );
+
+              })}
+            </Row>
+
+
+          </Container>
         </div>
     );
   };
