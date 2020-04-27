@@ -7,6 +7,24 @@ import ApiConnectionManager from "../../util/ApiConnectionManager";
 import Authenticator from "../Authenticator/Authenticator";
 import {env} from "../../util/Environment";
 import {
+  CardBody,
+  CardImg,
+  CardTitle,
+  Button,
+  CardText,
+  Row,
+  Col,
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  Jumbotron,
+  Container,
+  Card,
+  NavbarToggler, Collapse, Navbar
+} from 'reactstrap';
+import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import {
   Menu,
   MenuList,
   MenuButton,
@@ -22,11 +40,28 @@ class Collections extends React.Component {
 
     this.acm = new ApiConnectionManager();
 
+    this.dropdownClick = this.dropdownClick.bind(this);
     this.state = {
       collections: [],
-      collectionName: ''
+      collectionName: '',
+      dropdownOpen: null
     };
   }
+
+  dropdownClick(name) {
+    if(this.state.dropdownOpen == name)
+    {
+      this.setState({
+          dropdownOpen: null
+      }
+      )
+    }
+    else{
+      this.setState({
+        dropdownOpen: name
+      })
+    }
+  };
   onEnter = (evt) => {
     if(evt.key === 'Enter') {
       this.createCollection();
@@ -73,40 +108,56 @@ class Collections extends React.Component {
       return (<Authenticator onUserAction={this.updateCollections}/>);
 
     return (
-        <div className='Collections'>
+        <div >
+          <Container>
+            <br/>
+            <Row>
+              <Form>
+                <FormGroup>
 
-          <div>
-            <h1>Create Collection</h1>
-            Collection <input type='text'
-                              value={this.state.collectionName}
-                              onChange={evt => this.setState({collectionName: evt.target.value})} onKeyDown={this.onEnter}/><br/>
-            <button onClick={this.createCollection}>Create Collection</button>
-          </div>
+                  <Label htmlFor="form-group" >Collection Name</Label>
+                  <input type='text'
+                         id="form-control"
+                         value={this.state.collectionName}
+                         onChange={evt => this.setState({collectionName: evt.target.value})} onKeyDown={this.onEnter}/><br/>
+                </FormGroup>
+              </Form> &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;
+              <div>
+                <Button color="success" onClick={this.createCollection}>Create Collection</Button>
+              </div>
+            </Row>
+          </Container>
 
           {this.state.collections.map(collection => {
             const currentUserRole = collection.aclList.find(aclEntry => aclEntry.username === this.props.username).role;
             const collectionOwner = collection.aclList.find(aclEntry => aclEntry.role === 'ROLE_OWNER').username;
             return (
-                <div key={collectionOwner + collection.uri}>
-                  <Menu>
-                    <MenuButton >
-                      Collection: {collection.name}<br/>
-                      Role: {currentUserRole}
-                    </MenuButton>
-                    <MenuList>
-                      <MenuItem onSelect={() => {}}>
-                        <Link to={`/collection/${collectionOwner}/${collection.uri}`}>Collection</Link>
-                      </MenuItem>
-                      {
-                        collectionOwner === this.props.username &&
+                <Container>
+                  <div key={collectionOwner + collection.uri}>
+                    <Dropdown
+                        isOpen={this.state.dropdownOpen === collection.name} size="lg"
+                        onClick = {() => this.dropdownClick(collection.name)}>
+                      <DropdownToggle>
+                        Collection: {collection.name}<br/>
+                        Role: {currentUserRole}
+                      </DropdownToggle>
+                      <DropdownMenu>
+                        <DropdownItem onClick={() => {}}>
+                          <Link to={`/collection/${collectionOwner}/${collection.uri}`}>Collection</Link>
+                        </DropdownItem>
+                        {
+                          collectionOwner === this.props.username &&
                           (
-                            <MenuItem onSelect={() => this.deleteCollection(collectionOwner, collection.uri)}>Delete</MenuItem>
+                              <DropdownItem onClick={() => this.deleteCollection(collectionOwner, collection.uri)}>Delete</DropdownItem>
                           )
-                      }
-                    </MenuList>
-                  </Menu>
-                </div>
-            );
+                        }
+                      </DropdownMenu>
+
+                    </Dropdown>
+                    <br/>
+                  </div>
+                </Container>
+          );
           })}
         </div>
     );

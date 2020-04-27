@@ -7,7 +7,23 @@ import ApiConnectionManager from "../../util/ApiConnectionManager";
 import { env } from "../../util/Environment";
 import UserSearch from "../UserSearch/UserSearch";
 import Photos from "../Photos/Photos";
-
+import {
+    CardBody,
+    CardImg,
+    CardTitle,
+    Button,
+    CardText,
+    Row,
+    Col,
+    Form,
+    FormGroup,
+    Label,
+    Input,
+    Jumbotron,
+    Container,
+    Card,
+    NavbarToggler, Collapse, Navbar
+} from 'reactstrap';
 class Collection extends React.Component {
     constructor(props) {
         super(props);
@@ -151,59 +167,99 @@ class Collection extends React.Component {
 
     const photosJsx = this.state.collection.photos.map(photo =>
       <div className='collection-photo-container' key={photo.uri}>
-        <img src={`${env.serverUrl}/perma/${photo.uri}`} />
+          <img src={`${env.serverUrl}/perma/${photo.uri}`} />
         <p>{photo.description}</p>
         <p>Uploaded on {photo.uploadDate}</p>
-        <button onClick={() => this.deletePhoto(photo.uri)}>Delete</button>
+        <Button onClick={() => this.deletePhoto(photo.uri)}>Delete</Button>
       </div>
     );
 
     const uploadJsx = (
       <div>
-        <Photos onSelect = {photos => photos.forEach(photo => this.addPhoto(photo.uri))}>
+          <Photos onSelect = {photos => photos.forEach(photo => this.addPhoto(photo.uri))}>
         </Photos>
       </div>
     );
     const uploadOrCollection = this.state.uploadPressed ? uploadJsx: photosJsx ;
 
     const aclListJsx = (
-      <ul>
-        {
-          this.state.collection.aclList.map((aclEntry, index) =>
-            <li key={aclEntry.username}>
-              <select value={aclEntry.role}
-                      onChange={evt => this.updateAclEntryRole(index, evt.target.value)}>
-                <option value="ROLE_OWNER">Owner</option>
-                <option value="ROLE_EDITOR">Editor</option>
-                <option value="ROLE_VIEWER">Viewer</option>
-              </select>
-              <button onClick={() => this.removeAclEntry(index)}>Remove</button>
-              {aclEntry.username}
-            </li>
-          )
-        }
-      </ul>
+        <Container>
+            <ul>
+                {
+                    this.state.collection.aclList.map((aclEntry, index) =>
+
+                        <li key={aclEntry.username}>
+                            <Form>
+                                <Row >
+                                    <Col >
+                                        <FormGroup>
+                                            <select class="form-control"
+                                                    value={aclEntry.role}
+                                                    onChange={evt => this.updateAclEntryRole(index, evt.target.value)}>
+                                                <option value="ROLE_OWNER">Owner</option>
+                                                <option value="ROLE_EDITOR">Editor</option>
+                                                <option value="ROLE_VIEWER">Viewer</option>
+                                            </select>
+                                        </FormGroup>
+                                    </Col>
+                                    <Col>
+                                        <Button color="success" onClick={() => this.removeAclEntry(index)}>Remove</Button>
+                                        {aclEntry.username} &nbsp;&nbsp; &nbsp;
+                                    </Col>
+                                </Row>
+                            </Form>
+                        </li>
+                    )
+                }
+            </ul>
+
+
+        </Container>
     );
 
     return (
-      <div className='Collection'>
-        <h1>Collection {this.state.collection.name}</h1>
-        <h2>By {this.getOwner()}</h2>
-        <h2>ACL List:</h2>
-        {aclListJsx}
-        <h2>Add user</h2>
-        <UserSearch selectText='Add to collection'
-                    onUserSelect={this.addUserToAcl}
-                    userFilter={this.userNotInAcl}
-                    ref={this.userSearchRef} />
-        <button onClick={this.saveChanges}>Save changes</button>
-        <button onClick={this.getCollection}>Undo changes and reload</button>
-        <div>
-          <button onClick={() => this.setState({uploadPressed: !this.state.uploadPressed})}>Upload/See photos</button>
-          {uploadOrCollection}
-        </div>
-        <Link to='/collections'>Return to list of collections.</Link>
-      </div>
+        <Container>
+            <div className='Collection'>
+                <br/>
+
+                <h1 className="heading">Collection {this.state.collection.name}</h1>
+                <h2>
+                    by {this.getOwner()}
+                </h2>
+                <br/>
+                <Container>
+                    <Row>
+                        <h3>ACL List:</h3>
+                        {aclListJsx}
+                    </Row>
+                    <Row>
+                        <Col sm="2.5">
+                            <h3>Add user</h3>
+                        </Col>
+                        <Col >
+                            <UserSearch  id="form-control"
+                                        selectText='Add to collection'
+                                        onUserSelect={this.addUserToAcl}
+                                        userFilter={this.userNotInAcl}
+                                        ref={this.userSearchRef} />
+                        </Col>
+                    </Row>
+                </Container>
+
+
+                <Button color="success" onClick={this.saveChanges}>Save changes</Button>  &nbsp;&nbsp; &nbsp;
+                <Button color="success" onClick={this.getCollection}>Undo changes and reload</Button>
+                <div>
+                    <br/>
+
+                    <Button color="success" onClick={() => this.setState({uploadPressed: !this.state.uploadPressed})}>Upload/See photos</Button>
+                    <br/>
+                    {uploadOrCollection}
+
+                </div>
+                <Link to='/collections'>Return to list of collections.</Link>
+            </div>
+        </Container>
     );
   }
 }

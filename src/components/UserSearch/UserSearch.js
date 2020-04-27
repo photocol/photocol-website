@@ -2,7 +2,23 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './UserSearch.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
-
+import {
+  CardBody,
+  CardImg,
+  CardTitle,
+  Button,
+  CardText,
+  Row,
+  Col,
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  Jumbotron,
+  Container,
+  Card,
+  NavbarToggler, Collapse, Navbar
+} from 'reactstrap';
 class UserSearch extends React.Component {
   constructor(props) {
     super(props);
@@ -37,20 +53,27 @@ class UserSearch extends React.Component {
   render = () => {
     return (
       <div>
-        <input type='text'
+        <input class="form-control"
+               type='text'
                value={this.state.queries}
                onChange={evt => {
                  this.setState({queryString: evt.target.value}, this.searchUsers)
                }} />
+               <br/>
         <ul>
           {
             this.state.searchResults.map(result =>
-              <div key={result}>
-                {result}
-                <button onClick={() => this.props.onUserSelect(result)}>
-                  {this.props.selectText}
-                </button>
-              </div>
+                <Container>
+                  <div key={result}>
+                    {result} &nbsp; &nbsp;
+                    <Button color="success" onClick={() => this.props.onUserSelect(result)}>
+                      {this.props.selectText}
+                    </Button>
+                    <br/>
+                    <br/>
+                  </div>
+                </Container>
+
             )
           }
         </ul>
