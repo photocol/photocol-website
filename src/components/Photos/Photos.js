@@ -79,8 +79,7 @@ class Photos extends React.Component {
                                     Select Photos
                                 </Button> &nbsp;&nbsp; &nbsp;
 
-                                {!this.isSelect && this.state.isSelected &&
-                                <Button color="success" onClick={this.deleteSelectedPhotos}>Delete Photos</Button>}
+                                {!this.isSelect && this.state.isSelected && <Button color="success" onClick={this.deleteSelectedPhotos}>Delete Photos</Button>}
                                 {
                                     // for when used as selection component
                                     this.isSelect && (<Button color="success" onClick={this.confirmPhotoSelection}>Upload</Button>)
@@ -99,13 +98,13 @@ class Photos extends React.Component {
                         </Col>
                     </Row>
                     <br/>
+                    {
+                        // listing images
+                        this.state.photoList.map((photo, index) => photoJsx(photo, index))
+                    }
                 </Container>
 
 
-                {
-                    // listing images
-                    this.state.photoList.map((photo, index) => photoJsx(photo, index))
-                }
 
 
             </div>

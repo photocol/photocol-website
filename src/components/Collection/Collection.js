@@ -170,7 +170,7 @@ class Collection extends React.Component {
           <img src={`${env.serverUrl}/perma/${photo.uri}`} />
         <p>{photo.description}</p>
         <p>Uploaded on {photo.uploadDate}</p>
-        <Button onClick={() => this.deletePhoto(photo.uri)}>Delete</Button>
+        <Button color="success" onClick={() => this.deletePhoto(photo.uri)}>Delete</Button>
       </div>
     );
 
@@ -191,7 +191,8 @@ class Collection extends React.Component {
                         <li key={aclEntry.username}>
                             <Form>
                                 <Row >
-                                    <Col >
+                                    <Col className="text-center" sm={6}>
+                                        <a2>{aclEntry.username}</a2>
                                         <FormGroup>
                                             <select class="form-control"
                                                     value={aclEntry.role}
@@ -203,9 +204,12 @@ class Collection extends React.Component {
                                         </FormGroup>
                                     </Col>
                                     <Col>
+                                        <br/>
                                         <Button color="success" onClick={() => this.removeAclEntry(index)}>Remove</Button>
-                                        {aclEntry.username} &nbsp;&nbsp; &nbsp;
+
                                     </Col>
+                                    &nbsp;&nbsp; &nbsp;
+
                                 </Row>
                             </Form>
                         </li>
