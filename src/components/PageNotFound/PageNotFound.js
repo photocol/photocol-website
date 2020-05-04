@@ -1,16 +1,13 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import './PageNotFound.css';
+import { Container } from 'reactstrap';
 
 const PageNotFound = () => (
-  <div className="PageNotFound">
-    You are friggin lost. <Link to='/'>Go home</Link>
-  </div>
+  <Container className="PageNotFound mt-5 text-center">
+    <h1 className='display-1'>404</h1>
+    You're lost. <Link to='/'>Go home</Link>.
+  </Container>
 );
-
-PageNotFound.propTypes = {};
-
-PageNotFound.defaultProps = {};
 
 export default PageNotFound;
