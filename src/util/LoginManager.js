@@ -30,7 +30,7 @@ class LoginManager {
         method: 'POST',
         body: JSON.stringify({
           username: username,
-          passwordHash: password
+          password: password
         })
       }).then(res => {
         // update store
@@ -47,7 +47,7 @@ class LoginManager {
         method: 'POST',
         body: JSON.stringify({
           username: username,
-          passwordHash: password,
+          password: password,
           email: email
         })
       }).then(res => {
