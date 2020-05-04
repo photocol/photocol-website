@@ -65,8 +65,8 @@ class Authenticator extends React.Component {
 
   signUp = () => {
     // basic formatting
-    const username = this.username.trim().toLowerCase();
-    const email = this.email.trim().toLowerCase();
+    const username = this.state.username.trim().toLowerCase();
+    const email = this.state.email.trim().toLowerCase();
     this.setState({ username: username, email: email });
 
     this.lm.signUp(username, this.state.password, email)
