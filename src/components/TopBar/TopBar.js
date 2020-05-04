@@ -1,24 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { LinkContainer } from 'react-router-bootstrap';
 import LoginManager from '../../util/LoginManager';
 import './TopBar.css';
-import { CardBody, CardImg, CardTitle, Button, CardText, Row, Col, Form, FormGroup, Label, Input, Jumbotron, Container, Card } from 'reactstrap';
-import { useState } from 'react';
-import {
-    Collapse,
-    Navbar,
-    NavbarToggler,
-    NavbarBrand,
-    Nav,
-    NavItem,
-    NavLink,
-    UncontrolledDropdown,
-    DropdownToggle,
-    DropdownMenu,
-    DropdownItem,
-    NavbarText
-} from 'reactstrap';
+import { Button, Collapse, Navbar, NavbarToggler, NavbarBrand, Nav, NavItem, NavLink, NavbarText } from 'reactstrap';
+
 class TopBar extends React.Component {
   constructor(props) {
     super(props);
@@ -32,26 +18,32 @@ class TopBar extends React.Component {
     return (
         <div>
             <Navbar color="dark" dark expand="md">
-                <NavbarBrand href="/">Photocol</NavbarBrand>
+                <LinkContainer to='/'>
+                    <NavbarBrand>Photocol</NavbarBrand>
+                </LinkContainer>
                 <NavbarToggler onClick={() => this.setState({isOpen: !this.state.isOpen})} />
                 <Collapse isOpen={this.state.isOpen} navbar>
                     <Nav className="mr-auto" navbar>
-                        <NavItem>
-                            <NavLink href='/profile'>Profile</NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink href='/collections'>Collections</NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink href='/photos'>Photos</NavLink>
-                        </NavItem>
-
+                        <LinkContainer to='/profile'>
+                            <NavLink>Profile</NavLink>
+                        </LinkContainer>
+                        <LinkContainer to='/collections'>
+                            <NavLink>Collections</NavLink>
+                        </LinkContainer>
+                        <LinkContainer to='/photos'>
+                            <NavLink>Photos</NavLink>
+                        </LinkContainer>
                     </Nav>
-                    <NavbarText className ="text-center">Currently signed-in user:<br/>
-                        {this.props.username}</NavbarText> &nbsp; &nbsp; &nbsp;
+                    {this.props.username!=='not logged in' &&
+                        (
+                            <NavbarText className="text-center">Hi, {this.props.username}</NavbarText>
+                        )
+                    }
                     <NavItem>
                         {this.props.username==='not logged in'
-                            ? <Button color="success" href='/authenticate'>Sign in</Button>
+                            ? <LinkContainer to='/authenticate'>
+                                <Button color="success">Log in / Sign up</Button>
+                              </LinkContainer>
                             : <Button color="success" onClick={this.lm.logOut}>Sign out</Button>
                         }
                     </NavItem>
