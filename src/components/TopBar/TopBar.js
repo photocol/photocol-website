@@ -35,16 +35,13 @@ class TopBar extends React.Component {
                         </LinkContainer>
                     </Nav>
                     {this.props.username!=='not logged in' &&
-                        (
-                            <NavbarText className="text-center">Hi, {this.props.username}</NavbarText>
-                        )
-                    }
+                        <NavbarText className="mr-3">{this.props.username}</NavbarText>}
                     <NavItem>
                         {this.props.username==='not logged in'
                             ? <LinkContainer to='/authenticate'>
-                                <Button color="success">Log in / Sign up</Button>
+                                <Button outline color="info">Log in / Sign up</Button>
                               </LinkContainer>
-                            : <Button color="success" onClick={this.lm.logOut}>Sign out</Button>
+                            : <Button outline color="info" onClick={this.lm.logOut}>Sign out</Button>
                         }
                     </NavItem>
                 </Collapse>
