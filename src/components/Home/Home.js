@@ -1,17 +1,13 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import './Home.css';
+import { Container } from 'reactstrap';
 
 const Home = () => (
-  <div className="Home">
+  <Container className="Home mt-5">
     <h1>Welcome to Photocol!</h1>
     <p>A work in progress</p>
     <p>by JLRLTYVZ</p>
-  </div>
+  </Container>
 );
-
-Home.propTypes = {};
-
-Home.defaultProps = {};
 
 export default Home;
