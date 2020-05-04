@@ -35,8 +35,8 @@ class LoginManager {
       }).then(res => {
         // update store
         store.dispatch({type: 'login', username: username});
-        resolve(res.response);
-      }).catch(err => reject(err.response));
+        resolve(res);
+      }).catch(err => reject(err));
     });
   }
 
@@ -52,8 +52,8 @@ class LoginManager {
         })
       }).then(res => {
         store.dispatch({type: 'login', username: username});
-        resolve(res.response);
-      }).catch(err => reject(err.response));
+        resolve(res);
+      }).catch(err => reject(err));
     });
   }
 
@@ -64,8 +64,8 @@ class LoginManager {
         .then(res => {
           // update store
           store.dispatch({type: 'logout'});
-          resolve(res.response);
-        }).catch(err => reject(err.response));
+          resolve(res);
+        }).catch(err => reject(err));
     });
   }
 }
