@@ -24,6 +24,8 @@ class Collection extends React.Component {
       collection: {
         name: '',
         uri: '',
+        description: '',
+        coverPhotoUri: '',
         photos: [],
         aclList: []
       },
@@ -90,15 +92,33 @@ class Collection extends React.Component {
       .map(aclEntry => ({...aclEntry, role: 'ROLE_NONE'}));
     const aclListDiff = newEntries.concat(removedEntries);
 
-    // TODO: do something if owner changes
+    // get changes in name, description, coverPhotoUri
+    // set to null if no change so to prevent unnecessary db updates when not necessary
+    const newName = current.name===previous.name ? null : current.name;
+    const newDescription = current.description===previous.description ? null : current.description;
+    const newCoverPhotoUri = current.coverPhotoUri===previous.coverPhotoUri ? null : current.coverPhotoUri;
 
     this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}/update`, {
       method: 'POST',
       body: JSON.stringify({
+        name: newName,
+        description: newDescription,
+        coverPhotoUri: newCoverPhotoUri,
         aclList: aclListDiff
       })
     })
-      .then(res => console.log(res))
+      .then(res => {
+        if(res.response===true) {
+
+          // TODO: if owner or username changed, redirect to new url
+
+          this.toggleEditModal();
+          return;
+        }
+
+        // TODO: ERROR HANDLING HERE
+        console.error(res.response);
+      })
       .catch(err => {
         console.error(err)
       });
@@ -145,6 +165,13 @@ class Collection extends React.Component {
     })
       .then(res => this.getCollection())
       .catch(res => console.error(res));
+  };
+
+  toggleEditModal = () => this.setState({ isEditing: !this.state.isEditing });
+
+  cancelChangesAndExit = () => {
+    this.getCollection();
+    this.toggleEditModal();
   };
 
   render = () => {
@@ -197,8 +224,6 @@ class Collection extends React.Component {
       </ListGroupItem>
     );
 
-    const toggleEditModal = () => this.setState({ isEditing: !this.state.isEditing });
-
     const changeCollectionName = evt => {
       const newName = evt.target.value;
       const newUri = newName.trim().toLowerCase().replace(/ /g, '-').replace(/[^0-9a-z\-\.]/g, '');
@@ -213,28 +238,41 @@ class Collection extends React.Component {
     };
 
     const editAclModal = (
-      <Modal isOpen={this.state.isEditing} toggle={toggleEditModal}>
-        <ModalHeader toggle={toggleEditModal}>Edit collection</ModalHeader>
+      <Modal isOpen={this.state.isEditing} toggle={this.cancelChangesAndExit} style={{maxWidth: 1000}}>
+        <ModalHeader toggle={this.cancelChangesAndExit}>Edit collection</ModalHeader>
         <ModalBody>
           <Form>
             <FormGroup>
-              <Label htmlFor={'edit-collection-name'}>Collection name</Label>
+              <Label htmlFor={'edit-collection-name'}>
+                Collection name{' '}
+                <FormText className={'d-inline'}>({this.state.collection.name.length}/50)</FormText>
+              </Label>
               <Input id={'edit-collection-name'}
                      type={'text'}
                      value={this.state.collection.name}
+                     maxLength={50}
                      onChange={changeCollectionName} />
               <FormText>This collection will be available at <code>/collection/{this.state.username}/{this.state.collection.uri}</code>.</FormText>
             </FormGroup>
             <FormGroup>
-              <Label>Description</Label>
+              <Label htmlFor={'edit-collection-description'}>
+                Description{' '}
+                <FormText className={'d-inline'}>({(this.state.collection.description || '').length}/1000)</FormText>
+              </Label>
               <textarea className={'form-control'}
+                        id={'edit-collection-description'}
                         rows={6}
+                        maxLength={1000}
+                        placeholder={'A description helps people know what this collection is about!'}
                         value={this.state.collection.description}
                         onChange={evt => this.setState({collection: { ...this.state.collection, description: evt.target.value}})}></textarea>
             </FormGroup>
             <FormGroup>
-              <Label>Choose cover image</Label>
-              <h1>THIS IS A WORK IN PROGRESS</h1>
+              <Label htmlFor={'edit-collection-cover-photo'}>Choose cover image</Label>
+              <Input id={'edit-collection-cover-photo'}
+                     value={this.state.collection.coverPhotoUri}
+                     placeholder={'Enter URI here. (This is temporary)'}
+                     onChange={evt => this.setState({collection: {...this.state.collection, coverPhotoUri: evt.target.value}})} />
             </FormGroup>
             <FormGroup>
               <Label>Change user access</Label>
@@ -252,8 +290,9 @@ class Collection extends React.Component {
           </Form>
         </ModalBody>
         <ModalFooter>
-          <Button onClick={() => this.setState({isEditing: false, isEditingAcl: false})} outline>Cancel</Button>
-          <Button onClick={() => this.setState({isEditing: false, isEditingAcl: false})} outline color={'info'}>Save and exit</Button>
+          {JSON.stringify(this.state.collection)!==JSON.stringify(this.state.lastLoadedCollection) && <FormText>Unsaved changes</FormText>}
+          <Button onClick={this.cancelChangesAndExit} outline>Cancel changes and exit</Button>
+          <Button onClick={this.saveChanges} outline color={'info'}>Save and exit</Button>
         </ModalFooter>
       </Modal>
     );
@@ -289,16 +328,34 @@ class Collection extends React.Component {
 
     return (
       <div className={'Collection'}>
-        <Jumbotron fluid>
-          <Container className={'mt-5 Collection'}>
+        <Jumbotron fluid className={'text-light position-relative d-flex flex-column justify-content-center'} style={{
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          height: '30rem'
+        }}>
+          <div className={'w-100 h-100 position-absolute'}
+               style={{
+                 backgroundImage: `url(${env.serverUrl}/perma/${this.state.collection.coverPhotoUri})`,
+                 top: 0,
+                 backgroundSize: 'cover',
+                 backgroundPosition: 'center',
+                 zIndex: -1
+               }}></div>
+          <Container>
             {editAclModal}
             <div class={'d-flex flex-row align-items-center'}>
               <span className="display-4 mr-3">{this.state.collection.name}</span>
               <span>
-                <Button className={'mr-2'} outline onClick={toggleEditModal} title={'Edit collection'}>
+                <Button className={'mr-2'}
+                        outline
+                        onClick={this.toggleEditModal}
+                        color={'info'}
+                        title={'Edit collection'}>
                   <FontAwesomeIcon icon={faEdit} fixedWidth={true} />
                 </Button>
-                <Button className={'mr-2'} outline title={'Toggle show/upload photos'}
+                <Button className={'mr-2'}
+                        outline
+                        title={'Toggle show/upload photos'}
+                        color={'info'}
                         onClick={() => this.setState({uploadPressed: !this.state.uploadPressed})}>
                   <FontAwesomeIcon icon={faFileUpload} fixedWidth={true} />
                 </Button>
