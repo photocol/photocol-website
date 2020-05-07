@@ -247,8 +247,13 @@ class Collection extends React.Component {
             <div class={'d-flex flex-row align-items-center'}>
               <span className="display-3 mr-3">{this.state.collection.name}</span>
               <span>
-                <Button className={'mr-2'} outline onClick={toggleEditModal}><FontAwesomeIcon icon={faEdit} className={'fa-fw'} /></Button>
-                <Button className={'mr-2'} outline onClick={() => this.setState({uploadPressed: !this.state.uploadPressed})}><FontAwesomeIcon icon={faFileUpload} className={'fa-fw'} /></Button>
+                <Button className={'mr-2'} outline onClick={toggleEditModal}>
+                  <FontAwesomeIcon icon={faEdit} fixedWidth={true} />
+                </Button>
+                <Button className={'mr-2'} outline
+                        onClick={() => this.setState({uploadPressed: !this.state.uploadPressed})}>
+                  <FontAwesomeIcon icon={faFileUpload} fixedWidth={true} />
+                </Button>
               </span>
             </div>
             <p>
