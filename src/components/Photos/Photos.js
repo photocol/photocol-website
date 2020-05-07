@@ -9,6 +9,8 @@ import {connect} from "react-redux";
 import Authenticator from "../Authenticator/Authenticator";
 import { CardBody, CardImg, CardTitle, Button, CardText, Row, Col, Form, FormGroup, Label, Input, Jumbotron, Container, Card } from 'reactstrap';
 import { Progress } from 'reactstrap';
+import Gallery from "react-photo-gallery";
+
 
 class Photos extends React.Component {
   constructor(props) {
@@ -61,7 +63,6 @@ class Photos extends React.Component {
                if(!this.isSelect && !this.state.isSelected)
                  this.history.push(`/photo/${photo.uri}`)
              }}>
-            <img className="photod" src={`${env.serverUrl}/perma/${photo.uri}`} title={photo.caption}/>
         </label>
       </li>
     );
@@ -111,8 +112,12 @@ class Photos extends React.Component {
           </Row>
           <br/>
           {
-            // listing images
-            this.state.photoList.map((photo, index) => photoJsx(photo, index))
+            // listing images -- fun code is here.
+            this.state.isSelected ? <Gallery photos={this.state.photoList}/> : <Gallery photos={this.state.photoList}/>
+            // this.state.photoList.map((photo, index) => {
+            //   photoJsx(photo, index);
+            //   console.log(photo);
+            // })
           }
         </Container>
 
@@ -123,11 +128,17 @@ class Photos extends React.Component {
     );
   };
 
+
+
+
   getPhotoList = () => {
     this.acm.request('/photo/currentuser').then(res => {
       this.setState({
         photoList: res.response.map(photo => ({
           ...photo,
+          src: `${env.serverUrl}/perma/${photo.uri}`,
+          width: 3,
+          height: 2,
           selected: false,
         }))
       });
