@@ -2,23 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './UserSearch.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
-import {
-  CardBody,
-  CardImg,
-  CardTitle,
-  Button,
-  CardText,
-  Row,
-  Col,
-  Form,
-  FormGroup,
-  Label,
-  Input,
-  Jumbotron,
-  Container,
-  Card,
-  NavbarToggler, Collapse, Navbar
-} from 'reactstrap';
+import { Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Label, Row, Col, Button, Input, ListGroup, ListGroupItem} from 'reactstrap';
+
 class UserSearch extends React.Component {
   constructor(props) {
     super(props);
@@ -52,45 +37,34 @@ class UserSearch extends React.Component {
 
   render = () => {
     return (
-      <div>
-        <input class="form-control"
-               type='text'
-               value={this.state.queries}
-               onChange={evt => {
-                 this.setState({queryString: evt.target.value}, this.searchUsers)
-               }} />
-               <br/>
-        <ul>
+      <Dropdown isOpen={this.state.searchResults.length>0}>
+        <DropdownToggle className={'bg-transparent p-0 border-0'}>
+          <Input type='text'
+                 value={this.state.queries}
+                 placeholder={this.props.promptText}
+                 onChange={evt => { this.setState({queryString: evt.target.value}, this.searchUsers) }} />
+        </DropdownToggle>
+        <DropdownMenu>
           {
-            this.state.searchResults.map(result =>
-                <Container>
-                  <div key={result}>
-                    {result} &nbsp; &nbsp;
-                    <Button color="success" onClick={() => this.props.onUserSelect(result)}>
-                      {this.props.selectText}
-                    </Button>
-                    <br/>
-                    <br/>
-                  </div>
-                </Container>
-
-            )
+            this.state.searchResults.map(result => (
+              <DropdownItem key={result} onClick={() => this.props.onUserSelect(result)}>{result}</DropdownItem>
+            ))
           }
-        </ul>
-      </div>
+        </DropdownMenu>
+      </Dropdown>
     );
   };
 }
 
 UserSearch.propTypes = {
   onUserSelect: PropTypes.func,
-  buttonText: PropTypes.string,
+  promptText: PropTypes.string,
   userFilter: PropTypes.func
 };
 
 UserSearch.defaultProps = {
   onUserSelect: () => {},
-  buttonText: 'Select',
+  promptText: 'Select user',
   userFilter: () => true
 };
 

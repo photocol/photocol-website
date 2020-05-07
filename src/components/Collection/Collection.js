@@ -5,13 +5,14 @@ import ApiConnectionManager from "../../util/ApiConnectionManager";
 import { env } from "../../util/Environment";
 import UserSearch from "../UserSearch/UserSearch";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserSlash, faEdit, faFileUpload } from '@fortawesome/free-solid-svg-icons';
+import { faUserSlash, faUserPlus, faEdit, faFileUpload } from '@fortawesome/free-solid-svg-icons';
 import Photos from "../Photos/Photos";
 import catlogo from '../../cat-profile.png';
 import {
   CardBody, CardImg, CardTitle, Button, CardText, Row, Col, Form, FormGroup, Label, Input, Jumbotron, Container,
   Card, NavbarToggler, Collapse, Navbar, Modal, ModalHeader, ModalBody, ModalFooter, ListGroupItem, ListGroup,
-  CardHeader } from 'reactstrap';
+  CardHeader, FormText } from 'reactstrap';
+import Photo from "../Photo/Photo";
 class Collection extends React.Component {
     constructor(props) {
         super(props);
@@ -29,7 +30,8 @@ class Collection extends React.Component {
       lastLoadedCollection: {}, // for use when updating component
       errorMsg: '',
       uploadPressed: false,
-      isEditingAcl: false
+      isEditingAcl: false,
+      newAclEntryRole: 'ROLE_VIEWER'
     };
 
     this.acm = new ApiConnectionManager();
@@ -66,9 +68,10 @@ class Collection extends React.Component {
         ...this.state.collection,
         aclList: this.state.collection.aclList.concat({
           username: username,
-          role: 'ROLE_VIEWER'
+          role: this.state.newAclEntryRole
         })
-      }
+      },
+      newAclEntryRole: 'ROLE_VIEWER'
     }, this.userSearchRef.current.refilter);
   };
 
@@ -155,16 +158,40 @@ class Collection extends React.Component {
       );
 
     const editAclModalUser = (userAcl, index) => (
-      <ListGroupItem className={'d-flex justify-content-between'}>
+      <ListGroupItem className={'d-flex justify-content-between'} key={userAcl.username}>
         <div className={'d-flex flex-column justify-content-center'}>{userAcl.username}</div>
         <div className={'d-flex flex-row align-items-center'}>
-          <select value={userAcl.role} className={'form-control w-auto mr-2'}>
+          <select value={userAcl.role}
+                  className={'form-control w-auto mr-2'}
+                  onChange={evt => this.updateAclEntryRole(index, evt.target.value)}>
             <option value={'ROLE_OWNER'}>Owner</option>
             <option value={'ROLE_EDITOR'}>Editor</option>
             <option value={'ROLE_VIEWER'}>Viewer</option>
           </select>
-          <Button color={'danger'}>
+          <Button outline color={'danger'} onClick={() => this.removeAclEntry(index)}>
             <FontAwesomeIcon icon={faUserSlash} />
+          </Button>
+        </div>
+      </ListGroupItem>
+    );
+
+    const addAclModalUser = (
+      <ListGroupItem className={'d-flex justify-content-between'}>
+        <UserSearch id="form-control"
+                    promptText={'Add user'}
+                    onUserSelect={this.addUserToAcl}
+                    userFilter={this.userNotInAcl}
+                    ref={this.userSearchRef} />
+        <div className={'d-flex flex-row align-items-center'}>
+          <select value={this.state.newAclEntryRole}
+                  className={'form-control w-auto mr-2'}
+                  onChange={evt => this.setState({newAclEntryRole: evt.target.value})}>
+            <option value={'ROLE_OWNER'}>Owner</option>
+            <option value={'ROLE_EDITOR'}>Editor</option>
+            <option value={'ROLE_VIEWER'}>Viewer</option>
+          </select>
+          <Button outline color={'success'} disabled className={'border-0'}>
+            <FontAwesomeIcon icon={faUserPlus} />
           </Button>
         </div>
       </ListGroupItem>
@@ -172,22 +199,42 @@ class Collection extends React.Component {
 
     const toggleEditModal = () => this.setState({ isEditing: !this.state.isEditing });
 
+    const changeCollectionName = evt => {
+      const newName = evt.target.value;
+      const newUri = newName.trim().toLowerCase().replace(/ /g, '-').replace(/[^0-9a-z\-\.]/g, '');
+
+      this.setState({
+        collection: {
+          ...this.state.collection,
+          name: newName,
+          uri: newUri
+        }
+      })
+    };
+
     const editAclModal = (
       <Modal isOpen={this.state.isEditing} toggle={toggleEditModal}>
         <ModalHeader toggle={toggleEditModal}>Edit collection</ModalHeader>
         <ModalBody>
           <Form>
             <FormGroup>
-              <Label>Collection name</Label>
-              <Input type={'text'} value={this.state.collection.name} />
-            </FormGroup>
-            <FormGroup>
-              <Label>Collection URI</Label>
-              <Input type={'text'} value={this.state.collection.uri} disabled />
+              <Label htmlFor={'edit-collection-name'}>Collection name</Label>
+              <Input id={'edit-collection-name'}
+                     type={'text'}
+                     value={this.state.collection.name}
+                     onChange={changeCollectionName} />
+              <FormText>This collection will be available at <code>/collection/{this.state.username}/{this.state.collection.uri}</code>.</FormText>
             </FormGroup>
             <FormGroup>
               <Label>Description</Label>
-              <textarea className={'form-control'} rows={4} value={this.state.collection.description}></textarea>
+              <textarea className={'form-control'}
+                        rows={6}
+                        value={this.state.collection.description}
+                        onChange={evt => this.setState({collection: { ...this.state.collection, description: evt.target.value}})}></textarea>
+            </FormGroup>
+            <FormGroup>
+              <Label>Choose cover image</Label>
+              <h1>THIS IS A WORK IN PROGRESS</h1>
             </FormGroup>
             <FormGroup>
               <Label>Change user access</Label>
@@ -197,6 +244,7 @@ class Collection extends React.Component {
                 <Collapse isOpen={this.state.isEditingAcl}>
                   <ListGroup flush>
                     {this.state.collection.aclList.map(editAclModalUser)}
+                    {addAclModalUser}
                   </ListGroup>
                 </Collapse>
               </Card>
@@ -245,25 +293,19 @@ class Collection extends React.Component {
           <Container className={'mt-5 Collection'}>
             {editAclModal}
             <div class={'d-flex flex-row align-items-center'}>
-              <span className="display-3 mr-3">{this.state.collection.name}</span>
+              <span className="display-4 mr-3">{this.state.collection.name}</span>
               <span>
-                <Button className={'mr-2'} outline onClick={toggleEditModal}>
+                <Button className={'mr-2'} outline onClick={toggleEditModal} title={'Edit collection'}>
                   <FontAwesomeIcon icon={faEdit} fixedWidth={true} />
                 </Button>
-                <Button className={'mr-2'} outline
+                <Button className={'mr-2'} outline title={'Toggle show/upload photos'}
                         onClick={() => this.setState({uploadPressed: !this.state.uploadPressed})}>
                   <FontAwesomeIcon icon={faFileUpload} fixedWidth={true} />
                 </Button>
               </span>
             </div>
-            <p>
-            </p>
+            <p>{this.state.collection.description || (<em>No description provided.</em>)}</p>
             <div className={'d-flex flex-row'}>{ this.state.collection.aclList.map(userAclCard) }</div>
-            {/*<UserSearch id="form-control"*/}
-            {/*            selectText='Add to collection'*/}
-            {/*            onUserSelect={this.addUserToAcl}*/}
-            {/*            userFilter={this.userNotInAcl}*/}
-            {/*            ref={this.userSearchRef} />*/}
           </Container>
         </Jumbotron>
 
