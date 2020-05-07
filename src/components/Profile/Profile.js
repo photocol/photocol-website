@@ -1,7 +1,7 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import './Profile.css';
 import {connect} from "react-redux";
+import { Container } from 'reactstrap';
 import Authenticator from "../Authenticator/Authenticator";
 
 class Profile extends React.Component {
@@ -14,18 +14,14 @@ class Profile extends React.Component {
       return (<Authenticator/>);
 
     return (
-      <div className='Profile'>
+      <Container className='Profile mt-5'>
         <h1>Profile</h1>
         <h2>Good day, {this.props.username}!</h2>
         <p>This page is a work in progress.</p>
-      </div>
+      </Container>
     );
   }
 }
-
-Profile.propTypes = {};
-
-Profile.defaultProps = {};
 
 const mapStateToProps = state => ({
   username: state.user.username

@@ -1,29 +1,17 @@
-
 import React from 'react';
-import PropTypes from 'prop-types';
 import {Link, withRouter} from 'react-router-dom';
 import './Collection.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import { env } from "../../util/Environment";
 import UserSearch from "../UserSearch/UserSearch";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUserSlash, faEdit, faFileUpload } from '@fortawesome/free-solid-svg-icons';
 import Photos from "../Photos/Photos";
+import catlogo from '../../cat-profile.png';
 import {
-    CardBody,
-    CardImg,
-    CardTitle,
-    Button,
-    CardText,
-    Row,
-    Col,
-    Form,
-    FormGroup,
-    Label,
-    Input,
-    Jumbotron,
-    Container,
-    Card,
-    NavbarToggler, Collapse, Navbar
-} from 'reactstrap';
+  CardBody, CardImg, CardTitle, Button, CardText, Row, Col, Form, FormGroup, Label, Input, Jumbotron, Container,
+  Card, NavbarToggler, Collapse, Navbar, Modal, ModalHeader, ModalBody, ModalFooter, ListGroupItem, ListGroup,
+  CardHeader } from 'reactstrap';
 class Collection extends React.Component {
     constructor(props) {
         super(props);
@@ -40,7 +28,8 @@ class Collection extends React.Component {
       },
       lastLoadedCollection: {}, // for use when updating component
       errorMsg: '',
-      uploadPressed: false
+      uploadPressed: false,
+      isEditingAcl: false
     };
 
     this.acm = new ApiConnectionManager();
@@ -165,106 +154,116 @@ class Collection extends React.Component {
         </div>
       );
 
-    const photosJsx = this.state.collection.photos.map(photo =>
-      <div className='collection-photo-container' key={photo.uri}>
-          <img src={`${env.serverUrl}/perma/${photo.uri}`} />
-        <p>{photo.description}</p>
-        <p>Uploaded on {photo.uploadDate}</p>
-        <Button color="success" onClick={() => this.deletePhoto(photo.uri)}>Delete</Button>
-      </div>
+    const editAclModalUser = (userAcl, index) => (
+      <ListGroupItem className={'d-flex justify-content-between'}>
+        <div className={'d-flex flex-column justify-content-center'}>{userAcl.username}</div>
+        <div className={'d-flex flex-row align-items-center'}>
+          <select value={userAcl.role} className={'form-control w-auto mr-2'}>
+            <option value={'ROLE_OWNER'}>Owner</option>
+            <option value={'ROLE_EDITOR'}>Editor</option>
+            <option value={'ROLE_VIEWER'}>Viewer</option>
+          </select>
+          <Button color={'danger'}>
+            <FontAwesomeIcon icon={faUserSlash} />
+          </Button>
+        </div>
+      </ListGroupItem>
     );
 
+    const toggleEditModal = () => this.setState({ isEditing: !this.state.isEditing });
+
+    const editAclModal = (
+      <Modal isOpen={this.state.isEditing} toggle={toggleEditModal}>
+        <ModalHeader toggle={toggleEditModal}>Edit collection</ModalHeader>
+        <ModalBody>
+          <Form>
+            <FormGroup>
+              <Label>Collection name</Label>
+              <Input type={'text'} value={this.state.collection.name} />
+            </FormGroup>
+            <FormGroup>
+              <Label>Collection URI</Label>
+              <Input type={'text'} value={this.state.collection.uri} disabled />
+            </FormGroup>
+            <FormGroup>
+              <Label>Description</Label>
+              <textarea className={'form-control'} rows={4} value={this.state.collection.description}></textarea>
+            </FormGroup>
+            <FormGroup>
+              <Label>Change user access</Label>
+              <Card>
+                <CardHeader onClick={() => this.setState({isEditingAcl: !this.state.isEditingAcl})}
+                            style={{cursor: 'pointer'}}>Show user list</CardHeader>
+                <Collapse isOpen={this.state.isEditingAcl}>
+                  <ListGroup flush>
+                    {this.state.collection.aclList.map(editAclModalUser)}
+                  </ListGroup>
+                </Collapse>
+              </Card>
+            </FormGroup>
+          </Form>
+        </ModalBody>
+        <ModalFooter>
+          <Button onClick={() => this.setState({isEditing: false, isEditingAcl: false})} outline>Cancel</Button>
+          <Button onClick={() => this.setState({isEditing: false, isEditingAcl: false})} outline color={'info'}>Save and exit</Button>
+        </ModalFooter>
+      </Modal>
+    );
+
+    const photosJsx = this.state.collection.photos.length===0
+      ? (
+        <Container>
+          <p>There are no photos here yet.</p>
+        </Container>
+      )
+      : this.state.collection.photos.map(photo =>
+        <div className='collection-photo-container' key={photo.uri}>
+          <img src={`${env.serverUrl}/perma/${photo.uri}`} />
+          <p>{photo.description}</p>
+          <p>Uploaded on {photo.uploadDate}</p>
+          <Button color="success" onClick={() => this.deletePhoto(photo.uri)}>Delete</Button>
+        </div>
+      );
+
     const uploadJsx = (
-      <div>
-          <Photos onSelect = {photos => photos.forEach(photo => this.addPhoto(photo.uri))}>
-        </Photos>
-      </div>
+      <Photos onSelect = {photos => photos.forEach(photo => this.addPhoto(photo.uri))}></Photos>
     );
     const uploadOrCollection = this.state.uploadPressed ? uploadJsx: photosJsx ;
 
-    const aclListJsx = (
-        <Container>
-            <ul>
-                {
-                    this.state.collection.aclList.map((aclEntry, index) =>
-
-                        <li key={aclEntry.username}>
-                            <Form>
-                                <Row >
-                                    <Col className="text-center" sm={6}>
-                                        <a2>{aclEntry.username}</a2>
-                                        <FormGroup>
-                                            <select class="form-control"
-                                                    value={aclEntry.role}
-                                                    onChange={evt => this.updateAclEntryRole(index, evt.target.value)}>
-                                                <option value="ROLE_OWNER">Owner</option>
-                                                <option value="ROLE_EDITOR">Editor</option>
-                                                <option value="ROLE_VIEWER">Viewer</option>
-                                            </select>
-                                        </FormGroup>
-                                    </Col>
-                                    <Col>
-                                        <br/>
-                                        <Button color="success" onClick={() => this.removeAclEntry(index)}>Remove</Button>
-
-                                    </Col>
-                                    &nbsp;&nbsp; &nbsp;
-
-                                </Row>
-                            </Form>
-                        </li>
-                    )
-                }
-            </ul>
-
-
-        </Container>
+    const userAclCard = (aclEntry, index) => (
+      <div key={aclEntry.username} className={'mr-2'}>
+        <Card outline color={aclEntry.role==='ROLE_OWNER'?'success':aclEntry.role==='ROLE_ENTRY'?'warning':'danger'}
+              style={{width: 50, height: 50}}>
+          <img src={catlogo} title={aclEntry.username} style={{width: 50, height: 50}}/>
+        </Card>
+      </div>
     );
 
     return (
-        <Container>
-            <div className='Collection'>
-                <br/>
-
-                <h1 className="heading">Collection {this.state.collection.name}</h1>
-                <h2>
-                    by {this.getOwner()}
-                </h2>
-                <br/>
-                <Container>
-                    <Row>
-                        <h3>ACL List:</h3>
-                        {aclListJsx}
-                    </Row>
-                    <Row>
-                        <Col sm="2.5">
-                            <h3>Add user</h3>
-                        </Col>
-                        <Col >
-                            <UserSearch  id="form-control"
-                                        selectText='Add to collection'
-                                        onUserSelect={this.addUserToAcl}
-                                        userFilter={this.userNotInAcl}
-                                        ref={this.userSearchRef} />
-                        </Col>
-                    </Row>
-                </Container>
-
-
-                <Button color="success" onClick={this.saveChanges}>Save changes</Button>  &nbsp;&nbsp; &nbsp;
-                <Button color="success" onClick={this.getCollection}>Undo changes and reload</Button>
-                <div>
-                    <br/>
-
-                    <Button color="success" onClick={() => this.setState({uploadPressed: !this.state.uploadPressed})}>Upload/See photos</Button>
-                    <br/>
-                    {uploadOrCollection}
-
-                </div>
-                <br/>
-                <Link to='/collections'>Return to list of collections.</Link>
+      <div className={'Collection'}>
+        <Jumbotron fluid>
+          <Container className={'mt-5 Collection'}>
+            {editAclModal}
+            <div class={'d-flex flex-row align-items-center'}>
+              <span className="display-3 mr-3">{this.state.collection.name}</span>
+              <span>
+                <Button className={'mr-2'} outline onClick={toggleEditModal}><FontAwesomeIcon icon={faEdit} /></Button>
+                <Button className={'mr-2'} outline onClick={() => this.setState({uploadPressed: !this.state.uploadPressed})}><FontAwesomeIcon icon={faFileUpload} /></Button>
+              </span>
             </div>
-        </Container>
+            <p>
+            </p>
+            <div className={'d-flex flex-row'}>{ this.state.collection.aclList.map(userAclCard) }</div>
+            {/*<UserSearch id="form-control"*/}
+            {/*            selectText='Add to collection'*/}
+            {/*            onUserSelect={this.addUserToAcl}*/}
+            {/*            userFilter={this.userNotInAcl}*/}
+            {/*            ref={this.userSearchRef} />*/}
+          </Container>
+        </Jumbotron>
+
+        {uploadOrCollection}
+      </div>
     );
   }
 }
