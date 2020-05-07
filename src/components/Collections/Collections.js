@@ -1,41 +1,12 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import './Collections.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import Authenticator from "../Authenticator/Authenticator";
-import {env} from "../../util/Environment";
-import {
-  CardBody,
-  CardImg,
-  CardTitle,
-  Button,
-  CardText,
-  Row,
-  Col,
-  Form,
-  FormGroup,
-  Table,
-  Tbody,
-  Label,
-  Input,
-  Jumbotron,
-  Container,
-  Card,
-  NavbarToggler, Collapse, Navbar
-} from 'reactstrap';
-import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
-import {
-  Menu,
-  MenuList,
-  MenuButton,
-  MenuItem,
-  MenuItems,
-  MenuPopover,
-  MenuLink,
-} from "@reach/menu-button";
+import { Button, Row, Col, Form, FormGroup, Label, Container, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import "@reach/menu-button/styles.css";
+
 class Collections extends React.Component {
   constructor(props) {
     super(props);
@@ -50,25 +21,19 @@ class Collections extends React.Component {
     };
   }
 
-  dropdownClick(name) {
-    if(this.state.dropdownOpen == name)
-    {
-      this.setState({
-          dropdownOpen: null
-      }
-      )
-    }
-    else{
-      this.setState({
-        dropdownOpen: name
-      })
-    }
+  dropdownClick = name => {
+    if(this.state.dropdownOpen===name)
+      this.setState({ dropdownOpen: null });
+    else
+      this.setState({ dropdownOpen: name });
   };
-  onEnter = (evt) => {
+
+  onEnter = evt => {
     if(evt.key === 'Enter') {
       this.createCollection();
     }
   };
+
   updateCollections = () => {
     this.acm.request('/collection/currentuser')
         .then(res => {
@@ -91,9 +56,9 @@ class Collections extends React.Component {
         isPublic: false,
         name: this.state.collectionName
       })
-    }) .then(res => {
-      this.updateCollections();})
-        .catch(err => console.error(err));
+    })
+      .then(res => this.updateCollections())
+      .catch(err => console.error(err));
   };
 
   deleteCollection = (username, uri) => {

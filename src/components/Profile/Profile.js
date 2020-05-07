@@ -5,9 +5,6 @@ import { Container } from 'reactstrap';
 import Authenticator from "../Authenticator/Authenticator";
 
 class Profile extends React.Component {
-  constructor(props) {
-    super(props);
-  }
 
   render = () => {
     if(this.props.username==='not logged in')

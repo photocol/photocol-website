@@ -59,6 +59,7 @@ class Authenticator extends React.Component {
           case 'PASSWORD_MISSING':
             this.setState({loginError: {password: 'Password left blank.'}});
             break;
+          default:
         }
       });
   };
@@ -110,6 +111,7 @@ class Authenticator extends React.Component {
           case 'PASSWORD_FORMAT':
             this.setState({signupError: {password: 'Password format requirements not met.'}});
             break;
+          default:
         }
       });
   };
@@ -219,8 +221,13 @@ class Authenticator extends React.Component {
             </CardBody>
           </Card>
           <small className='text-muted'>
-            {this.state.isLogin ? "Don't have an account?" : "Already have an account?"}&nbsp;
-            <a color='info' href='' onClick={this.toggleLoginSignup}>{this.state.isLogin ? 'Sign up' : 'Log in'} instead.</a>
+            {this.state.isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
+            {/* semantically a button, but make it look like a link */}
+            <Button className={'btn-link bg-transparent border-0 outline-0 p-0 border-0'}
+                    style={{fontSize: 'inherit'}}
+                    onClick={this.toggleLoginSignup}>
+              {this.state.isLogin ? 'Sign up' : 'Log in'} instead.
+            </Button>
           </small>
         </Container>
     );

@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import './Photo.css';
 import {Link, withRouter} from 'react-router-dom';
 import {env} from "../../util/Environment";

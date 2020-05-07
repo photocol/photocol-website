@@ -9,10 +9,9 @@ import { faUserSlash, faUserPlus, faEdit, faFileUpload } from '@fortawesome/free
 import Photos from "../Photos/Photos";
 import catlogo from '../../cat-profile.png';
 import {
-  CardBody, CardImg, CardTitle, Button, CardText, Row, Col, Form, FormGroup, Label, Input, Jumbotron, Container,
-  Card, NavbarToggler, Collapse, Navbar, Modal, ModalHeader, ModalBody, ModalFooter, ListGroupItem, ListGroup,
-  CardHeader, FormText } from 'reactstrap';
-import Photo from "../Photo/Photo";
+  Button, Form, FormGroup, Label, Input, Jumbotron, Container, Card, Collapse, Modal, ModalHeader, ModalBody,
+  ModalFooter, ListGroupItem, ListGroup, CardHeader, FormText } from 'reactstrap';
+
 class Collection extends React.Component {
     constructor(props) {
         super(props);
@@ -226,7 +225,7 @@ class Collection extends React.Component {
 
     const changeCollectionName = evt => {
       const newName = evt.target.value;
-      const newUri = newName.trim().toLowerCase().replace(/ /g, '-').replace(/[^0-9a-z\-\.]/g, '');
+      const newUri = newName.trim().toLowerCase().replace(/ /g, '-').replace(/[^0-9a-z\-.]/g, '');
 
       this.setState({
         collection: {

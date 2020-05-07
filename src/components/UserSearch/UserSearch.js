@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './UserSearch.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
-import { Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Label, Row, Col, Button, Input, ListGroup, ListGroupItem} from 'reactstrap';
+import { Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Input } from 'reactstrap';
 
 class UserSearch extends React.Component {
   constructor(props) {

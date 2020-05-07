@@ -2,15 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './Photos.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
-import store from "../../util/Store";
-import {Link, withRouter} from "react-router-dom"
+import { withRouter} from "react-router-dom"
 import { env } from "../../util/Environment";
 import {connect} from "react-redux";
 import Authenticator from "../Authenticator/Authenticator";
-import { CardBody, CardImg, CardTitle, Button, CardText, Row, Col, Form, FormGroup, Label, Input, Jumbotron, Container, Card } from 'reactstrap';
-import { Progress } from 'reactstrap';
-import Gallery from "react-photo-gallery";
-
+import { Button, Jumbotron, Container, ModalBody, Modal, Progress, ModalHeader } from 'reactstrap';
+import PhotoSelectorList from '../PhotoSelectorList/PhotoSelectorList';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBan, faFileUpload } from '@fortawesome/free-solid-svg-icons';
 
 class Photos extends React.Component {
   constructor(props) {
@@ -21,6 +20,7 @@ class Photos extends React.Component {
       isSelected: false,
       uploadCount: 0,
       uploadTotal: 0,
+      uploadModal: false
     };
 
     this.history = props.history;
@@ -38,6 +38,8 @@ class Photos extends React.Component {
   confirmPhotoSelection = () => {
     this.onSelect(this.state.photoList.filter(photo => photo.selected));
   };
+
+  toggleUploadModal = () => this.setState({ uploadModal: !this.state.uploadModal });
 
   render = () => {
     if(this.props.username==='not logged in')
@@ -69,62 +71,112 @@ class Photos extends React.Component {
 
     return (
       <div className="Photos">
-        <Container>
-          <Row>
-            <Col>
-              <div className ="select">
-                <Button color="success" className={this.state.isSelected ? "ButtonOn" : ''}
-                    onClick={
-                      () => {
-                        this.state.isSelected && this.state.photoList.forEach((photo) => photo.selected = false);
-                        this.setState({isSelected: !this.state.isSelected});
-                      }
-                    }>
-                  {this.state.isSelected ? "Cancel" : "Select Photos"}
-                </Button> &nbsp;&nbsp; &nbsp;
+        {/* file upload modal */}
+        <Modal isOpen={this.state.uploadModal} toggle={this.toggleUploadModal}>
+          <ModalHeader toggle={this.toggleUploadModal}>
+            Upload photos
+          </ModalHeader>
+          <ModalBody>
+            {/* progress bar */}
+            {this.state.uploadTotal
+              ? (<Progress animated color="success" value={this.state.uploadCount/this.state.uploadTotal * 100} />)
+              : ""}
 
-                {!this.isSelect && this.state.isSelected && <Button color="success" onClick={this.deleteSelectedPhotos}>Delete Photos</Button>}
-                {
-                  // for when used as selection component
-                  this.isSelect && (<Button color="success" onClick={this.confirmPhotoSelection}>Upload</Button>)
-                }
-              </div>
-            </Col>
-            <Col>
-              <div className="custom-file">
-                <input className="custom-file-input"
+            {/* file upload input */}
+            <div className="custom-file">
+              <input className="custom-file-input"
                      id="customFile"
                      type="file"
                      onChange={this.uploadPhoto}
                      multiple/>
-                <label className="custom-file-label" htmlFor="customFile">Upload file</label>
-              </div>
-            </Col>
-          </Row>
-          <br/>
-          <Row>
-            <Col>
-              <div>
-                {this.state.uploadTotal ? (<Progress animated color="success"
-                                 value={this.state.uploadCount/this.state.uploadTotal * 100} />) : ""}
-              </div>
-            </Col>
-          </Row>
-          <br/>
-          {
-            // listing images -- fun code is here.
-            this.state.isSelected ? <Gallery photos={this.state.photoList}/> : <Gallery photos={this.state.photoList}/>
-            // this.state.photoList.map((photo, index) => {
-            //   photoJsx(photo, index);
-            //   console.log(photo);
-            // })
-          }
-        </Container>
+              <label className="custom-file-label" htmlFor="customFile">Upload...</label>
+            </div>
+          </ModalBody>
+        </Modal>
 
+        {/* control buttons go here */}
+        <Jumbotron fluid style={{marginBottom: 2}}>
+          <Container>
+            <div className="custom-file">
+              <h1 className={'display-1'}>All photos</h1>
+              <Button outline
+                      className={'m-2'}
+                      color={'info'}
+                      onClick={this.toggleUploadModal}
+                      title={'Upload photos'}>
+                <FontAwesomeIcon icon={faFileUpload} />
+              </Button>
+              <Button outline
+                      className={'m-2'}
+                      color={'danger'}
+                      title={'Delete selected photos'}
+                      disabled>
+                <FontAwesomeIcon icon={faBan} />
+              </Button>
+            </div>
+          </Container>
+        </Jumbotron>
 
-
-
+        {/* displaying the actual photos */}
+        <PhotoSelectorList onSelectedChange={selectedPhotos => console.log(selectedPhotos.join(', ') + ' are selected.')} />
       </div>
+
+      //   <Container>
+      //     <Row>
+      //       <Col>
+      //         <div className ="select">
+      //           <Button color="success" className={this.state.isSelected ? "ButtonOn" : ''}
+      //               onClick={
+      //                 () => {
+      //                   this.state.isSelected && this.state.photoList.forEach((photo) => photo.selected = false);
+      //                   this.setState({isSelected: !this.state.isSelected});
+      //                 }
+      //               }>
+      //             {this.state.isSelected ? "Cancel" : "Select Photos"}
+      //           </Button> &nbsp;&nbsp; &nbsp;
+      //
+      //           {!this.isSelect && this.state.isSelected && <Button color="success" onClick={this.deleteSelectedPhotos}>Delete Photos</Button>}
+      //           {
+      //             // for when used as selection component
+      //             this.isSelect && (<Button color="success" onClick={this.confirmPhotoSelection}>Upload</Button>)
+      //           }
+      //         </div>
+      //       </Col>
+      //       <Col>
+      //         <div className="custom-file">
+      //           <input className="custom-file-input"
+      //                id="customFile"
+      //                type="file"
+      //                onChange={this.uploadPhoto}
+      //                multiple/>
+      //           <label className="custom-file-label" htmlFor="customFile">Upload file</label>
+      //         </div>
+      //       </Col>
+      //     </Row>
+      //     <br/>
+      //     <Row>
+      //       <Col>
+      //         <div>
+      //           {this.state.uploadTotal ? (<Progress animated color="success"
+      //                            value={this.state.uploadCount/this.state.uploadTotal * 100} />) : ""}
+      //         </div>
+      //       </Col>
+      //     </Row>
+      //     <br/>
+      //     {
+      //       // listing images -- fun code is here.
+      //       this.state.isSelected ? <Gallery photos={this.state.photoList}/> : <Gallery photos={this.state.photoList}/>
+      //       // this.state.photoList.map((photo, index) => {
+      //       //   photoJsx(photo, index);
+      //       //   console.log(photo);
+      //       // })
+      //     }
+      //   </Container>
+      //
+      //
+      //
+      //
+      // </div>
     );
   };
 
