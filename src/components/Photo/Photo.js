@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import './Photo.css';
 import {Link, withRouter} from 'react-router-dom';
 import {env} from "../../util/Environment";
+import {Button} from "reactstrap";
 
 class Photo extends React.Component {
   constructor(props) {
@@ -16,7 +17,9 @@ class Photo extends React.Component {
 
   render = () => {
     return (<div>
-      <Link to='/photos'>Return to list of photos.</Link>
+      <Link to='/photos'>
+        <Button color="success">Return to Photos</Button>
+      </Link>
       <div class='fill-screen'><img className="photo333" src={`${env.serverUrl}/perma/${this.state.photouri}`}/></div>
     </div>);
   }
