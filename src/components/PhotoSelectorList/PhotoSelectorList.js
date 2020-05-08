@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import './PhotoSelectorList.css';
 import SelectedImage from "./SelectedImage";
 import Gallery from 'react-photo-gallery';
-import { env } from "../../util/Environment";
 
 class PhotoSelectorList extends React.Component {
 
@@ -29,7 +28,7 @@ class PhotoSelectorList extends React.Component {
 
   render = () => {
     const photoList = this.props.photoList.map(photo => ({
-      src: `${env.serverUrl}/perma/${photo.uri}`,
+      src: `${process.env.REACT_APP_SERVER_URL}/perma/${photo.uri}`,
       width: photo.metadata.width,
       height: photo.metadata.height,
       title: photo.filename,

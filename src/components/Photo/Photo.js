@@ -1,7 +1,6 @@
 import React from 'react';
 import './Photo.css';
 import {Link, withRouter} from 'react-router-dom';
-import {env} from "../../util/Environment";
 import {Button} from "reactstrap";
 
 class Photo extends React.Component {
@@ -19,7 +18,7 @@ class Photo extends React.Component {
       <Link to='/photos'>
         <Button color="success">Return to Photos</Button>
       </Link>
-      <div class='fill-screen'><img className="photo333" src={`${env.serverUrl}/perma/${this.state.photouri}`}/></div>
+      <div class='fill-screen'><img className="photo333" src={`${process.env.REACT_APP_SERVER_URL}/perma/${this.state.photouri}`}/></div>
     </div>);
   }
 };

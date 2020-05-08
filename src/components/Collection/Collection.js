@@ -2,7 +2,6 @@ import React from 'react';
 import {Link, withRouter} from 'react-router-dom';
 import './Collection.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
-import { env } from "../../util/Environment";
 import UserSearch from "../UserSearch/UserSearch";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserSlash, faUserPlus, faEdit, faFileUpload } from '@fortawesome/free-solid-svg-icons';
@@ -304,7 +303,7 @@ class Collection extends React.Component {
       )
       : this.state.collection.photos.map(photo =>
         <div className='collection-photo-container' key={photo.uri}>
-          <img src={`${env.serverUrl}/perma/${photo.uri}`} />
+          <img src={`${process.env.REACT_APP_SERVER_URL}/perma/${photo.uri}`} />
           <p>{photo.description}</p>
           <p>Uploaded on {photo.uploadDate}</p>
           <Button color="success" onClick={() => this.deletePhoto(photo.uri)}>Delete</Button>
@@ -333,7 +332,7 @@ class Collection extends React.Component {
         }}>
           <div className={'w-100 h-100 position-absolute'}
                style={{
-                 backgroundImage: `url(${env.serverUrl}/perma/${this.state.collection.coverPhotoUri})`,
+                 backgroundImage: `url(${process.env.REACT_APP_SERVER_URL}/perma/${this.state.collection.coverPhotoUri})`,
                  top: 0,
                  backgroundSize: 'cover',
                  backgroundPosition: 'center',
