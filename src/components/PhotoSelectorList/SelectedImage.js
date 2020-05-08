@@ -67,14 +67,12 @@ const SelectedImage = ({ index, photo, margin, direction, top, left, selected, o
       className={!isSelected ? "not-selected" : ""}
     >
       <Checkmark selected={isSelected ? true : false} />
-      <img
-        alt={photo.title}
-        style={
-          isSelected ? { ...imgStyle, ...selectedImgStyle } : { ...imgStyle }
-        }
-        {...photo}
-        onClick={handleOnClick}
-      />
+      <img alt={photo.title}
+           style={ isSelected ? { ...imgStyle, ...selectedImgStyle } : { ...imgStyle } }
+           width={photo.width}
+           height={photo.height}
+           src={photo.src}
+           onClick={handleOnClick} />
       <style>{`.not-selected:hover{outline:2px solid #06befa}`}</style>
     </div>
   );

@@ -9,52 +9,44 @@ class PhotoSelectorList extends React.Component {
 
   constructor(props) {
     super(props);
-
-    this.state = {
-      photoList: props.photoList
-    };
-  }
-
-  componentWillReceiveProps(nextProps, nextContext) {
-    this.setState({
-      photoList: nextProps.photoList.map(photo => ({
-        src: `${env.serverUrl}/perma/${photo.uri}`,
-        width: photo.metadata.width,
-        height: photo.metadata.height
-      }))
-    });
   }
 
   // this calls onChange with the selected photos
-  changeHandler = () => {
-    this.props.onSelectedChange(this.state.photoList
-      .map((photo, index) => photo.isSelected ? index : -1)
-      .filter(index => index>=0));
-  };
-
-  setSelected = (index, value) => {
-    this.setState({
-      photoList: this.state.photoList.map((photo, i) => i === index ? {...photo, isSelected: value} : photo)
-    }, this.changeHandler);
+  changeHandler = (index, value) => {
+    this.props.onSelectedChange(this.props.photoList.map((photo, i) => i===index ? {...photo, isSelected: value} : photo));
   };
 
   selectedImageRenderer = ({index, left, top, key, photo}) => (
-    <SelectedImage selected={this.state.photoList[index].isSelected}
+    <SelectedImage selected={photo.isSelected}
                    key={key}
                    margin={'2px'}
                    index={index}
                    photo={photo}
                    left={left}
                    top={top}
-                   onChange={this.setSelected} />
+                   onChange={this.changeHandler} />
   );
 
-  render = () => <Gallery photos={this.state.photoList} renderImage={this.selectedImageRenderer} />;
+  render = () => {
+    const photoList = this.props.photoList.map(photo => ({
+      src: `${env.serverUrl}/perma/${photo.uri}`,
+      width: photo.metadata.width,
+      height: photo.metadata.height,
+      title: photo.filename,
+      isSelected: photo.isSelected || false
+    }));
+
+    return (
+      <Gallery photos={photoList} renderImage={this.selectedImageRenderer} />
+    );
+  }
 
 }
 
 PhotoSelectorList.propTypes = {
   photoList: PropTypes.arrayOf(PropTypes.object),
+  selectEnabled: PropTypes.bool,
+  multiSelectEnabled: PropTypes.bool,
   onSelectedChange: PropTypes.func
 };
 
@@ -69,6 +61,8 @@ PhotoSelectorList.defaultProps = {
     { src: 'https://helpx.adobe.com/content/dam/help/en/stock/how-to/visual-reverse-image-search/jcr_content/main-pars/image/visual-reverse-image-search-v2_intro.jpg', width: 1000, height: 560, isSelected: false },
     { src: 'https://image.freepik.com/free-photo/image-human-brain_99433-298.jpg', width: 626, height: 417, isSelected: false }
   ],
+  selectEnabled: false,
+  multiSelectEnabled: true,
   onSelectedChange: () => {}
 };
 

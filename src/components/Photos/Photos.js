@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import './Photos.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import { withRouter} from "react-router-dom"
-import { env } from "../../util/Environment";
 import {connect} from "react-redux";
 import Authenticator from "../Authenticator/Authenticator";
 import { Button, Jumbotron, Container, ModalBody, Modal, Progress, ModalHeader } from 'reactstrap';
@@ -20,7 +19,7 @@ class Photos extends React.Component {
       isSelected: false,
       uploadCount: 0,
       uploadTotal: 0,
-      uploadModal: false
+      uploadModal: false,
     };
 
     this.history = props.history;
@@ -50,14 +49,11 @@ class Photos extends React.Component {
   };
 
   deleteSelectedPhotos = () => {
-    this.state.photoList.forEach((photo) => {
-      photo.selected && this.deletePhoto(photo.uri);
-    });
-    this.setState({isSelected : false})
+    this.state.photoList.filter(photo => photo.isSelected).forEach(photo => this.deletePhoto(photo.uri));
+    this.getPhotoList();
   };
 
   deletePhoto = uri => {
-    console.log(uri);
     this.acm.request("/photo/" + uri, {
       method: 'DELETE'
     })
@@ -118,6 +114,8 @@ class Photos extends React.Component {
     //   </li>
     // );
 
+    const selectedPhotos = this.state.photoList.filter(photo => photo.isSelected);
+
     return (
       <div className="Photos">
         {/* file upload modal */}
@@ -148,27 +146,31 @@ class Photos extends React.Component {
           <Container>
             <div className="custom-file">
               <h1 className={'display-1'}>All photos</h1>
-              <Button outline
-                      className={'m-2'}
-                      color={'info'}
-                      onClick={this.toggleUploadModal}
-                      title={'Upload photos'}>
-                <FontAwesomeIcon icon={faFileUpload} />
-              </Button>
-              <Button outline
-                      className={'m-2'}
-                      color={'danger'}
-                      title={'Delete selected photos'}
-                      disabled>
-                <FontAwesomeIcon icon={faBan} />
-              </Button>
+              <div>
+                <Button outline
+                        className={'m-2'}
+                        color={'info'}
+                        onClick={this.toggleUploadModal}
+                        title={'Upload photos'}>
+                  <FontAwesomeIcon icon={faFileUpload} />
+                </Button>
+                <Button outline
+                        className={'m-2'}
+                        color={'danger'}
+                        title={'Delete selected photos'}
+                        onClick={this.deleteSelectedPhotos}
+                        disabled={selectedPhotos.length===0}>
+                  <FontAwesomeIcon icon={faBan} />
+                </Button>
+                <span>{selectedPhotos.length===0 ? '' : selectedPhotos.length + ' selected photos'}</span>
+              </div>
             </div>
           </Container>
         </Jumbotron>
 
         {/* displaying the actual photos */}
         <PhotoSelectorList photoList={this.state.photoList}
-                           onSelectedChange={selectedPhotos => console.log(selectedPhotos.join(', ') + ' are selected.')} />
+                           onSelectedChange={photoList => this.setState({photoList: photoList})} />
       </div>
 
       //   <Container>
