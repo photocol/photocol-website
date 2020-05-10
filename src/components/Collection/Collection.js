@@ -4,12 +4,20 @@ import './Collection.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import UserSearch from "../UserSearch/UserSearch";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserSlash, faUserPlus, faEdit, faFileUpload } from '@fortawesome/free-solid-svg-icons';
+import {
+  faUserSlash,
+  faUserPlus,
+  faEdit,
+  faFileUpload,
+  faObjectUngroup,
+  faMinusSquare
+} from '@fortawesome/free-solid-svg-icons';
 import Photos from "../Photos/Photos";
 import catlogo from '../../cat-profile.png';
 import {
   Button, Form, FormGroup, Label, Input, Jumbotron, Container, Card, Collapse, Modal, ModalHeader, ModalBody,
   ModalFooter, ListGroupItem, ListGroup, CardHeader, FormText } from 'reactstrap';
+import PhotoSelectorList from "../PhotoSelectorList/PhotoSelectorList";
 
 class Collection extends React.Component {
     constructor(props) {
@@ -31,6 +39,8 @@ class Collection extends React.Component {
       errorMsg: '',
       uploadPressed: false,
       isEditingAcl: false,
+      isAddingPhotos: false,
+      isSelectMode: false,
       newAclEntryRole: 'ROLE_VIEWER'
     };
 
@@ -143,7 +153,7 @@ class Collection extends React.Component {
       }
     });
 
-  addPhoto = (uri) => {
+  addPhoto = uri => {
     this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}/addphoto`, {
         method: 'POST',
         body: JSON.stringify({
@@ -154,7 +164,17 @@ class Collection extends React.Component {
         .catch(res => console.error(res));
   };
 
-  deletePhoto = uri => {
+  addPhotos = selectedPhotos => {
+    selectedPhotos.forEach(photo => this.addPhoto(photo.uri));
+    this.toggleAddPhotosModal();
+  };
+
+  removeSelectedPhotos = () => {
+    const selectedPhotos = this.state.collection.photos.filter(photo => photo.isSelected);
+    selectedPhotos.forEach(photo => this.removePhoto(photo.uri));
+  };
+
+  removePhoto = uri => {
     this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}/removephoto`, {
       method: 'POST',
       body: JSON.stringify({
@@ -166,10 +186,20 @@ class Collection extends React.Component {
   };
 
   toggleEditModal = () => this.setState({ isEditing: !this.state.isEditing });
+  toggleAddPhotosModal = () => this.setState({ isAddingPhotos: !this.state.isAddingPhotos });
 
   cancelChangesAndExit = () => {
     this.getCollection();
     this.toggleEditModal();
+  };
+
+  updateCollectionPhotos = photoList => {
+    this.setState({
+      collection: {
+        ...this.state.collection,
+        photos: photoList
+      }
+    });
   };
 
   render = () => {
@@ -295,6 +325,13 @@ class Collection extends React.Component {
       </Modal>
     );
 
+    const addPhotosModal = (
+      <Modal toggle={this.toggleAddPhotosModal} isOpen={this.state.isAddingPhotos} style={{maxWidth: 1600}}>
+        <ModalHeader toggle={this.toggleAddPhotosModal}></ModalHeader>
+        <Photos onSelect={this.addPhotos}></Photos>
+      </Modal>
+    );
+
     const photosJsx = this.state.collection.photos.length===0
       ? (
         <Container>
@@ -310,11 +347,6 @@ class Collection extends React.Component {
         </div>
       );
 
-    const uploadJsx = (
-      <Photos onSelect = {photos => photos.forEach(photo => this.addPhoto(photo.uri))}></Photos>
-    );
-    const uploadOrCollection = this.state.uploadPressed ? uploadJsx: photosJsx ;
-
     const userAclCard = (aclEntry, index) => (
       <div key={aclEntry.username} className={'mr-2'}>
         <Card outline color={aclEntry.role==='ROLE_OWNER'?'success':aclEntry.role==='ROLE_ENTRY'?'warning':'danger'}
@@ -324,9 +356,13 @@ class Collection extends React.Component {
       </div>
     );
 
+    const selectedPhotos = this.state.collection.photos.filter(photo => photo.isSelected);
+
     return (
       <div className={'Collection'}>
-        <Jumbotron fluid className={'text-light position-relative d-flex flex-column justify-content-center'} style={{
+        {editAclModal}
+        {addPhotosModal}
+        <Jumbotron fluid className={'mb-0 text-light position-relative d-flex flex-column justify-content-center'} style={{
           backgroundColor: 'rgba(0,0,0,0.5)',
           height: '30rem'
         }}>
@@ -339,32 +375,48 @@ class Collection extends React.Component {
                  zIndex: -1
                }}></div>
           <Container>
-            {editAclModal}
-            <div class={'d-flex flex-row align-items-center'}>
+            <div className={'d-flex flex-row align-items-center'}>
               <span className="display-4 mr-3">{this.state.collection.name}</span>
               <span>
                 <Button className={'mr-2'}
-                        outline
                         onClick={this.toggleEditModal}
                         color={'info'}
-                        title={'Edit collection'}>
+                        title={'Edit collection details'}>
                   <FontAwesomeIcon icon={faEdit} fixedWidth={true} />
                 </Button>
                 <Button className={'mr-2'}
-                        outline
-                        title={'Toggle show/upload photos'}
+                        title={'Add photos to collection'}
                         color={'info'}
-                        onClick={() => this.setState({uploadPressed: !this.state.uploadPressed})}>
+                        onClick={this.toggleAddPhotosModal}>
                   <FontAwesomeIcon icon={faFileUpload} fixedWidth={true} />
                 </Button>
+                <Button className={'mr-2'}
+                        title={'Select photos'}
+                        color={'info'}
+                        onClick={() => this.setState({isSelectMode: !this.state.isSelectMode})}>
+                  <FontAwesomeIcon icon={faObjectUngroup} fixedWidth={true} />
+                </Button>
+                {
+                  this.state.isSelectMode && (
+                    <Button className={'mr-2'}
+                            title={'Remove selected photos'}
+                            color={'danger'}
+                            disabled={selectedPhotos.length===0}
+                            onClick={this.removeSelectedPhotos}>
+                      <FontAwesomeIcon icon={faMinusSquare} fixedWidth={true} />
+                    </Button>
+                  )
+                }
+                {!this.state.isSelectMode || selectedPhotos.length===0 ? '' : selectedPhotos.length + ' photos selected.'}
               </span>
             </div>
             <p>{this.state.collection.description || (<em>No description provided.</em>)}</p>
             <div className={'d-flex flex-row'}>{ this.state.collection.aclList.map(userAclCard) }</div>
           </Container>
         </Jumbotron>
-
-        {uploadOrCollection}
+        <PhotoSelectorList photoList={this.state.collection.photos}
+                           onSelectedChange={this.updateCollectionPhotos}
+                           selectEnabled={this.state.isSelectMode} />
       </div>
     );
   }
