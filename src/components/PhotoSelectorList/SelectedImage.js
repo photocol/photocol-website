@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import {Link} from "react-router-dom";
 
 const Checkmark = ({ selected }) => (
   <div
@@ -39,7 +40,7 @@ const cont = {
   position: "relative"
 };
 
-const SelectedImage = ({ index, photo, margin, direction, top, left, selected, onChange }) => {
+const SelectedImage = ({ index, photo, margin, direction, top, left, selected, selectEnabled, onChange }) => {
   const [isSelected, setIsSelected] = useState(selected);
   //calculate x,y scale
   const sx = (100 - (30 / photo.width) * 100) / 100;
@@ -58,14 +59,11 @@ const SelectedImage = ({ index, photo, margin, direction, top, left, selected, o
   };
 
   useEffect(() => {
-    setIsSelected(selected);
-  }, [selected]);
+    setIsSelected(selectEnabled && selected);
+  }, [selectEnabled, selected]);
 
-  return (
-    <div
-      style={{ margin, height: photo.height, width: photo.width, ...cont }}
-      className={!isSelected ? "not-selected" : ""}
-    >
+  const imageJsx = (
+    <>
       <Checkmark selected={isSelected ? true : false} />
       <img alt={photo.title}
            style={ isSelected ? { ...imgStyle, ...selectedImgStyle } : { ...imgStyle } }
@@ -74,8 +72,24 @@ const SelectedImage = ({ index, photo, margin, direction, top, left, selected, o
            src={photo.src}
            onClick={handleOnClick} />
       <style>{`.not-selected:hover{outline:2px solid #06befa}`}</style>
-    </div>
+    </>
   );
+
+  return selectEnabled
+    ? (
+      <div
+        style={{ margin, height: photo.height, width: photo.width, ...cont }}
+        className={!isSelected ? "not-selected" : ""}>
+        {imageJsx}
+        Hello, world!
+      </div>
+    )
+    : (
+      <Link to={`/photo/${photo.src}`}
+            style={{ margin, height: photo.height, width: photo.width, ...cont }}>
+        {imageJsx}
+      </Link>
+    );
 };
 
 export default SelectedImage;

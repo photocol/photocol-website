@@ -6,10 +6,6 @@ import Gallery from 'react-photo-gallery';
 
 class PhotoSelectorList extends React.Component {
 
-  constructor(props) {
-    super(props);
-  }
-
   // this calls onChange with the selected photos
   changeHandler = (index, value) => {
     this.props.onSelectedChange(this.props.photoList.map((photo, i) => i===index ? {...photo, isSelected: value} : photo));
@@ -23,6 +19,7 @@ class PhotoSelectorList extends React.Component {
                    photo={photo}
                    left={left}
                    top={top}
+                   selectEnabled={this.props.selectEnabled}
                    onChange={this.changeHandler} />
   );
 

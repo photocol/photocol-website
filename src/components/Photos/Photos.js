@@ -8,7 +8,7 @@ import Authenticator from "../Authenticator/Authenticator";
 import { Button, Jumbotron, Container, ModalBody, Modal, Progress, ModalHeader } from 'reactstrap';
 import PhotoSelectorList from '../PhotoSelectorList/PhotoSelectorList';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBan, faFileUpload } from '@fortawesome/free-solid-svg-icons';
+import { faBan, faFileUpload, faObjectUngroup } from '@fortawesome/free-solid-svg-icons';
 
 class Photos extends React.Component {
   constructor(props) {
@@ -20,6 +20,7 @@ class Photos extends React.Component {
       uploadCount: 0,
       uploadTotal: 0,
       uploadModal: false,
+      isSelectMode: false
     };
 
     this.history = props.history;
@@ -142,17 +143,24 @@ class Photos extends React.Component {
         </Modal>
 
         {/* control buttons go here */}
-        <Jumbotron fluid style={{marginBottom: 2}}>
+        <Jumbotron fluid style={{marginBottom: 2}} className={this.state.isSelectMode ? 'bg-dark text-light' : ''}>
           <Container>
             <div className="custom-file">
-              <h1 className={'display-1'}>All photos</h1>
+              <h1 className={'display-1'}>{this.state.isSelectMode ? 'Select' : 'Your' } photos</h1>
               <div>
                 <Button outline
                         className={'m-2'}
-                        color={'info'}
+                        color={'primary'}
                         onClick={this.toggleUploadModal}
                         title={'Upload photos'}>
                   <FontAwesomeIcon icon={faFileUpload} />
+                </Button>
+                <Button outline
+                        className={'m-2'}
+                        color={'info'}
+                        title={'Toggle selection mode'}
+                        onClick={() => this.setState({isSelectMode: !this.state.isSelectMode})}>
+                  <FontAwesomeIcon icon={faObjectUngroup} />
                 </Button>
                 <Button outline
                         className={'m-2'}
@@ -170,6 +178,7 @@ class Photos extends React.Component {
 
         {/* displaying the actual photos */}
         <PhotoSelectorList photoList={this.state.photoList}
+                           selectEnabled={this.state.isSelectMode}
                            onSelectedChange={photoList => this.setState({photoList: photoList})} />
       </div>
 
