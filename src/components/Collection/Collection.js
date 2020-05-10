@@ -326,32 +326,17 @@ class Collection extends React.Component {
     );
 
     const addPhotosModal = (
-      <Modal toggle={this.toggleAddPhotosModal} isOpen={this.state.isAddingPhotos} style={{maxWidth: 1600}}>
+      <Modal toggle={this.toggleAddPhotosModal} isOpen={this.state.isAddingPhotos} style={{maxWidth: 1000}}>
         <ModalHeader toggle={this.toggleAddPhotosModal}></ModalHeader>
         <Photos onSelect={this.addPhotos}></Photos>
       </Modal>
     );
 
-    const photosJsx = this.state.collection.photos.length===0
-      ? (
-        <Container>
-          <p>There are no photos here yet.</p>
-        </Container>
-      )
-      : this.state.collection.photos.map(photo =>
-        <div className='collection-photo-container' key={photo.uri}>
-          <img src={`${process.env.REACT_APP_SERVER_URL}/perma/${photo.uri}`} />
-          <p>{photo.description}</p>
-          <p>Uploaded on {photo.uploadDate}</p>
-          <Button color="success" onClick={() => this.deletePhoto(photo.uri)}>Delete</Button>
-        </div>
-      );
-
     const userAclCard = (aclEntry, index) => (
       <div key={aclEntry.username} className={'mr-2'}>
         <Card outline color={aclEntry.role==='ROLE_OWNER'?'success':aclEntry.role==='ROLE_ENTRY'?'warning':'danger'}
               style={{width: 50, height: 50}}>
-          <img src={catlogo} title={aclEntry.username} style={{width: 50, height: 50}}/>
+          <img src={catlogo} alt={aclEntry.username} title={aclEntry.username} style={{width: 50, height: 50}}/>
         </Card>
       </div>
     );

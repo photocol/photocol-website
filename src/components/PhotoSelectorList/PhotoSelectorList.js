@@ -8,7 +8,10 @@ class PhotoSelectorList extends React.Component {
 
   // this calls onChange with the selected photos
   changeHandler = (index, value) => {
-    this.props.onSelectedChange(this.props.photoList.map((photo, i) => i===index ? {...photo, isSelected: value} : photo));
+    if(!this.props.multiSelectEnabled)
+      this.props.onSelectedChange(this.props.photoList.map((photo, i) => i===index ? {...photo, isSelected: value} : {...photo, isSelected: false}));
+    else
+      this.props.onSelectedChange(this.props.photoList.map((photo, i) => i===index ? {...photo, isSelected: value} : photo));
   };
 
   selectedImageRenderer = ({index, left, top, key, photo}) => (
