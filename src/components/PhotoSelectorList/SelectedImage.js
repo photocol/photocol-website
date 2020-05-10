@@ -75,6 +75,8 @@ const SelectedImage = ({ index, photo, margin, direction, top, left, selected, s
     </>
   );
 
+  const filename = /\/[0-9]+\.\w+$/.exec(photo.src)[0];
+
   return selectEnabled
     ? (
       <div
@@ -85,7 +87,7 @@ const SelectedImage = ({ index, photo, margin, direction, top, left, selected, s
       </div>
     )
     : (
-      <Link to={`/photo/${photo.src}`}
+      <Link to={`/photo${filename}`}
             style={{ margin, height: photo.height, width: photo.width, ...cont }}>
         {imageJsx}
       </Link>
