@@ -53,14 +53,15 @@ class Collection extends React.Component {
           errorMsg: '',
           collection: res.response,
           lastLoadedCollection: JSON.parse(JSON.stringify(res.response))  // simple clone for checking against later
-        }, () => {
+        }, async () => {
 
           // get profile photos; do this in callback to avoid extra wait time
-          const aclListWithProfilePhotos = this.state.collection.aclList.map(async (aclEntry, index) => {
-            const profilePhoto = await this.acm.request(`/profile/${aclEntry.username}`, { method: 'POST' }).response.profilePhoto;
+          const aclListWithProfilePhotos = await Promise.all(this.state.collection.aclList.map(async (aclEntry, index) => {
+            const profilePhoto = (await this.acm.request(`/user/profile/${aclEntry.username}`)).response.profilePhoto;
             return {...aclEntry, profilePhoto};
-          });
-          this.setState({collection: {...this.state.collection, aclListWithProfilePhotos}});
+          }));
+          console.log(aclListWithProfilePhotos);
+          this.setState({collection: {...this.state.collection, aclList: aclListWithProfilePhotos}});
         });
       })
       .catch(err => {
@@ -74,9 +75,7 @@ class Collection extends React.Component {
     (this.state.collection.aclList.find(acl => acl.role==='ROLE_OWNER') || {username:''}).username;
 
   addUserToAcl = async username => {
-    const profilePhoto = await this.acm.request(`/profile/${username}`, { method: 'POST' }).response.profilePhoto;
-
-    console.log(profilePhoto);
+    const profilePhoto = (await this.acm.request(`/user/profile/${username}`)).response.profilePhoto;
 
     this.setState({
       collection: {
@@ -342,7 +341,11 @@ class Collection extends React.Component {
       <div key={aclEntry.username} className={'mr-2'}>
         <Card outline color={aclEntry.role==='ROLE_OWNER'?'success':aclEntry.role==='ROLE_ENTRY'?'warning':'danger'}
               style={{width: 50, height: 50}}>
-          <img src={aclEntry.profilePhoto || catlogo} alt={aclEntry.username} title={aclEntry.username} style={{width: 50, height: 50}}/>
+          <Link to={`/profile/${aclEntry.username}`} title={aclEntry.username}>
+            <img src={aclEntry.profilePhoto ? `${process.env.REACT_APP_SERVER_URL}/perma/${aclEntry.profilePhoto}` : catlogo}
+                 alt={aclEntry.username}
+                 style={{width: 50, height: 50}}/>
+          </Link>
         </Card>
       </div>
     );
