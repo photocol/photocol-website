@@ -11,6 +11,7 @@ import {
   Button, Form, FormGroup, Label, Input, Jumbotron, Container, Card, Collapse, Modal, ModalHeader, ModalBody,
   ModalFooter, ListGroupItem, ListGroup, CardHeader, FormText } from 'reactstrap';
 import PhotoSelectorList from "../PhotoSelectorList/PhotoSelectorList";
+import {ToastChef, Toaster} from "../../util/Toaster";
 
 class Collection extends React.Component {
     constructor(props) {
@@ -35,11 +36,14 @@ class Collection extends React.Component {
       isEditingAcl: false,
       isAddingPhotos: false,
       isSelectMode: false,
-      newAclEntryRole: 'ROLE_VIEWER'
+      newAclEntryRole: 'ROLE_VIEWER',
+      toasts: []
     };
 
     this.acm = new ApiConnectionManager();
     this.userSearchRef = React.createRef();
+
+    this.addToast = ToastChef.getAddToastFunction(this);
   }
   
   // putting this in componentDidMount() hook to be able to call setState properly
@@ -123,19 +127,13 @@ class Collection extends React.Component {
       })
     })
       .then(res => {
-        if(res.response===true) {
-
-          // TODO: if owner or username changed, redirect to new url
-
-          this.toggleEditModal();
-          return;
-        }
-
-        // TODO: ERROR HANDLING HERE
-        console.error(res.response);
+        // TODO: handle username or owner change
+        this.addToast('', 'Changes successfully saved', 'success');
+        this.toggleEditModal();
       })
       .catch(err => {
-        console.error(err)
+        // TODO: error handling here
+        this.addToast('Error', err.response.error + ' ' + err.response.details, 'warning');
       });
   };
 
@@ -198,6 +196,7 @@ class Collection extends React.Component {
   cancelChangesAndExit = () => {
     this.getCollection();
     this.toggleEditModal();
+    this.addToast('', 'Cancelled changes to profile', 'info');
   };
 
   updateCollectionPhotos = photoList => {
@@ -272,6 +271,11 @@ class Collection extends React.Component {
       })
     };
 
+    const collectionAclWithoutProfilePhotos = this.state.collection.aclList.map(aclEntry => ({...aclEntry, profilePhoto: undefined}));
+    const hasUnsavedChanges = JSON.stringify({
+      ...this.state.collection,
+      aclList: collectionAclWithoutProfilePhotos
+    })!==JSON.stringify(this.state.lastLoadedCollection);
     const editAclModal = (
       <Modal isOpen={this.state.isEditing} toggle={this.cancelChangesAndExit} style={{maxWidth: 1000}}>
         <ModalHeader toggle={this.cancelChangesAndExit}>Edit collection</ModalHeader>
@@ -344,7 +348,7 @@ class Collection extends React.Component {
           </Form>
         </ModalBody>
         <ModalFooter>
-          {JSON.stringify(this.state.collection)!==JSON.stringify(this.state.lastLoadedCollection) && <FormText>Unsaved changes</FormText>}
+          {hasUnsavedChanges && <FormText>Unsaved changes</FormText>}
           <Button onClick={this.cancelChangesAndExit} outline>Cancel changes and exit</Button>
           <Button onClick={this.saveChanges} outline color={'info'}>Save and exit</Button>
         </ModalFooter>
@@ -377,6 +381,7 @@ class Collection extends React.Component {
       <div className={'Collection'}>
         {editAclModal}
         {addPhotosModal}
+        <Toaster toasts={this.state.toasts} onRemoveToast={ToastChef.getRemoveToastFunction(this)} />
         <Jumbotron fluid className={'mb-0 text-light position-relative d-flex flex-column justify-content-center'} style={{
           backgroundColor: 'rgba(0,0,0,0.5)',
           height: '30rem'

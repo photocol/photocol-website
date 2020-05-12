@@ -20,7 +20,7 @@ class Toaster extends React.Component {
       </Toast>
     ));
     return (
-      <div className={'position-absolute'} style={{top: 10, right: 10}}>
+      <div className={'position-absolute'} style={{top: 10, right: 10, zIndex: 10000}}>
         {toasts}
       </div>
     );
