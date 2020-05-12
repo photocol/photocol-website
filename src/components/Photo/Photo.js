@@ -47,10 +47,16 @@ class Photo extends React.Component {
   render = () => {
       return (
         <div className={'Photo'}>
-          <Container>
+          <Container >
+            <br/>
             <Link to='/photos'>
-              <Button color="info" >Go back</Button>
+              <Button outline color="info" className={'m-2'} >Go back</Button>
             </Link>
+            <Button outline color="info" href={`${process.env.REACT_APP_SERVER_URL}/perma/${this.state.photouri}/${this.state.photo.filename}`}
+                    download
+                    className={'m-2'} > Download</Button>
+            <br/>
+            <br/>
             <div>
               <img className="photo333" src={`${process.env.REACT_APP_SERVER_URL}/perma/${this.state.photouri}`}/>
               <Card>
