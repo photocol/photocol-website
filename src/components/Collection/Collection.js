@@ -37,6 +37,7 @@ class Collection extends React.Component {
       isAddingPhotos: false,
       isSelectMode: false,
       newAclEntryRole: 'ROLE_VIEWER',
+      addUsername: '',
       toasts: []
     };
 
@@ -240,6 +241,8 @@ class Collection extends React.Component {
       <ListGroupItem className={'d-flex justify-content-between'}>
         <UserSearch id="form-control"
                     promptText={'Add user'}
+                    searchQuery={this.state.addUsername}
+                    onChange={evt => this.setState({addUsername: evt.target.value})}
                     onUserSelect={this.addUserToAcl}
                     userFilter={this.userNotInAcl}
                     ref={this.userSearchRef} />

@@ -81,7 +81,8 @@ class Collections extends React.Component {
 
   render = () => {
     if(this.props.username==='not logged in')
-      return (<Authenticator onUserAction={this.updateCollections}/>);
+      return (<Authenticator onUserAction={this.updateCollections} promptText={'Authenticate to see your collections'} />);
+
     const createCollection = (
         <Modal isOpen={this.state.isCreating} toggle={this.toggleIsCreating} >
           <ModalHeader toggle={this.toggleIsCreating}>
