@@ -63,7 +63,7 @@ class Collections extends React.Component {
     this.acm.request('/collection/new', {
       method: 'POST',
       body: JSON.stringify({
-        isPublic: false,
+        isPublic: 0,
         name: this.state.collectionName
       })
     })
