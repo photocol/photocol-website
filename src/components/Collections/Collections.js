@@ -11,9 +11,6 @@ import {faUserEdit, faPlus} from "@fortawesome/free-solid-svg-icons";
 import catlogo from '../../cat-profile.png';
 
 
-
-
-
 class Collections extends React.Component {
   constructor(props) {
     super(props);
@@ -138,9 +135,9 @@ class Collections extends React.Component {
                                 <DropdownToggle outline color="info">
                                   <Row>
                                     <Col xs={"1"}>
-                                      {this.state.collection.coverPhotoUri === null
+                                      {collection.coverPhotoUri === undefined
                                           ?  <img src={catlogo} style={{width: 30, height: 30}}/>
-                                          :  <img src={`${process.env.REACT_APP_SERVER_URL}/perma/${this.state.collection.coverPhotoUri}`} style={{width: 30, height: 30}}/>
+                                          :  <img src={`${process.env.REACT_APP_SERVER_URL}/perma/${collection.coverPhotoUri}`} style={{width: 30, height: 30}}/>
                                       }
                                     </Col>
                                     <Col xs={"9"}>
