@@ -182,7 +182,7 @@ class Profile extends React.Component {
             <img src={this.state.user.profilePhoto ? `${process.env.REACT_APP_SERVER_URL}/perma/${this.state.user.profilePhoto}` : defaultPhoto}
                  alt={`${this.state.user.username}'s profile`}
                  title={`${this.state.user.username}'s profile`}
-                 style={{maxWidth: '20rem', maxHeight: '20rem'}} />
+                 style={{width: '300px', height: '300px', borderRadius: '50%', objectFit: 'cover'}} />
             <h1 className={'display-3'}>{this.state.user.username || 'User not found'}</h1>
             { this.state.user.displayName && <p><em>({this.state.user.displayName})</em></p> }
             <p>{this.state.user.email}</p>

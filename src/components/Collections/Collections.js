@@ -4,12 +4,13 @@ import { connect } from 'react-redux';
 import './Collections.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import Authenticator from "../Authenticator/Authenticator";
-import {Button, Row, Col, Form, FormGroup, Label, Container, Card, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, Progress} from 'reactstrap';
+import {Button, Row, Col, CardImg, CardImgOverlay, CardHeader, CardTitle, CardSubtitle,CardText, CardBody, CardColumns, Form, FormGroup, Label, Container, Card, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, Progress} from 'reactstrap';
 import "@reach/menu-button/styles.css";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faUserEdit, faPlus} from "@fortawesome/free-solid-svg-icons";
 import catlogo from '../../cat-profile.png';
-
+import { LinkContainer } from 'react-router-bootstrap';
+import cover from '../../No_cover.jpg';
 
 class Collections extends React.Component {
   constructor(props) {
@@ -39,6 +40,7 @@ class Collections extends React.Component {
   onEnter = evt => {
     if(evt.key === 'Enter') {
       this.createCollection();
+      this.setState({collectionName: ''})
     }
   };
 
@@ -119,7 +121,7 @@ class Collections extends React.Component {
             </Row>
           </Container>
           <br/>
-          <Container>
+          <Container >
             <Row>
               {this.state.collections.map(collection => {
                 const currentUserRole = collection.aclList.find(aclEntry => aclEntry.username === this.props.username).role;
@@ -128,37 +130,47 @@ class Collections extends React.Component {
 
                         <div key={collectionOwner + collection.uri}>
                           <Col>
-                            <Card>
-                              <Dropdown
-                                  isOpen={this.state.dropdownOpen === collection.name} size="lg"
-                                  onClick = {() => this.dropdownClick(collection.name)}>
-                                <DropdownToggle outline color="info">
-                                  <Row>
-                                    <Col xs={"1"}>
-                                      {collection.coverPhotoUri === undefined
-                                          ?  <img src={catlogo} style={{width: 30, height: 30}}/>
-                                          :  <img src={`${process.env.REACT_APP_SERVER_URL}/perma/${collection.coverPhotoUri}`} style={{width: 30, height: 30}}/>
-                                      }
-                                    </Col>
-                                    <Col xs={"9"}>
-                                      {collection.name}<br/>
-                                      By {collectionOwner}
-                                    </Col>
-                                  </Row>
-                                </DropdownToggle>
-                                <DropdownMenu>
-                                  <DropdownItem>
-                                    <Link to={`/collection/${collectionOwner}/${collection.uri}`}>Collection</Link>
-                                  </DropdownItem>
-                                  {
-                                    collectionOwner === this.props.username &&
-                                    (
-                                        <DropdownItem onClick={() => this.deleteCollection(collectionOwner, collection.uri)}>Delete</DropdownItem>
-                                    )
-                                  }
-                                </DropdownMenu>
-                              </Dropdown>
-                            </Card>
+                            <LinkContainer to={`/collection/${collectionOwner}/${collection.uri}`}
+                                           style={{ width: '20rem', height: '17rem' }}>
+                              <Card body outline color="info" className="text-center">
+                                {collection.coverPhotoUri === undefined
+                                  ?  <CardImg thumbnail src={cover} alt="Card image cap"
+                                              className = "image"/>
+                                  :  <CardImg thumbnail src={`${process.env.REACT_APP_SERVER_URL}/perma/${collection.coverPhotoUri}`}
+                                              className = "image"/>
+                                }
+                                <CardBody>
+                                  <CardTitle style={{ fontWeight: 'bold' }}>
+                                    {collection.name}
+                                  </CardTitle>
+                                  <CardSubtitle className="mb-2 text-muted">
+                                    By {collectionOwner}
+                                  </CardSubtitle>
+                                  <CardText className ="description" >
+                                    {collection.description}
+                                  </CardText>
+                                </CardBody>
+                                {/*<Dropdown*/}
+                                {/*  isOpen={this.state.dropdownOpen === collection.name} size="lg"*/}
+                                {/*  onClick = {() => this.dropdownClick(collection.name)}>*/}
+                                {/*  <DropdownToggle outline color="info">*/}
+
+                                {/*  </DropdownToggle>*/}
+                                {/*  <DropdownMenu>*/}
+                                {/*    <DropdownItem>*/}
+                                {/*      <Link to={`/collection/${collectionOwner}/${collection.uri}`}>Collection</Link>*/}
+                                {/*    </DropdownItem>*/}
+                                {/*    {*/}
+                                {/*      collectionOwner === this.props.username &&*/}
+                                {/*      (*/}
+                                {/*        <DropdownItem onClick={() => this.deleteCollection(collectionOwner, collection.uri)}>Delete</DropdownItem>*/}
+                                {/*      )*/}
+                                {/*    }*/}
+                                {/*  </DropdownMenu>*/}
+                                {/*</Dropdown>*/}
+                              </Card>
+                            </LinkContainer>
+
 
                           </Col>
 

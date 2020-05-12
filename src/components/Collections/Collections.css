@@ -1,1 +1,12 @@
 .Collections {}
+.description{
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.image {
+    object-fit: cover;
+    width: 50px;
+    height: 135px;
+}
