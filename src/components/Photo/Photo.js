@@ -22,16 +22,7 @@ class Photo extends React.Component {
       }
     };
   }
-  componentDidMount() {
-    this.getPhotoList();
-  }
-  getPhotoList = () => {
-    this.acm.request('/photo/currentuser').then(res => {
-      this.setState({ photoList: res.response });
-    }).catch(err => {
-      console.error(err);
-    });
-  };
+
   render = () => {
     return (
         <div className={'Photo'}>
