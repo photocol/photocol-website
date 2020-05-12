@@ -97,6 +97,19 @@ class Profile extends React.Component {
         profilePhoto: this.state.user.profilePhoto
       })
     })
+      .then(res => {
+        this.toggleIsEditing();
+        this.addToast('', 'Saved changes to profile successfully', 'success');
+      })
+      .catch(err => {
+        this.addToast('Error', err.response.error, 'danger');
+      });
+  };
+
+  cancelChanges = () => {
+    this.updateUser(this.state.username);
+    this.toggleIsEditing();
+    this.addToast('', 'Changes to profile cancelled', 'info');
   };
 
   toggleIsEditing = () => this.setState({isEditing: !this.state.isEditing});
@@ -109,8 +122,8 @@ class Profile extends React.Component {
     const selectedPhoto = this.state.photoList.find(photo => photo.isSelected);
     const defaultPhoto = 'https://cdn.iconscout.com/icon/free/png-256/account-profile-avatar-man-circle-round-user-30452.png';
     const editUserModal = (
-      <Modal isOpen={this.state.isEditing} toggle={this.toggleIsEditing} style={{maxWidth: 1000}}>
-        <ModalHeader toggle={this.toggleIsEditing}>
+      <Modal isOpen={this.state.isEditing} toggle={this.cancelChanges} style={{maxWidth: 1000}}>
+        <ModalHeader toggle={this.cancelChanges}>
           {this.props.username}: Editing profile
         </ModalHeader>
         <ModalBody>
@@ -154,7 +167,7 @@ class Profile extends React.Component {
           </FormGroup>
         </ModalBody>
         <ModalFooter>
-          <Button onClick={this.updateUser}>Cancel changes and exit</Button>
+          <Button onClick={this.cancelChanges}>Cancel changes and exit</Button>
           <Button color={'success'} onClick={this.saveProfile}>Save and exit</Button>
         </ModalFooter>
       </Modal>
