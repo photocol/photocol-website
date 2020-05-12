@@ -79,7 +79,7 @@ class Profile extends React.Component {
 
   updateUser = username => {
     console.log(username);
-    if(username===this.props.username || !username&&this.props.username)
+    if(username===this.props.username || (!username && this.props.username))
       this.getPhotoList();
     this.setState({
       username: username,

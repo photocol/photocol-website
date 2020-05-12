@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {Link} from "react-router-dom";
-import { Button, Jumbotron, Container, ModalBody, Modal, Progress, ModalHeader } from 'reactstrap';
 
 const Checkmark = ({ selected }) => (
     <div

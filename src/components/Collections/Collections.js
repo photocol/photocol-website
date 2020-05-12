@@ -4,12 +4,11 @@ import { connect } from 'react-redux';
 import './Collections.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import Authenticator from "../Authenticator/Authenticator";
-import {Button, Row, Col, Form, FormGroup, Label, Container, Card, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, Progress} from 'reactstrap';
+import {Button, Row, Col, FormGroup, Container, Card, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody} from 'reactstrap';
 import "@reach/menu-button/styles.css";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faUserEdit, faPlus} from "@fortawesome/free-solid-svg-icons";
+import {faPlus} from "@fortawesome/free-solid-svg-icons";
 import catlogo from '../../cat-profile.png';
-
 
 class Collections extends React.Component {
   constructor(props) {
@@ -122,7 +121,7 @@ class Collections extends React.Component {
           <Container>
             <Row>
               {this.state.collections.map(collection => {
-                const currentUserRole = collection.aclList.find(aclEntry => aclEntry.username === this.props.username).role;
+                // const currentUserRole = collection.aclList.find(aclEntry => aclEntry.username === this.props.username).role;
                 const collectionOwner = collection.aclList.find(aclEntry => aclEntry.role === 'ROLE_OWNER').username;
                 return (
 
@@ -135,10 +134,9 @@ class Collections extends React.Component {
                                 <DropdownToggle outline color="info">
                                   <Row>
                                     <Col xs={"1"}>
-                                      {collection.coverPhotoUri === undefined
-                                          ?  <img src={catlogo} style={{width: 30, height: 30}}/>
-                                          :  <img src={`${process.env.REACT_APP_SERVER_URL}/perma/${collection.coverPhotoUri}`} style={{width: 30, height: 30}}/>
-                                      }
+                                      <img src={collection.coverPhotoUri ? `${process.env.REACT_APP_SERVER_URL}/perma/${collection.coverPhotoUri}` : catlogo}
+                                           alt={`${collection.name}`}
+                                           style={{width: 30, height: 30}} />
                                     </Col>
                                     <Col xs={"9"}>
                                       {collection.name}<br/>
