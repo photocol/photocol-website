@@ -25,6 +25,7 @@ class Collection extends React.Component {
         uri: '',
         description: '',
         coverPhotoUri: '',
+        isPublic: 0,
         photos: [],
         aclList: []
       },
@@ -54,7 +55,6 @@ class Collection extends React.Component {
           collection: res.response,
           lastLoadedCollection: JSON.parse(JSON.stringify(res.response))  // simple clone for checking against later
         }, async () => {
-
           // get profile photos; do this in callback to avoid extra wait time
           const aclListWithProfilePhotos = await Promise.all(this.state.collection.aclList.map(async (aclEntry, index) => {
             const profilePhoto = (await this.acm.request(`/user/profile/${aclEntry.username}`)).response.profilePhoto;
@@ -110,6 +110,7 @@ class Collection extends React.Component {
     const newName = current.name===previous.name ? null : current.name;
     const newDescription = current.description===previous.description ? null : current.description;
     const newCoverPhotoUri = current.coverPhotoUri===previous.coverPhotoUri ? null : current.coverPhotoUri;
+    const newIsPublic = current.isPublic===previous.isPublic ? null : current.isPublic;
 
     this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}/update`, {
       method: 'POST',
@@ -117,7 +118,8 @@ class Collection extends React.Component {
         name: newName,
         description: newDescription,
         coverPhotoUri: newCoverPhotoUri,
-        aclList: aclListDiff
+        aclList: aclListDiff,
+        isPublic: newIsPublic
       })
     })
       .then(res => {
@@ -299,6 +301,25 @@ class Collection extends React.Component {
                         placeholder={'A description helps people know what this collection is about!'}
                         value={this.state.collection.description}
                         onChange={evt => this.setState({collection: { ...this.state.collection, description: evt.target.value}})}></textarea>
+            </FormGroup>
+            <FormGroup>
+              <Label htmlFor={'edit-collection-pub'}>Visibility</Label>
+              <select className={'form-control'}
+                      value={this.state.collection.isPublic}
+                      onChange={evt => this.setState({collection: {...this.state.collection, isPublic: evt.target.value}})}>
+                <option value={0}>Private</option>
+                <option value={1}>Public</option>
+                <option value={2}>Discoverable</option>
+              </select>
+              <FormText>
+                {
+                  this.state.collection.isPublic===0
+                    ? 'Private collections are only viewable by the users it is explicitly shared with.'
+                    : this.state.collection.isPublic===1
+                      ? 'Public collections are viewable by anyone.'
+                      : 'Discoverable collection details are public, but their images are private.'
+                }
+              </FormText>
             </FormGroup>
             <FormGroup>
               <Label htmlFor={'edit-collection-cover-photo'}>Choose cover image</Label>
