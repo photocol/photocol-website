@@ -2,8 +2,23 @@ import React from 'react';
 import './Profile.css';
 import {connect} from "react-redux";
 import {
-  Button, Card, CardHeader, Collapse, Container, FormGroup, FormText, Input, Jumbotron, Label, Modal,
-  ModalBody, ModalFooter, ModalHeader
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  CardImg,
+  Col,
+  Collapse,
+  Container,
+  FormGroup,
+  FormText,
+  Input,
+  Jumbotron,
+  Label,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader, Row
 } from 'reactstrap';
 import {Toaster,ToastChef} from "../../util/Toaster";
 import {Link, withRouter} from 'react-router-dom';
@@ -33,7 +48,8 @@ class Profile extends React.Component {
         displayName: ''
       },
       photoList: [],
-      toasts: []
+      toasts: [],
+      collections: []
     };
     this.acm = new ApiConnectionManager();
 
@@ -49,13 +65,14 @@ class Profile extends React.Component {
   };
 
   componentDidUpdate = (prevProps, prevState) => {
-    const username = this.props.match.params.username;
+    const username = this.props.match.params.username || this.props.username;
     if (username!==prevState.username)
       this.updateUser(username);
   };
 
   componentDidMount = () => {
-    const username = this.props.match.params.username;
+    console.log('testing');
+    const username = this.props.match.params.username || this.props.username;
     this.updateUser(username);
   };
 
@@ -72,10 +89,15 @@ class Profile extends React.Component {
         profilePhoto: '',
         displayName: ''
       },
+      collections: []
     });
     this.acm.request('/user/profile' + (this.state.username ? `/${this.state.username}` : ''))
       .then(res => {
-        this.setState({user: {displayName: '', profilePhoto: '', ...res.response}});
+        console.log(res);
+        this.setState({
+          user: {displayName: '', profilePhoto: '', ...res.response, collections: undefined},
+          collections: res.response.collections
+        });
       })
       .catch(err => {
         switch(err.response.error) {
@@ -118,6 +140,20 @@ class Profile extends React.Component {
     /* show authentication if not logged in and if no username is specified as url param */
     if(this.props.username==='not logged in' && !this.state.isUrlUsername)
       return (<Authenticator/>);
+
+    const collectionsJsx = this.state.collections.map(collection => (
+      <Col xs={12} md={6} lg={4}>
+        <Link to={`/collection/${this.state.username}/${collection.uri}`} className={'link-nostyle'}>
+          <Card>
+            <CardImg top src={`${process.env.REACT_APP_SERVER_URL}/perma/${collection.coverPhotoUri}`} />
+            <CardBody>
+              <p className={'text-truncate'}>{collection.name}</p>
+              <p className={'small text-secondary'}>{collection.description}</p>
+            </CardBody>
+          </Card>
+        </Link>
+      </Col>
+    ));
 
     const selectedPhoto = this.state.photoList.find(photo => photo.isSelected);
     const defaultPhoto = 'https://cdn.iconscout.com/icon/free/png-256/account-profile-avatar-man-circle-round-user-30452.png';
@@ -205,7 +241,12 @@ class Profile extends React.Component {
           <Container><h1>Friends</h1></Container>
         </Jumbotron>
         <Jumbotron fluid>
-          <Container><h1>Public collections</h1></Container>
+          <Container>
+            <h1>Public collections</h1>
+            <Row>
+              {collectionsJsx}
+            </Row>
+          </Container>
         </Jumbotron>
       </>
     );

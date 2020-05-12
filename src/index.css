@@ -1,3 +1,12 @@
 .cursor-pointer {
     cursor: pointer;
 }
+
+.link-nostyle {
+    text-decoration: inherit;
+    color: inherit;
+}
+.link-nostyle:hover {
+    text-decoration: inherit;
+    color: inherit;
+}
