@@ -89,6 +89,16 @@ class Profile extends React.Component {
       });
   };
 
+  saveProfile = () => {
+    this.acm.request('/user/update', {
+      method: 'POST',
+      body: JSON.stringify({
+        displayName: this.state.user.displayName,
+        profilePhoto: this.state.user.profilePhoto
+      })
+    })
+  };
+
   toggleIsEditing = () => this.setState({isEditing: !this.state.isEditing});
 
   render = () => {
@@ -144,8 +154,8 @@ class Profile extends React.Component {
           </FormGroup>
         </ModalBody>
         <ModalFooter>
-          <Button>Cancel changes and exit</Button>
-          <Button color={'success'}>Save and exit</Button>
+          <Button onClick={this.updateUser}>Cancel changes and exit</Button>
+          <Button color={'success'} onClick={this.saveProfile}>Save and exit</Button>
         </ModalFooter>
       </Modal>
     );
