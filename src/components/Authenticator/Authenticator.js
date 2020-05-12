@@ -214,13 +214,13 @@ class Authenticator extends React.Component {
           {/* if on /authenticate route and logged in, redirect to homepage */
             this.props.location.pathname==='/authenticate' && this.props.username!=='not logged in'
             && <Redirect to='/' />}
-          <h3 className='display-4'>{this.state.isLogin ? 'Welcome back.' : 'Hi, who dis?'}</h3>
+          <h3 className='display-4 text-center'>{this.props.promptText || (this.state.isLogin ? 'Welcome back.' : 'Hi, who dis?')}</h3>
           <Card className='my-2'>
             <CardBody>
               {loginOrSignup}
             </CardBody>
           </Card>
-          <small className='text-muted'>
+          <small className='d-block text-muted text-center'>
             {this.state.isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
             {/* semantically a button, but make it look like a link */}
             <Button className={'btn-link bg-transparent border-0 outline-0 p-0 border-0'}
@@ -235,11 +235,13 @@ class Authenticator extends React.Component {
 }
 
 Authenticator.propTypes = {
-  onUserAction: PropTypes.func
+  onUserAction: PropTypes.func,
+  promptText: PropTypes.string
 };
 
 Authenticator.defaultProps = {
-  onUserAction: () => {}
+  onUserAction: () => {},
+  promptText: ''
 };
 
 const mapStateToProps = state => ({

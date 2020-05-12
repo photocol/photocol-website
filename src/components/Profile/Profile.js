@@ -21,12 +21,13 @@ import {
   ModalHeader, Row
 } from 'reactstrap';
 import {Toaster,ToastChef} from "../../util/Toaster";
-import {Link, withRouter} from 'react-router-dom';
+import {Link, Redirect, withRouter} from 'react-router-dom';
 import Authenticator from "../Authenticator/Authenticator";
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheck, faUserEdit} from "@fortawesome/free-solid-svg-icons";
 import PhotoSelectorList from "../PhotoSelectorList/PhotoSelectorList";
+import UserSearch from "../UserSearch/UserSearch";
 
 class Profile extends React.Component {
 
@@ -49,7 +50,8 @@ class Profile extends React.Component {
       },
       photoList: [],
       toasts: [],
-      collections: []
+      collections: [],
+      searchUsername: ''
     };
     this.acm = new ApiConnectionManager();
 
@@ -71,7 +73,6 @@ class Profile extends React.Component {
   };
 
   componentDidMount = () => {
-    console.log('testing');
     const username = this.props.match.params.username || this.props.username;
     this.updateUser(username);
   };
@@ -82,7 +83,7 @@ class Profile extends React.Component {
       this.getPhotoList();
     this.setState({
       username: username,
-      isUrlUsername: !!username,
+      isUrlUsername: !!this.props.match.params.username,
       user: {
         username: '',
         email: '',
@@ -93,7 +94,6 @@ class Profile extends React.Component {
     });
     this.acm.request('/user/profile' + (this.state.username ? `/${this.state.username}` : ''))
       .then(res => {
-        console.log(res);
         this.setState({
           user: {displayName: '', profilePhoto: '', ...res.response, collections: undefined},
           collections: res.response.collections
@@ -109,6 +109,11 @@ class Profile extends React.Component {
             this.addToast('Error', err.response.error, 'danger');
         }
       });
+  };
+
+  switchUser = () => {
+    this.props.history.push(`/profile/${this.state.searchUsername}`);
+    this.setState({searchUsername: ''});
   };
 
   saveProfile = () => {
@@ -137,9 +142,37 @@ class Profile extends React.Component {
   toggleIsEditing = () => this.setState({isEditing: !this.state.isEditing});
 
   render = () => {
+
+    console.log(this.state.user);
+
+    const searchUserJsx = (
+      <Jumbotron fluid className={'text-center bg-transparent'}>
+        <Container>
+          <h1 className={'display-4'}>View a user's profile</h1>
+          <UserSearch promptText={'Search users'}
+                      searchQuery={this.state.searchUsername}
+                      onChange={evt => this.setState({searchUsername: evt.target.value})}
+                      onUserSelect={username => this.setState({searchUsername: username})}
+                      className={'d-inline-block mx-2'} />
+          <Button onClick={this.switchUser}
+                  outline
+                  color={'primary'}>View profile</Button>
+        </Container>
+      </Jumbotron>
+    );
+
     /* show authentication if not logged in and if no username is specified as url param */
     if(this.props.username==='not logged in' && !this.state.isUrlUsername)
-      return (<Authenticator/>);
+      return (
+        <>
+          {searchUserJsx}
+          <Authenticator promptText={'View your profile'} />
+        </>
+      );
+
+    /* this makes some of the above code dealing with case that not specified in username, but is useful */
+    if(this.props.username!=='not logged in' && !!!this.props.match.params.username )
+      return (<Redirect to={`/profile/${this.props.username}`} />);
 
     const collectionsJsx = this.state.collections.map(collection => (
       <Col xs={12} md={6} lg={4}>
@@ -213,7 +246,7 @@ class Profile extends React.Component {
       <>
         {editUserModal}
         <Toaster toasts={this.state.toasts} onRemoveToast={ToastChef.getRemoveToastFunction(this)} />
-        <Jumbotron>
+        <Jumbotron className={'bg-transparent'}>
           <Container className='mt-5 text-center'>
             <img src={this.state.user.profilePhoto ? `${process.env.REACT_APP_SERVER_URL}/perma/${this.state.user.profilePhoto}` : defaultPhoto}
                  alt={`${this.state.user.username}'s profile`}
@@ -237,10 +270,10 @@ class Profile extends React.Component {
             }
           </Container>
         </Jumbotron>
-        <Jumbotron fluid>
+        <Jumbotron fluid className={'bg-transparent'}>
           <Container><h1>Friends</h1></Container>
         </Jumbotron>
-        <Jumbotron fluid>
+        <Jumbotron fluid className={'bg-transparent'}>
           <Container>
             <h1>Public collections</h1>
             <Row>
@@ -248,6 +281,7 @@ class Profile extends React.Component {
             </Row>
           </Container>
         </Jumbotron>
+        {searchUserJsx}
       </>
     );
   }
