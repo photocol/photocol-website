@@ -4,14 +4,7 @@ import './Collection.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import UserSearch from "../UserSearch/UserSearch";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faUserSlash,
-  faUserPlus,
-  faEdit,
-  faFileUpload,
-  faObjectUngroup,
-  faMinusSquare
-} from '@fortawesome/free-solid-svg-icons';
+import { faUserSlash, faUserPlus, faEdit, faFileUpload, faObjectUngroup, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import Photos from "../Photos/Photos";
 import catlogo from '../../cat-profile.png';
 import {
@@ -60,6 +53,14 @@ class Collection extends React.Component {
           errorMsg: '',
           collection: res.response,
           lastLoadedCollection: JSON.parse(JSON.stringify(res.response))  // simple clone for checking against later
+        }, () => {
+
+          // get profile photos; do this in callback to avoid extra wait time
+          const aclListWithProfilePhotos = this.state.collection.aclList.map(async (aclEntry, index) => {
+            const profilePhoto = await this.acm.request(`/profile/${aclEntry.username}`, { method: 'POST' }).response.profilePhoto;
+            return {...aclEntry, profilePhoto};
+          });
+          this.setState({collection: {...this.state.collection, aclListWithProfilePhotos}});
         });
       })
       .catch(err => {
@@ -72,13 +73,18 @@ class Collection extends React.Component {
   getOwner = () =>
     (this.state.collection.aclList.find(acl => acl.role==='ROLE_OWNER') || {username:''}).username;
 
-  addUserToAcl = (username) => {
+  addUserToAcl = async username => {
+    const profilePhoto = await this.acm.request(`/profile/${username}`, { method: 'POST' }).response.profilePhoto;
+
+    console.log(profilePhoto);
+
     this.setState({
       collection: {
         ...this.state.collection,
         aclList: this.state.collection.aclList.concat({
           username: username,
-          role: this.state.newAclEntryRole
+          role: this.state.newAclEntryRole,
+          profilePhoto: profilePhoto
         })
       },
       newAclEntryRole: 'ROLE_VIEWER'
@@ -336,7 +342,7 @@ class Collection extends React.Component {
       <div key={aclEntry.username} className={'mr-2'}>
         <Card outline color={aclEntry.role==='ROLE_OWNER'?'success':aclEntry.role==='ROLE_ENTRY'?'warning':'danger'}
               style={{width: 50, height: 50}}>
-          <img src={catlogo} alt={aclEntry.username} title={aclEntry.username} style={{width: 50, height: 50}}/>
+          <img src={aclEntry.profilePhoto || catlogo} alt={aclEntry.username} title={aclEntry.username} style={{width: 50, height: 50}}/>
         </Card>
       </div>
     );
