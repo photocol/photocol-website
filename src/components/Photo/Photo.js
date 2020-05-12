@@ -1,9 +1,8 @@
 import React from 'react';
 import './Photo.css';
 import {Link, withRouter} from 'react-router-dom';
-import { Button, Row, Col, Form, FormGroup, Label, Card, Container, CardHeader, CardBody, CardText, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import { Button, Card, Container, CardBody, CardText } from 'reactstrap';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
-
 
 class Photo extends React.Component {
   constructor(props) {
@@ -58,7 +57,9 @@ class Photo extends React.Component {
             <br/>
             <br/>
             <div>
-              <img className="photo333" src={`${process.env.REACT_APP_SERVER_URL}/perma/${this.state.photouri}`}/>
+              <img className="photo333"
+                   src={`${process.env.REACT_APP_SERVER_URL}/perma/${this.state.photouri}`}
+                   alt={this.state.photo.filename}/>
               <Card>
                 <CardBody>
                   <CardText>

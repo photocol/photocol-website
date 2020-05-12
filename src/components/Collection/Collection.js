@@ -11,6 +11,7 @@ import {
   Button, Form, FormGroup, Label, Input, Jumbotron, Container, Card, Collapse, Modal, ModalHeader, ModalBody,
   ModalFooter, ListGroupItem, ListGroup, CardHeader, FormText } from 'reactstrap';
 import PhotoSelectorList from "../PhotoSelectorList/PhotoSelectorList";
+import {ToastChef, Toaster} from "../../util/Toaster";
 
 class Collection extends React.Component {
     constructor(props) {
@@ -25,6 +26,7 @@ class Collection extends React.Component {
         uri: '',
         description: '',
         coverPhotoUri: '',
+        isPublic: 0,
         photos: [],
         aclList: []
       },
@@ -34,11 +36,14 @@ class Collection extends React.Component {
       isEditingAcl: false,
       isAddingPhotos: false,
       isSelectMode: false,
-      newAclEntryRole: 'ROLE_VIEWER'
+      newAclEntryRole: 'ROLE_VIEWER',
+      toasts: []
     };
 
     this.acm = new ApiConnectionManager();
     this.userSearchRef = React.createRef();
+
+    this.addToast = ToastChef.getAddToastFunction(this);
   }
   
   // putting this in componentDidMount() hook to be able to call setState properly
@@ -54,7 +59,6 @@ class Collection extends React.Component {
           collection: res.response,
           lastLoadedCollection: JSON.parse(JSON.stringify(res.response))  // simple clone for checking against later
         }, async () => {
-
           // get profile photos; do this in callback to avoid extra wait time
           const aclListWithProfilePhotos = await Promise.all(this.state.collection.aclList.map(async (aclEntry, index) => {
             const profilePhoto = (await this.acm.request(`/user/profile/${aclEntry.username}`)).response.profilePhoto;
@@ -110,6 +114,7 @@ class Collection extends React.Component {
     const newName = current.name===previous.name ? null : current.name;
     const newDescription = current.description===previous.description ? null : current.description;
     const newCoverPhotoUri = current.coverPhotoUri===previous.coverPhotoUri ? null : current.coverPhotoUri;
+    const newIsPublic = current.isPublic===previous.isPublic ? null : current.isPublic;
 
     this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}/update`, {
       method: 'POST',
@@ -117,23 +122,18 @@ class Collection extends React.Component {
         name: newName,
         description: newDescription,
         coverPhotoUri: newCoverPhotoUri,
-        aclList: aclListDiff
+        aclList: aclListDiff,
+        isPublic: newIsPublic
       })
     })
       .then(res => {
-        if(res.response===true) {
-
-          // TODO: if owner or username changed, redirect to new url
-
-          this.toggleEditModal();
-          return;
-        }
-
-        // TODO: ERROR HANDLING HERE
-        console.error(res.response);
+        // TODO: handle username or owner change
+        this.addToast('', 'Changes successfully saved', 'success');
+        this.toggleEditModal();
       })
       .catch(err => {
-        console.error(err)
+        // TODO: error handling here
+        this.addToast('Error', err.response.error + ' ' + err.response.details, 'warning');
       });
   };
 
@@ -196,6 +196,7 @@ class Collection extends React.Component {
   cancelChangesAndExit = () => {
     this.getCollection();
     this.toggleEditModal();
+    this.addToast('', 'Cancelled changes to profile', 'info');
   };
 
   updateCollectionPhotos = photoList => {
@@ -270,6 +271,11 @@ class Collection extends React.Component {
       })
     };
 
+    const collectionAclWithoutProfilePhotos = this.state.collection.aclList.map(aclEntry => ({...aclEntry, profilePhoto: undefined}));
+    const hasUnsavedChanges = JSON.stringify({
+      ...this.state.collection,
+      aclList: collectionAclWithoutProfilePhotos
+    })!==JSON.stringify(this.state.lastLoadedCollection);
     const editAclModal = (
       <Modal isOpen={this.state.isEditing} toggle={this.cancelChangesAndExit} style={{maxWidth: 1000}}>
         <ModalHeader toggle={this.cancelChangesAndExit}>Edit collection</ModalHeader>
@@ -301,6 +307,25 @@ class Collection extends React.Component {
                         onChange={evt => this.setState({collection: { ...this.state.collection, description: evt.target.value}})}></textarea>
             </FormGroup>
             <FormGroup>
+              <Label htmlFor={'edit-collection-pub'}>Visibility</Label>
+              <select className={'form-control'}
+                      value={this.state.collection.isPublic}
+                      onChange={evt => this.setState({collection: {...this.state.collection, isPublic: evt.target.value}})}>
+                <option value={0}>Private</option>
+                <option value={1}>Public</option>
+                <option value={2}>Discoverable</option>
+              </select>
+              <FormText>
+                {
+                  this.state.collection.isPublic===0
+                    ? 'Private collections are only viewable by the users it is explicitly shared with.'
+                    : this.state.collection.isPublic===1
+                      ? 'Public collections are viewable by anyone.'
+                      : 'Discoverable collection details are public, but their images are private.'
+                }
+              </FormText>
+            </FormGroup>
+            <FormGroup>
               <Label htmlFor={'edit-collection-cover-photo'}>Choose cover image</Label>
               <Input id={'edit-collection-cover-photo'}
                      value={this.state.collection.coverPhotoUri}
@@ -323,7 +348,7 @@ class Collection extends React.Component {
           </Form>
         </ModalBody>
         <ModalFooter>
-          {JSON.stringify(this.state.collection)!==JSON.stringify(this.state.lastLoadedCollection) && <FormText>Unsaved changes</FormText>}
+          {hasUnsavedChanges && <FormText>Unsaved changes</FormText>}
           <Button onClick={this.cancelChangesAndExit} outline>Cancel changes and exit</Button>
           <Button onClick={this.saveChanges} outline color={'info'}>Save and exit</Button>
         </ModalFooter>
@@ -356,6 +381,7 @@ class Collection extends React.Component {
       <div className={'Collection'}>
         {editAclModal}
         {addPhotosModal}
+        <Toaster toasts={this.state.toasts} onRemoveToast={ToastChef.getRemoveToastFunction(this)} />
         <Jumbotron fluid className={'mb-0 text-light position-relative d-flex flex-column justify-content-center'} style={{
           backgroundColor: 'rgba(0,0,0,0.5)',
           height: '30rem'
