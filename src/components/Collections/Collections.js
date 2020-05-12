@@ -4,19 +4,30 @@ import { connect } from 'react-redux';
 import './Collections.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import Authenticator from "../Authenticator/Authenticator";
-import { Button, Row, Col, Form, FormGroup, Label, Container, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import {Button, Row, Col, Form, FormGroup, Label, Container, Card, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, Progress} from 'reactstrap';
 import "@reach/menu-button/styles.css";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faUserEdit, faPlus} from "@fortawesome/free-solid-svg-icons";
+import catlogo from '../../cat-profile.png';
+
+
+
+
 
 class Collections extends React.Component {
   constructor(props) {
     super(props);
 
     this.acm = new ApiConnectionManager();
-
     this.dropdownClick = this.dropdownClick.bind(this);
     this.state = {
       collections: [],
       collectionName: '',
+      isCreating: false,
+      collection: {
+        description: '',
+        coverPhotoUri: ''
+      },
       dropdownOpen: null
     };
   }
@@ -33,6 +44,8 @@ class Collections extends React.Component {
       this.createCollection();
     }
   };
+
+  toggleIsCreating = () => this.setState({isCreating: !this.state.isCreating});
 
   updateCollections = () => {
     this.acm.request('/collection/currentuser')
@@ -73,69 +86,90 @@ class Collections extends React.Component {
   render = () => {
     if(this.props.username==='not logged in')
       return (<Authenticator onUserAction={this.updateCollections}/>);
-
-    return (
-        <div >
-          <Container>
-            <br/>
+    const createCollection = (
+        <Modal isOpen={this.state.isCreating} toggle={this.toggleIsCreating} >
+          <ModalHeader toggle={this.toggleIsCreating}>
+            Create Collection
+          </ModalHeader>
+          <ModalBody>
             <Row>
-              <Form>
+              <Col>
                 <FormGroup>
-
-                  <Label htmlFor="form-group" >Collection Name</Label>
                   <input type='text'
                          id="form-control"
                          value={this.state.collectionName}
                          onChange={evt => this.setState({collectionName: evt.target.value})} onKeyDown={this.onEnter}/><br/>
                 </FormGroup>
-              </Form> &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;
-              <div>
-                <Button color="success" onClick={this.createCollection}>Create Collection</Button>
-              </div>
+              </Col>
+              <Col>
+                <Button outline color="info" onClick={this.createCollection}>Create </Button>
+              </Col>
+            </Row>
+          </ModalBody>
+        </Modal>
+    );
+    return (
+        <div >
+          <Container>
+            <br/>
+            <Row>
+              <Container>
+                {createCollection}
+                <Button outline title={'Create Collection'} onClick={this.toggleIsCreating}>
+                  <FontAwesomeIcon icon={faPlus} /> Create
+                </Button>
+              </Container>
             </Row>
           </Container>
+          <br/>
           <Container>
             <Row>
               {this.state.collections.map(collection => {
                 const currentUserRole = collection.aclList.find(aclEntry => aclEntry.username === this.props.username).role;
                 const collectionOwner = collection.aclList.find(aclEntry => aclEntry.role === 'ROLE_OWNER').username;
-
                 return (
 
                         <div key={collectionOwner + collection.uri}>
                           <Col>
-                            <Dropdown
-                                isOpen={this.state.dropdownOpen === collection.name} size="lg"
-                                onClick = {() => this.dropdownClick(collection.name)}>
-                              <DropdownToggle color="dark">
-                                Collection: {collection.name}<br/>
-                                Role: {currentUserRole}
-                              </DropdownToggle>
-                              <DropdownMenu>
-                                <DropdownItem onClick={() => {}}>
-                                  <Link to={`/collection/${collectionOwner}/${collection.uri}`}>Collection</Link>
-                                </DropdownItem>
-                                {
-                                  collectionOwner === this.props.username &&
-                                  (
-                                      <DropdownItem onClick={() => this.deleteCollection(collectionOwner, collection.uri)}>Delete</DropdownItem>
-                                  )
-                                }
-                              </DropdownMenu>
-                            </Dropdown>
+                            <Card>
+                              <Dropdown
+                                  isOpen={this.state.dropdownOpen === collection.name} size="lg"
+                                  onClick = {() => this.dropdownClick(collection.name)}>
+                                <DropdownToggle outline color="info">
+                                  <Row>
+                                    <Col xs={"1"}>
+                                      {this.state.collection.coverPhotoUri === null
+                                          ?  <img src={catlogo} style={{width: 30, height: 30}}/>
+                                          :  <img src={`${process.env.REACT_APP_SERVER_URL}/perma/${this.state.collection.coverPhotoUri}`} style={{width: 30, height: 30}}/>
+                                      }
+                                    </Col>
+                                    <Col xs={"9"}>
+                                      {collection.name}<br/>
+                                      By {collectionOwner}
+                                    </Col>
+                                  </Row>
+                                </DropdownToggle>
+                                <DropdownMenu>
+                                  <DropdownItem>
+                                    <Link to={`/collection/${collectionOwner}/${collection.uri}`}>Collection</Link>
+                                  </DropdownItem>
+                                  {
+                                    collectionOwner === this.props.username &&
+                                    (
+                                        <DropdownItem onClick={() => this.deleteCollection(collectionOwner, collection.uri)}>Delete</DropdownItem>
+                                    )
+                                  }
+                                </DropdownMenu>
+                              </Dropdown>
+                            </Card>
+
                           </Col>
 
                           <br/>
                         </div>
-
-
-
                 );
-
               })}
             </Row>
-
-
           </Container>
         </div>
     );

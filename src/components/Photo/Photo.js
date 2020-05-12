@@ -1,25 +1,47 @@
 import React from 'react';
 import './Photo.css';
 import {Link, withRouter} from 'react-router-dom';
-import {Button} from "reactstrap";
+import { Button, Row, Col, Form, FormGroup, Label, Container, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import ApiConnectionManager from "../../util/ApiConnectionManager";
+
 
 class Photo extends React.Component {
   constructor(props) {
     super(props);
     // get params from uri
     const {photouri} = props.match.params;
+    this.acm = new ApiConnectionManager();
+
     this.state = {
       photouri,
+      photo: {
+        filename: '',
+        uploadDate: '',
+        caption: '',
+        uri: ''
+      }
     };
   }
-
+  componentDidMount() {
+    this.getPhotoList();
+  }
+  getPhotoList = () => {
+    this.acm.request('/photo/currentuser').then(res => {
+      this.setState({ photoList: res.response });
+    }).catch(err => {
+      console.error(err);
+    });
+  };
   render = () => {
-    return (<div>
-      <Link to='/photos'>
-        <Button color="success">Return to Photos</Button>
-      </Link>
-      <div class='fill-screen'><img className="photo333" src={`${process.env.REACT_APP_SERVER_URL}/perma/${this.state.photouri}`}/></div>
-    </div>);
+    return (
+        <div className={'Photo'}>
+          <Link to='/photos'>
+            <Button color="info" >Go back</Button>
+          </Link>
+          <div className='fill-screen'>
+            <img className="photo333" src={`${process.env.REACT_APP_SERVER_URL}/perma/${this.state.photouri}`}/>
+          </div>
+        </div>);
   }
 };
 
