@@ -159,9 +159,9 @@ class Collection extends React.Component {
       })
       .catch(res => {
         const error = res.response.error;
+        console.log(error);
         const details = res.response.details;
         this.addToast('Error', error + ' ' + details, 'warning');
-        console.log(error);
         switch(error){
           case 'INPUT_FORMAT_ERROR':
             break;
@@ -498,7 +498,7 @@ class Collection extends React.Component {
     const userAclCard = (aclEntry, index) => (
       <div key={aclEntry.username} className={'mr-4'}>
         <Link to={`/profile/${aclEntry.username}`} title={aclEntry.username}>
-          <Card className={'position-relative'}>
+          <Card className={'position-relative bg-transparent rounded-circle'} >
             <div className={'fa-layers fa-fw fa-2x position-absolute'} style={{right: -10, top: -10}}>
               <FontAwesomeIcon icon={faCircle} color={'primary'} />
               <FontAwesomeIcon icon={aclEntry.role==='ROLE_OWNER' ? faStar : aclEntry.role==='ROLE_EDITOR' ? faEdit : faEye}
@@ -508,7 +508,6 @@ class Collection extends React.Component {
             <CardImg src={aclEntry.profilePhoto ? `${process.env.REACT_APP_SERVER_URL}/perma/${aclEntry.profilePhoto}` : defaultAvatar}
                      alt={aclEntry.username}
                      style={{width: 64, height: 64, borderRadius: '50%', objectFit: 'cover'}}
-                     className={'bg-light'}
                      bottom />
 
           </Card>
