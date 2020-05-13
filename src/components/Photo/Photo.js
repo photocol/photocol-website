@@ -1,7 +1,7 @@
 import React from 'react';
 import './Photo.css';
 import {Link, withRouter} from 'react-router-dom';
-import { Button, Card, Container, CardBody, CardText } from 'reactstrap';
+import { Button, Card, Container, CardBody, CardText, CardImg, Table} from 'reactstrap';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 
 class Photo extends React.Component {
@@ -37,9 +37,9 @@ class Photo extends React.Component {
         this.setState({ photo: res.response });
         console.log(res.response);
       })
-      .catch(err => {
-        console.log(err);
-        console.error(err.response.error);
+      .catch(res => {
+        const error = res.response.error;
+        console.log(error);
       })
   };
 
@@ -57,40 +57,70 @@ class Photo extends React.Component {
           <br/>
           <br/>
           <div>
-            <img className="photo333"
-                 src={`${process.env.REACT_APP_SERVER_URL}/perma/${this.state.photouri}`}
-                 alt={this.state.photo.filename}/>
             <Card>
+              <CardImg
+                   src={`${process.env.REACT_APP_SERVER_URL}/perma/${this.state.photouri}`}
+                   alt={this.state.photo.filename}/>
               <CardBody>
                 <CardText>
-                  Filename: {this.state.photo.filename} <br/>
-                  Caption: {this.state.photo.caption}<br/>
-                  {this.state.photo.uploadDate === undefined
-                    ? 'Upload Date:'+ this.state.photo.uploadDate.toLocaleTimeString()
-                    : ''
-                  }
                 </CardText>
                 <CardText>
-                  Metadata: <br/>
-                  Width: {this.state.photo.metadata.width} <br/>
-                  Height: {this.state.photo.metadata.height} <br/>
-                  Mime Type: {this.state.photo.metadata.mimeType} <br/>
-                  {this.state.photo.metadata.exposureTime === undefined
-                    ? 'Exposure Time: '+ this.state.photo.metadata.exposureTime
-                    : ''
-                  }<br/>
-                  {this.state.photo.metadata.fNumber === undefined
-                    ? 'FNumber: '+ this.state.photo.metadata.fNumber
-                    : ''
-                  }<br/>
-                  {this.state.photo.metadata.iso === undefined
-                    ? 'Iso: '+ this.state.photo.metadata.iso
-                    : ''
-                  }<br/>
-                  {this.state.photo.metadata.captureDate === 0
-                    ? 'Capture Date:'+ this.state.photo.metadata.captureDate.toLocaleTimeString()
-                    : ''
-                  }
+                  <Table>
+                    <tbody>
+                    <tr>
+                      <th> Filename</th>
+                      <td>{this.state.photo.filename} </td>
+                    </tr>
+                    {this.state.photo.caption &&
+                    <tr>
+                      <th>Caption</th>
+                      <td>{this.state.photo.caption}</td>
+                    </tr>
+                    }
+                    {this.state.photo.uploadDate === undefined &&
+                    <tr>
+                      <th>Upload Date</th>
+                      <td>{this.state.photo.uploadDate}</td>
+                    </tr>
+                    }
+                    <tr>
+                      <th> Height</th>
+                      <td>{this.state.photo.metadata.height}</td>
+                    </tr>
+                    <tr>
+                      <th>Width</th>
+                      <td>{this.state.photo.metadata.width}</td>
+                    </tr>
+                    <tr>
+                      <th>Mime Type</th>
+                      <td>{this.state.photo.metadata.mimeType}</td>
+                    </tr>
+                    {this.state.photo.metadata.exposureTime === undefined &&
+                    <tr>
+                      <th>Exposure Time</th>
+                      <td>{this.state.photo.metadata.exposureTime}</td>
+                    </tr>
+                    }
+                    {this.state.photo.metadata.fNumber === undefined &&
+                    <tr>
+                      <th>Fnumber</th>
+                      <td>{this.state.photo.metadata.fNumber}</td>
+                    </tr>
+                    }
+                    {this.state.photo.metadata.iso === undefined &&
+                    <tr>
+                      <th>Iso</th>
+                      <td>{this.state.photo.metadata.iso}</td>
+                    </tr>
+                    }
+                    {this.state.photo.metadata.captureDate === 0 &&
+                    <tr>
+                      <th>Iso</th>
+                      <td>{this.state.photo.metadata.captureDate.toLocaleTimeString()}</td>
+                    </tr>
+                    }
+                    </tbody>
+                  </Table>
                 </CardText>
               </CardBody>
             </Card>
