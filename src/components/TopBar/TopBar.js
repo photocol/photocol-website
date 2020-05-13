@@ -40,9 +40,9 @@ class TopBar extends React.Component {
           <NavItem>
             {this.props.username==='not logged in'
               ? <LinkContainer to='/authenticate'>
-                <Button outline color="info"><FontAwesomeIcon icon={this.props.username==='not logged in' ? faSignInAlt : faSignOutAlt} /> Sign in</Button>
+                <Button outline color="info"><FontAwesomeIcon icon={faSignInAlt} /> Sign in</Button>
               </LinkContainer>
-              : <Button outline color="info" onClick={this.lm.logOut}>Sign out</Button>
+              : <Button outline color="info" onClick={this.lm.logOut}><FontAwesomeIcon icon={faSignOutAlt} /> Sign out</Button>
             }
           </NavItem>
         </Collapse>
