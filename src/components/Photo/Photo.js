@@ -1,9 +1,9 @@
 import React from 'react';
 import './Photo.css';
-import {Link, withRouter} from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import { Button, Card, Container, CardBody, CardText, CardImg, Table} from 'reactstrap';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
-
+import {withRouter, Route} from "react-router-dom"; // https://slate.com/technology/2014/04/charles-o-rear-is-the-photographer-who-took-the-windows-xp-wallpaper-photo-in-napa-valley.html
 class Photo extends React.Component {
   constructor(props) {
     super(props);
@@ -35,6 +35,7 @@ class Photo extends React.Component {
     this.acm.request(`/perma/${this.state.photouri}/details`)
       .then(res => {
         this.setState({ photo: res.response });
+        this.props.history.push()
         console.log(res.response);
       })
       .catch(res => {

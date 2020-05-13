@@ -186,7 +186,7 @@ class Photos extends React.Component {
                             color={'success'}
                             title={'Confirm selection'}
                             onClick={this.confirmPhotoSelection}>
-                      <FontAwesomeIcon fw icon={faCheck} />
+                      <FontAwesomeIcon fw icon={faCheck} /> Confirm
                     </Button>
                   )
                 }
