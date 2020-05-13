@@ -1,5 +1,7 @@
 import React from 'react';
-
+import ApiConnectionManager from "../../util/ApiConnectionManager";
+import Authenticator from "../Authenticator/Authenticator";
+import {connect} from 'react-redux';
 import './Collections.css';
 import {Button, Row, Col, CardImg, CardImgOverlay, CardHeader, CardTitle, CardSubtitle, CardText, CardBody, CardColumns, Form, FormGroup,
   FormFeedback, Label, Container, Card, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, Progress, Input, FormText
@@ -8,7 +10,7 @@ import "@reach/menu-button/styles.css";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPlus} from "@fortawesome/free-solid-svg-icons";
 import { LinkContainer } from 'react-router-bootstrap';
-import cover from '../../no_cover.svg'; // https://fontawesome.com/license
+import cover from '../../windows.jpg'; // https://slate.com/technology/2014/04/charles-o-rear-is-the-photographer-who-took-the-windows-xp-wallpaper-photo-in-napa-valley.html
 
 class Collections extends React.Component {
   constructor(props) {
@@ -162,34 +164,32 @@ class Collections extends React.Component {
                 // const currentUserRole = collection.aclList.find(aclEntry => aclEntry.username === this.props.username).role;
                 const collectionOwner = collection.aclList.find(aclEntry => aclEntry.role === 'ROLE_OWNER').username;
                 return (
-
-                        <div key={collectionOwner + collection.uri}>
-                          <Col>
-                            <LinkContainer to={`/collection/${collectionOwner}/${collection.uri}`}
-                                           style={{ width: '20rem', height: '17rem' }}>
-                              <Card body outline color="info" className="text-center">
-                                {collection.coverPhotoUri === undefined
-                                  ?  <CardImg thumbnail src={cover} alt="Card image cap"
-                                              className = "image"/>
-                                  :  <CardImg thumbnail src={`${process.env.REACT_APP_SERVER_URL}/perma/${collection.coverPhotoUri}`}
-                                              className = "image"/>
-                                }
-                                <CardBody>
-                                  <CardTitle style={{ fontWeight: 'bold' }}>
-                                    {collection.name}
-                                  </CardTitle>
-                                  <CardSubtitle className="mb-2 text-muted">
-                                    By {collectionOwner}
-                                  </CardSubtitle>
-                                  <CardText className ="description" >
-                                    {collection.description}
-                                  </CardText>
-                                </CardBody>
-                              </Card>
-                            </LinkContainer>
-                          </Col>
-                          <br/>
-                        </div>
+                  <Col key={collectionOwner + collection.uri}
+                       xs={"10"} md={"6"} lg={"4"}
+                       className="mb-4">
+                    <LinkContainer to={`/collection/${collectionOwner}/${collection.uri}`}
+                                   style={{ height: '17rem' }}>
+                      <Card outline color="info" className="text-center">
+                        {collection.coverPhotoUri === undefined
+                          ?  <CardImg top src={cover} alt="Card image cap"
+                                      className = "image"/>
+                          :  <CardImg top src={`${process.env.REACT_APP_SERVER_URL}/perma/${collection.coverPhotoUri}`}
+                                      className = "image"/>
+                        }
+                        <CardBody>
+                          <CardTitle style={{ fontWeight: 'bold' }}>
+                            {collection.name}
+                          </CardTitle>
+                          <CardSubtitle className="mb-2 text-muted">
+                            By {collectionOwner}
+                          </CardSubtitle>
+                          <CardText className ="description" >
+                            {collection.description}
+                          </CardText>
+                        </CardBody>
+                      </Card>
+                    </LinkContainer>
+                  </Col>
                 );
               })}
             </Row>

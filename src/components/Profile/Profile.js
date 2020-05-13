@@ -28,7 +28,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheck, faUserEdit} from "@fortawesome/free-solid-svg-icons";
 import PhotoSelectorList from "../PhotoSelectorList/PhotoSelectorList";
 import UserSearch from "../UserSearch/UserSearch";
-import defaultAvatar from '../../default_avatar.svg';
+import defaultAvatar from '../../noprofile.png';
 
 class Profile extends React.Component {
 
@@ -212,7 +212,7 @@ class Profile extends React.Component {
             <Card className={'my-2 d-inline-block'}>
               <img src={this.state.user.profilePhoto ? `${process.env.REACT_APP_SERVER_URL}/perma/${this.state.user.profilePhoto}` : defaultPhoto}
                    alt={`${this.props.username}'s profile`}
-                   style={{maxWidth:100, maxHeight: 100}} />
+                   style={{maxWidth:100, maxHeight: 100}}/>
             </Card>
             <Button color={'danger'}
                     outline
@@ -252,7 +252,8 @@ class Profile extends React.Component {
             <img src={this.state.user.profilePhoto ? `${process.env.REACT_APP_SERVER_URL}/perma/${this.state.user.profilePhoto}` : defaultPhoto}
                  alt={`${this.state.user.username}'s profile`}
                  title={`${this.state.user.username}'s profile`}
-                 style={{width: '300px', height: '300px', borderRadius: '50%', objectFit: 'cover'}} />
+                 style={{width: '300px', height: '300px', borderRadius: '50%', objectFit: 'cover'}}
+                 className={"mb-4"}/>
             <h1 className={'display-3'}>{this.state.user.username || 'User not found'}</h1>
             { this.state.user.displayName && <p><em>({this.state.user.displayName})</em></p> }
             <p>{this.state.user.email}</p>
