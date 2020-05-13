@@ -622,7 +622,7 @@ class Collection extends React.Component {
                             title={'Select photos'}
                             color={'info'}
                             onClick={() => this.setState({isSelectMode: !this.state.isSelectMode})}>
-                      <FontAwesomeIcon icon={faObjectUngroup} fixedWidth={true} /> Select
+                      <FontAwesomeIcon icon={faObjectUngroup} fixedWidth={true} /> Delete photos
                     </Button>
                   </>
                 )
