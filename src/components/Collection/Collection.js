@@ -576,6 +576,10 @@ class Collection extends React.Component {
           <Container>
             <div className={'d-flex flex-row align-items-center'}>
               <span className="display-4 mr-3">{this.state.collection.name}</span>
+            </div>
+            <p>{this.state.collection.description || (<em>No description provided.</em>)}</p>
+            <div className={'d-flex flex-row'}>{ this.state.collection.aclList.map(userAclCard) }</div>
+            <div className={'mt-4'}>
               <span>
                 {
                   currentUserRole==='ROLE_OWNER' && (
@@ -594,7 +598,7 @@ class Collection extends React.Component {
                               title={'Add photos to collection'}
                               color={'info'}
                               onClick={this.toggleAddPhotosModal}>
-                        <FontAwesomeIcon icon={faFileUpload} fixedWidth={true} /> Upload
+                        <FontAwesomeIcon icon={faFileUpload} fixedWidth={true} /> Add Photo
                       </Button>
                       <Button className={'mr-2'}
                               title={'Select photos'}
@@ -619,8 +623,6 @@ class Collection extends React.Component {
                 {!this.state.isSelectMode || selectedPhotos.length===0 ? '' : selectedPhotos.length + ' photos selected.'}
               </span>
             </div>
-            <p>{this.state.collection.description || (<em>No description provided.</em>)}</p>
-            <div className={'d-flex flex-row'}>{ this.state.collection.aclList.map(userAclCard) }</div>
           </Container>
         </Jumbotron>
         <PhotoSelectorList photoList={this.state.collection.photos}
