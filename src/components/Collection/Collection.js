@@ -11,7 +11,7 @@ import {
   faFileUpload,
   faObjectUngroup,
   faMinusSquare,
-  faCircle, faStar, faEye, faCheck
+  faCircle, faStar, faEye, faCheck, faShieldAlt, faLock, faGlobe
 } from '@fortawesome/free-solid-svg-icons';
 import Photos from "../Photos/Photos";
 import defaultAvatar from '../../noprofile.png';    // https://fontawesome.com/license
@@ -575,8 +575,13 @@ class Collection extends React.Component {
                }}></div>
           <Container>
             <div className={'d-flex flex-row align-items-center'}>
-              <span className="display-4 mr-3">{this.state.collection.name}</span>
-              <span>
+              <span className="display-4 mr-2">{this.state.collection.name}</span>
+              <FontAwesomeIcon icon={this.state.collection.isPublic===0 ? faLock : this.state.collection.isPublic===1 ? faGlobe : faShieldAlt}
+                               title={'This collection is ' + (this.state.collection.isPublic===0
+                                 ? 'private' : this.state.collection.isPublic===1 ? 'public' : 'discoverable')}/>
+            </div>
+            <p>{this.state.collection.description || (<em>No description provided.</em>)}</p>
+            <div className={'mb-4'}>
                 {
                   currentUserRole==='ROLE_OWNER' && (
                     <Button className={'mr-2'}
@@ -587,39 +592,37 @@ class Collection extends React.Component {
                     </Button>
                   )
                 }
-                {
-                  (currentUserRole==='ROLE_OWNER' || currentUserRole==='ROLE_EDITOR') && (
-                    <>
-                      <Button className={'mr-2'}
-                              title={'Add photos to collection'}
-                              color={'info'}
-                              onClick={this.toggleAddPhotosModal}>
-                        <FontAwesomeIcon icon={faFileUpload} fixedWidth={true} /> Upload
-                      </Button>
-                      <Button className={'mr-2'}
-                              title={'Select photos'}
-                              color={'info'}
-                              onClick={() => this.setState({isSelectMode: !this.state.isSelectMode})}>
-                        <FontAwesomeIcon icon={faObjectUngroup} fixedWidth={true} /> Select
-                      </Button>
-                    </>
-                  )
-                }
-                {
-                  this.state.isSelectMode && (
+              {
+                (currentUserRole==='ROLE_OWNER' || currentUserRole==='ROLE_EDITOR') && (
+                  <>
                     <Button className={'mr-2'}
-                            title={'Remove selected photos'}
-                            color={'danger'}
-                            disabled={selectedPhotos.length===0}
-                            onClick={this.removeSelectedPhotos}>
-                      <FontAwesomeIcon icon={faMinusSquare} fixedWidth={true} /> Delete
+                            title={'Add photos to collection'}
+                            color={'info'}
+                            onClick={this.toggleAddPhotosModal}>
+                      <FontAwesomeIcon icon={faFileUpload} fixedWidth={true} /> Add photos
                     </Button>
-                  )
-                }
-                {!this.state.isSelectMode || selectedPhotos.length===0 ? '' : selectedPhotos.length + ' photos selected.'}
-              </span>
+                    <Button className={'mr-2'}
+                            title={'Select photos'}
+                            color={'info'}
+                            onClick={() => this.setState({isSelectMode: !this.state.isSelectMode})}>
+                      <FontAwesomeIcon icon={faObjectUngroup} fixedWidth={true} /> Select
+                    </Button>
+                  </>
+                )
+              }
+              {
+                this.state.isSelectMode && (
+                  <Button className={'mr-2'}
+                          title={'Remove selected photos'}
+                          color={'danger'}
+                          disabled={selectedPhotos.length===0}
+                          onClick={this.removeSelectedPhotos}>
+                    <FontAwesomeIcon icon={faMinusSquare} fixedWidth={true} /> Delete
+                  </Button>
+                )
+              }
+              {!this.state.isSelectMode || selectedPhotos.length===0 ? '' : selectedPhotos.length + ' photos selected.'}
             </div>
-            <p>{this.state.collection.description || (<em>No description provided.</em>)}</p>
             <div className={'d-flex flex-row'}>{ this.state.collection.aclList.map(userAclCard) }</div>
           </Container>
         </Jumbotron>
