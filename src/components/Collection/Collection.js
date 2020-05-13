@@ -14,10 +14,10 @@ import {
   faCircle, faStar, faGlasses, faEye
 } from '@fortawesome/free-solid-svg-icons';
 import Photos from "../Photos/Photos";
-import defaultAvatar from '../../default_avatar.svg';    // https://fontawesome.com/license
+import defaultAvatar from '../../noprofile.png';    // https://fontawesome.com/license
 import {
   Button, Form, FormGroup, Label, Input, Jumbotron, Container, Card, Collapse, Modal, ModalHeader, ModalBody,
-  ModalFooter, ListGroupItem, ListGroup, CardHeader, FormText, CardImg
+  ModalFooter, ListGroupItem, ListGroup, CardHeader, FormText, CardImg, FormFeedback
 } from 'reactstrap';
 import PhotoSelectorList from "../PhotoSelectorList/PhotoSelectorList";
 import {ToastChef, Toaster} from "../../util/Toaster";
@@ -48,7 +48,9 @@ class Collection extends React.Component {
       isSelectMode: false,
       newAclEntryRole: 'ROLE_VIEWER',
       addUsername: '',
-      toasts: []
+      toasts: [],
+      changeCollectionNameError: {},
+      tooLongDescriptionError: {}
     };
 
     this.acm = new ApiConnectionManager();
@@ -133,7 +135,9 @@ class Collection extends React.Component {
         description: newDescription,
         coverPhotoUri: newCoverPhotoUri,
         aclList: aclListDiff,
-        isPublic: newIsPublic
+        isPublic: newIsPublic,
+        changeCollectionNameError: {},
+        tooLongDescriptionError: {}
       })
     })
       .then(res => {
@@ -141,10 +145,34 @@ class Collection extends React.Component {
         this.addToast('', 'Changes successfully saved', 'success');
         this.toggleEditModal();
       })
-      .catch(err => {
-        // TODO: error handling here
-        this.addToast('Error', err.response.error + ' ' + err.response.details, 'warning');
+      .catch(res => {
+        const error = res.response.error;
+        const details = res.response.details;
+        this.addToast('Error', error + ' ' + details, 'warning');
+        console.log(error);
+        switch(error){
+          case 'INPUT_FORMAT_ERROR':
+            break;
+          default:
+            this.setState({changeCollectionNameError: {name: `Error: "${error}". Please contact the devs for more info.`}});
+            return;
+        }
+        console.log(res.response);
+        console.log(details);
+        switch(details){
+          case 'NAME_FORMAT':
+            this.setState({changeCollectionNameError: {name: 'Invalid Collection Name'}});
+            break;
+          case 'NAME_MISSING':
+            this.setState({changeCollectionNameError: {name: 'Collection name missing'}});
+            break;
+          case 'NAME_MISSING':
+            this.setState({tooLongDescriptionError: {description: 'Description word limit is exceeded'}});
+            break;
+          default:
+        }
       });
+
   };
 
   updateAclEntryRole = (index, newRole) => {
@@ -318,7 +346,11 @@ class Collection extends React.Component {
                      type={'text'}
                      value={this.state.collection.name}
                      maxLength={50}
+                     invalid={!!this.state.changeCollectionNameError.name}
                      onChange={changeCollectionName} />
+              <FormFeedback>
+                {this.state.changeCollectionNameError.name}
+              </FormFeedback>
               <FormText>This collection will be available at <code>/collection/{this.state.username}/{this.state.collection.uri}</code>.</FormText>
             </FormGroup>
             <FormGroup>
@@ -332,7 +364,11 @@ class Collection extends React.Component {
                         maxLength={1000}
                         placeholder={'A description helps people know what this collection is about!'}
                         value={this.state.collection.description}
+                        invalid={!!this.state.tooLongDescriptionError.description}
                         onChange={evt => this.setState({collection: { ...this.state.collection, description: evt.target.value}})}></textarea>
+              <FormFeedback>
+                {this.state.tooLongDescriptionError.description}
+              </FormFeedback>
             </FormGroup>
             <FormGroup>
               <Label htmlFor={'edit-collection-pub'}>Visibility</Label>
@@ -402,7 +438,7 @@ class Collection extends React.Component {
             </div>
             <CardImg src={aclEntry.profilePhoto ? `${process.env.REACT_APP_SERVER_URL}/perma/${aclEntry.profilePhoto}` : defaultAvatar}
                      alt={aclEntry.username}
-                     style={{width: 64, height: 64}}
+                     style={{width: 64, height: 64, borderRadius: '50%', objectFit: 'cover'}}
                      className={'bg-light'}
                      bottom />
 
