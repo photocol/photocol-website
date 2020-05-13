@@ -11,7 +11,7 @@ import {
   faFileUpload,
   faObjectUngroup,
   faMinusSquare,
-  faCircle, faStar, faGlasses, faEye
+  faCircle, faStar, faGlasses, faEye, faCheck
 } from '@fortawesome/free-solid-svg-icons';
 import Photos from "../Photos/Photos";
 import defaultAvatar from '../../noprofile.png';    // https://fontawesome.com/license
@@ -50,7 +50,8 @@ class Collection extends React.Component {
       addUsername: '',
       toasts: [],
       changeCollectionNameError: {},
-      tooLongDescriptionError: {}
+      tooLongDescriptionError: {},
+      isSelectingPhoto: false
     };
 
     this.acm = new ApiConnectionManager();
@@ -143,6 +144,7 @@ class Collection extends React.Component {
       .then(res => {
         // TODO: handle username or owner change
         this.addToast('', 'Changes successfully saved', 'success');
+        this.getCollection();
         this.toggleEditModal();
       })
       .catch(res => {
@@ -327,11 +329,13 @@ class Collection extends React.Component {
       })
     };
 
-    const collectionAclWithoutProfilePhotos = this.state.collection.aclList.map(aclEntry => ({...aclEntry, profilePhoto: undefined}));
     const hasUnsavedChanges = JSON.stringify({
       ...this.state.collection,
-      aclList: collectionAclWithoutProfilePhotos
+      aclList: this.state.collection.aclList.map(aclEntry => ({...aclEntry, profilePhoto: undefined})),
+      photos: this.state.collection.photos.map(photo => ({...photo, isSelected: undefined}))
     })!==JSON.stringify(this.state.lastLoadedCollection);
+
+    const selectedPhoto = this.state.collection.photos.find(photo => photo.isSelected);
     const editAclModal = (
       <Modal isOpen={this.state.isEditing} toggle={this.cancelChangesAndExit} style={{maxWidth: 1000}}>
         <ModalHeader toggle={this.cancelChangesAndExit}>Edit collection</ModalHeader>
@@ -390,11 +394,35 @@ class Collection extends React.Component {
               </FormText>
             </FormGroup>
             <FormGroup>
-              <Label htmlFor={'edit-collection-cover-photo'}>Choose cover image</Label>
-              <Input id={'edit-collection-cover-photo'}
-                     value={this.state.collection.coverPhotoUri}
-                     placeholder={'Enter URI here. (This is temporary)'}
-                     onChange={evt => this.setState({collection: {...this.state.collection, coverPhotoUri: evt.target.value}})} />
+              <Label className={'d-block'}
+                     onClick={() => this.setState({isSelectingPhoto: !this.state.isSelectingPhoto})}>Choose cover image</Label>
+              <Card className={'my-2 d-inline-block'}>
+                <img src={this.state.collection.coverPhotoUri ? `${process.env.REACT_APP_SERVER_URL}/perma/${this.state.collection.coverPhotoUri}` : ''}
+                     alt={this.state.collection.coverPhotoUri || 'no collection photo selected'}
+                     style={{maxWidth:100, maxHeight: 100}}/>
+              </Card>
+              <Button color={'danger'}
+                      outline
+                      className={'ml-2'}
+                      onClick={() => this.setState({collection: {...this.state.collection, coverPhotoUri: ''}})}>Remove cover photo</Button>
+              <Card>
+                <CardHeader className={'cursor-pointer d-flex flex-row justify-content-between align-items-center'}
+                            onClick={() => this.setState({isSelectingPhoto: !this.state.isSelectingPhoto})}>
+                  Select photos from this collection
+                  <Button outline
+                          color={'success'}
+                          disabled={!selectedPhoto}
+                          onClick={() => this.setState({collection: {...this.state.collection, coverPhotoUri: selectedPhoto.uri}})}>
+                    <FontAwesomeIcon icon={faCheck} /> Choose cover photo
+                  </Button>
+                </CardHeader>
+                <Collapse isOpen={this.state.isSelectingPhoto} style={{maxHeight: 400, overflowY: 'scroll'}}>
+                  <PhotoSelectorList selectEnabled={true}
+                                     multiSelectEnabled={false}
+                                     onSelectedChange={photoList => this.setState({collection: {...this.state.collection, photos: photoList}})}
+                                     photoList={this.state.collection.photos} />
+                </Collapse>
+              </Card>
             </FormGroup>
             <FormGroup>
               <Label>Change user access</Label>
@@ -414,7 +442,7 @@ class Collection extends React.Component {
         <ModalFooter>
           {hasUnsavedChanges && <FormText>Unsaved changes</FormText>}
           <Button onClick={this.cancelChangesAndExit} outline>Cancel changes and exit</Button>
-          <Button onClick={this.saveChanges} outline color={'info'}>Save and exit</Button>
+          <Button onClick={this.saveChanges} outline color={'info'} disabled={!hasUnsavedChanges}>Save and exit</Button>
         </ModalFooter>
       </Modal>
     );
