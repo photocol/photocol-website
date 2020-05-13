@@ -278,7 +278,7 @@ class Profile extends React.Component {
             }
           </Container>
           <Container className='mt-5'>
-            <h1>Public collections</h1>
+            <h1>Public and discoverable collections</h1>
             <Row>
               {collectionsJsx}
             </Row>
