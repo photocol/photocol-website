@@ -29,7 +29,7 @@ class Home extends React.Component {
   render = () => {
     const collectionsJsx = this.state.collections.map(collection => (
       <Col xs={10} md={6} lg={4} className="mb-4">
-        <Link to={`/collection/${this.state.username}/${collection.uri}`} className={'link-nostyle'}>
+        <Link to={`/collection/${collection.owner}/${collection.uri}`} className={'link-nostyle'}>
           <Card style={{ height: '14rem' }}>
             {collection.coverPhotoUri === undefined
               ?  <CardImg top src={cover} alt="Card image cap"
