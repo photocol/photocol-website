@@ -504,7 +504,7 @@ class Collection extends React.Component {
                             onClick={this.toggleEditModal}
                             color={'info'}
                             title={'Edit collection details'}>
-                      <FontAwesomeIcon icon={faEdit} fixedWidth={true} />
+                      <FontAwesomeIcon icon={faEdit} fixedWidth={true} /> Edit
                     </Button>
                   )
                 }
@@ -515,13 +515,13 @@ class Collection extends React.Component {
                               title={'Add photos to collection'}
                               color={'info'}
                               onClick={this.toggleAddPhotosModal}>
-                        <FontAwesomeIcon icon={faFileUpload} fixedWidth={true} />
+                        <FontAwesomeIcon icon={faFileUpload} fixedWidth={true} /> Upload
                       </Button>
                       <Button className={'mr-2'}
                               title={'Select photos'}
                               color={'info'}
                               onClick={() => this.setState({isSelectMode: !this.state.isSelectMode})}>
-                        <FontAwesomeIcon icon={faObjectUngroup} fixedWidth={true} />
+                        <FontAwesomeIcon icon={faObjectUngroup} fixedWidth={true} /> Select
                       </Button>
                     </>
                   )
@@ -533,7 +533,7 @@ class Collection extends React.Component {
                             color={'danger'}
                             disabled={selectedPhotos.length===0}
                             onClick={this.removeSelectedPhotos}>
-                      <FontAwesomeIcon icon={faMinusSquare} fixedWidth={true} />
+                      <FontAwesomeIcon icon={faMinusSquare} fixedWidth={true} /> Delete
                     </Button>
                   )
                 }
