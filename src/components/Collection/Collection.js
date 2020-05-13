@@ -11,7 +11,7 @@ import {
   faFileUpload,
   faObjectUngroup,
   faMinusSquare,
-  faCircle, faStar, faEye, faCheck, faShieldAlt, faLock, faGlobe
+  faCircle, faStar, faEye, faCheck, faShieldAlt, faLock, faGlobe, faUserTimes
 } from '@fortawesome/free-solid-svg-icons';
 import Photos from "../Photos/Photos";
 import defaultAvatar from '../../noprofile.png';    // https://fontawesome.com/license
@@ -296,6 +296,23 @@ class Collection extends React.Component {
         this.props.history.push('/collections');
       })
       .catch(res => console.error(res));
+  };
+
+  leaveCollection = () => {
+    this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}/leave`)
+      .then(res => {
+        this.props.history.push('/collections');
+      })
+      .catch(err => {
+        const error = err.response.error;
+        switch(error) {
+          case 'CANNOT_LEAVE_NONEMPTY_COLLECTION_AS_OWNER':
+            this.addToast('', 'You can only leave the collection as owner if the collection is empty.', 'warning');
+            break;
+          default:
+            this.addToast('Error', err.response.error, 'danger');
+        }
+      });
   };
 
   render = () => {
@@ -618,6 +635,16 @@ class Collection extends React.Component {
                           disabled={selectedPhotos.length===0}
                           onClick={this.removeSelectedPhotos}>
                     <FontAwesomeIcon icon={faMinusSquare} fixedWidth={true} /> Delete
+                  </Button>
+                )
+              }
+              {
+                currentUserRole!=='ROLE_NONE' && (
+                  <Button className={'mr-2'}
+                          title={'Leave collection'}
+                          color={'warning'}
+                          onClick={this.leaveCollection}>
+                    <FontAwesomeIcon icon={faUserTimes} fixedWidth={true} /> Leave collection
                   </Button>
                 )
               }
