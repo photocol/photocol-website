@@ -25,7 +25,7 @@ class Photo extends React.Component {
     // get params from uri
     const {photouri} = props.match.params;
     this.acm = new ApiConnectionManager();
-
+    this.goBack = this.goBack.bind(this);
     this.state = {
       photouri,
       photo: {
@@ -45,6 +45,10 @@ class Photo extends React.Component {
       },
       isEditing: false
     };
+  }
+
+  goBack() {
+    this.props.history.goBack();
   }
 
   getPhoto = () => {
@@ -118,11 +122,9 @@ class Photo extends React.Component {
     return (
       <div className={'Photo'}>
         {editModal}
-        <Container >
+        <Container>
           <div className={'my-3'}>
-            <Link to='/photos'>
-              <Button outline color="info" className={'m-2'} ><FontAwesomeIcon icon={faArrowCircleLeft} /> Go back</Button>
-            </Link>
+            <Button outline color="info" className={'m-2'} onClick = {this.goBack}><FontAwesomeIcon icon={faArrowCircleLeft} /> Go back</Button>
             <Button outline color="info" href={`${process.env.REACT_APP_SERVER_URL}/perma/${this.state.photouri}/download/${this.state.photo.filename}`}
                     download
                     className={'m-2'} ><FontAwesomeIcon icon={faDownload} /> Download</Button>
