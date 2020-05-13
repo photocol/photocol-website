@@ -4,7 +4,15 @@ import './Collection.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import UserSearch from "../UserSearch/UserSearch";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserSlash, faUserPlus, faEdit, faFileUpload, faObjectUngroup, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
+import {
+  faUserSlash,
+  faUserPlus,
+  faEdit,
+  faFileUpload,
+  faObjectUngroup,
+  faMinusSquare,
+  faCircle, faStar, faGlasses, faEye
+} from '@fortawesome/free-solid-svg-icons';
 import Photos from "../Photos/Photos";
 import defaultAvatar from '../../noprofile.png';    // https://fontawesome.com/license
 import {
@@ -251,6 +259,12 @@ class Collection extends React.Component {
       <ListGroupItem className={'d-flex justify-content-between'} key={userAcl.username}>
         <div className={'d-flex flex-column justify-content-center'}>{userAcl.username}</div>
         <div className={'d-flex flex-row align-items-center'}>
+          <div className={'fa-layers fa-fw fa-2x mr-2'}>
+            <FontAwesomeIcon icon={faCircle} color={'primary'} />
+            <FontAwesomeIcon icon={userAcl.role==='ROLE_OWNER' ? faStar : userAcl.role ==='ROLE_EDITOR' ? faEdit : faEye}
+                             className={'text-light'}
+                             transform={'shrink-8 ' + (userAcl.role==='ROLE_EDITOR' ? 'right-1' : '')} />
+          </div>
           <select value={userAcl.role}
                   className={'form-control w-auto mr-2'}
                   onChange={evt => this.updateAclEntryRole(index, evt.target.value)}>
@@ -275,6 +289,12 @@ class Collection extends React.Component {
                     userFilter={this.userNotInAcl}
                     ref={this.userSearchRef} />
         <div className={'d-flex flex-row align-items-center'}>
+          <div className={'fa-layers fa-fw fa-2x mr-2'}>
+            <FontAwesomeIcon icon={faCircle} color={'primary'} />
+            <FontAwesomeIcon icon={this.state.newAclEntryRole==='ROLE_OWNER' ? faStar : this.state.newAclEntryRole==='ROLE_EDITOR' ? faEdit : faEye}
+                             className={'text-light'}
+                             transform={'shrink-8 ' + (this.state.newAclEntryRole==='ROLE_EDITOR' ? 'right-1' : '')} />
+          </div>
           <select value={this.state.newAclEntryRole}
                   className={'form-control w-auto mr-2'}
                   onChange={evt => this.setState({newAclEntryRole: evt.target.value})}>
@@ -404,8 +424,13 @@ class Collection extends React.Component {
     const userAclCard = (aclEntry, index) => (
       <div key={aclEntry.username} className={'mr-4'}>
         <Link to={`/profile/${aclEntry.username}`} title={aclEntry.username}>
-          <Card outline className={'overflow-hidden ' + (aclEntry.role==='ROLE_OWNER'?'bg-success':aclEntry.role==='ROLE_ENTRY'?'bg-warning':'bg-danger')}>
-            <CardHeader className={'pb-0'} />
+          <Card className={'position-relative'}>
+            <div className={'fa-layers fa-fw fa-2x position-absolute'} style={{right: -10, top: -10}}>
+              <FontAwesomeIcon icon={faCircle} color={'primary'} />
+              <FontAwesomeIcon icon={aclEntry.role==='ROLE_OWNER' ? faStar : aclEntry.role==='ROLE_EDITOR' ? faEdit : faEye}
+                               className={'text-light'}
+                               transform={'shrink-8 ' + (aclEntry.role==='ROLE_EDITOR' ? 'right-1' : '')} />
+            </div>
             <CardImg src={aclEntry.profilePhoto ? `${process.env.REACT_APP_SERVER_URL}/perma/${aclEntry.profilePhoto}` : defaultAvatar}
                      alt={aclEntry.username}
                      style={{width: 64, height: 64, borderRadius: '50%', objectFit: 'cover'}}
