@@ -91,7 +91,7 @@ class Photo extends React.Component {
       .then(res => {
         console.log(res.response);
         this.addToast('', 'Changes successfully saved', 'success');
-
+        this.toggleEditModal();
       })
       .catch(res => {
         const error = res.response.error;
@@ -170,6 +170,7 @@ class Photo extends React.Component {
     return (
       <div className={'Photo'}>
         {editModal}
+        <Toaster toasts={this.state.toasts} onRemoveToast={ToastChef.getRemoveToastFunction(this)} />
         <Container>
           <div className={'my-3'}>
             <Button outline color="info" className={'m-2'} onClick = {this.goBack}><FontAwesomeIcon icon={faArrowCircleLeft} /> Go back</Button>
