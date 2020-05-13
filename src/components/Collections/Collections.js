@@ -160,7 +160,7 @@ class Collections extends React.Component {
                        className="mb-4">
                     <LinkContainer to={`/collection/${collectionOwner}/${collection.uri}`}
                                    style={{ height: '17rem' }}>
-                      <Card outline color="info" className="text-center">
+                      <Card className="text-center">
                         {collection.coverPhotoUri === undefined
                           ?  <CardImg top src={cover} alt="Card image cap"
                                       className = "image"/>

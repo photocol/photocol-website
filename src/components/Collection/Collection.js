@@ -23,6 +23,7 @@ import PhotoSelectorList from "../PhotoSelectorList/PhotoSelectorList";
 import {ToastChef, Toaster} from "../../util/Toaster";
 import {connect} from "react-redux";
 import Authenticator from "../Authenticator/Authenticator";
+import cover from "../../windows.jpg";
 
 class Collection extends React.Component {
     constructor(props) {
@@ -455,7 +456,7 @@ class Collection extends React.Component {
               <Label className={'d-block'}
                      onClick={() => this.setState({isSelectingPhoto: !this.state.isSelectingPhoto})}>Choose cover image</Label>
               <Card className={'my-2 d-inline-block'}>
-                <img src={this.state.collection.coverPhotoUri ? `${process.env.REACT_APP_SERVER_URL}/perma/${this.state.collection.coverPhotoUri}` : ''}
+                <img src={this.state.collection.coverPhotoUri ? `${process.env.REACT_APP_SERVER_URL}/perma/${this.state.collection.coverPhotoUri}` : cover}
                      alt={this.state.collection.coverPhotoUri || 'no collection photo selected'}
                      style={{maxWidth:100, maxHeight: 100}}/>
               </Card>

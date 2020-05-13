@@ -29,6 +29,7 @@ import {faCheck, faUserEdit} from "@fortawesome/free-solid-svg-icons";
 import PhotoSelectorList from "../PhotoSelectorList/PhotoSelectorList";
 import UserSearch from "../UserSearch/UserSearch";
 import defaultAvatar from '../../noprofile.png';
+import cover from "../../windows.jpg";
 
 class Profile extends React.Component {
 
@@ -176,13 +177,18 @@ class Profile extends React.Component {
       return (<Redirect to={`/profile/${this.props.username}`} />);
 
     const collectionsJsx = this.state.collections.map(collection => (
-      <Col xs={12} md={6} lg={4}>
+      <Col xs={10} md={6} lg={4} className="mb-4">
         <Link to={`/collection/${this.state.username}/${collection.uri}`} className={'link-nostyle'}>
-          <Card>
-            <CardImg top src={`${process.env.REACT_APP_SERVER_URL}/perma/${collection.coverPhotoUri}`} />
+          <Card style={{ height: '14rem' }}>
+            {collection.coverPhotoUri === undefined
+              ?  <CardImg top src={cover} alt="Card image cap"
+                          className = "image"/>
+              :  <CardImg top src={`${process.env.REACT_APP_SERVER_URL}/perma/${collection.coverPhotoUri}`}
+                          className = "image"/>
+            }
             <CardBody>
               <p className={'text-truncate'}>{collection.name}</p>
-              <p className={'small text-secondary'}>{collection.description}</p>
+              <p className={'small text-secondary, text-truncate'}>{collection.description}</p>
             </CardBody>
           </Card>
         </Link>
@@ -248,7 +254,7 @@ class Profile extends React.Component {
         {editUserModal}
         <Toaster toasts={this.state.toasts} onRemoveToast={ToastChef.getRemoveToastFunction(this)} />
         <Jumbotron className={'bg-transparent'}>
-          <Container className='mt-5 text-center'>
+          <Container className='mt-2 text-center'>
             <img src={this.state.user.profilePhoto ? `${process.env.REACT_APP_SERVER_URL}/perma/${this.state.user.profilePhoto}` : defaultPhoto}
                  alt={`${this.state.user.username}'s profile`}
                  title={`${this.state.user.username}'s profile`}
@@ -271,12 +277,7 @@ class Profile extends React.Component {
               )
             }
           </Container>
-        </Jumbotron>
-        <Jumbotron fluid className={'bg-transparent'}>
-          <Container><h1>Friends</h1></Container>
-        </Jumbotron>
-        <Jumbotron fluid className={'bg-transparent'}>
-          <Container>
+          <Container className='mt-5'>
             <h1>Public collections</h1>
             <Row>
               {collectionsJsx}
