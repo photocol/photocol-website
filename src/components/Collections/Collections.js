@@ -3,8 +3,8 @@ import ApiConnectionManager from "../../util/ApiConnectionManager";
 import Authenticator from "../Authenticator/Authenticator";
 import {connect} from 'react-redux';
 import './Collections.css';
-import {Button, Row, Col, CardImg, CardImgOverlay, CardHeader, CardTitle, CardSubtitle, CardText, CardBody, CardColumns, Form, FormGroup,
-  FormFeedback, Label, Container, Card, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, Progress, Input, FormText
+import {Button, Row, Col, CardImg, CardTitle, CardSubtitle, CardText, CardBody,
+  FormFeedback, Container, Card, Modal, ModalHeader, ModalBody, Input, FormText
 } from 'reactstrap';
 import "@reach/menu-button/styles.css";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -42,10 +42,6 @@ class Collections extends React.Component {
   onEnter = evt => {
     if(evt.key === 'Enter') {
       this.createCollection();
-      this.setState({
-        collectionName: '',
-        createCollectionError: {}
-      })
     }
   };
 
@@ -73,7 +69,6 @@ class Collections extends React.Component {
         name: this.state.collectionName
       })
     }).then(res => {
-      this.updateCollections();
       const collectionUri = this.state.collectionName.trim().toLowerCase().replace(/ /g, '-').replace(/[^a-z0-9\-]/g, '');
       this.props.history.push(`/collection/${this.props.username}/${collectionUri}`);
     }).catch(res => {
