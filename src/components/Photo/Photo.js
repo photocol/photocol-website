@@ -10,7 +10,7 @@ class Photo extends React.Component {
     // get params from uri
     const {photouri} = props.match.params;
     this.acm = new ApiConnectionManager();
-
+    this.goBack = this.goBack.bind(this);
     this.state = {
       photouri,
       photo: {
@@ -30,12 +30,13 @@ class Photo extends React.Component {
       }
     };
   }
-
+  goBack() {
+    this.props.history.goBack();
+  }
   componentDidMount = () => {
     this.acm.request(`/perma/${this.state.photouri}/details`)
       .then(res => {
         this.setState({ photo: res.response });
-        this.props.history.push()
         console.log(res.response);
       })
       .catch(res => {
@@ -49,9 +50,7 @@ class Photo extends React.Component {
       <div className={'Photo'}>
         <Container >
           <br/>
-          <Link to='/photos'>
-            <Button outline color="info" className={'m-2'} >Go back</Button>
-          </Link>
+            <Button outline color="info" className={'m-2'} onClick = {this.goBack}>Go back</Button>
           <Button outline color="info" href={`${process.env.REACT_APP_SERVER_URL}/perma/download/${this.state.photouri}/${this.state.photo.filename}`}
                   download
                   className={'m-2'} > Download</Button>
