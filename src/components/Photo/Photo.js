@@ -40,7 +40,7 @@ class Photo extends React.Component {
             })
             .catch(err => {
                 console.log(err);
-                console.error(err.response.error);
+             //   console.error(err.response.error);
             })
     };
   render = () => {
@@ -87,7 +87,7 @@ class Photo extends React.Component {
                       ? 'Iso: '+ this.state.photo.metadata.iso
                       : ''
                     }<br/>
-                    {this.state.photo.metadata.captureDate === 0
+                    {this.state.photo.metadata.captureDate === undefined
                       ? 'Capture Date:'+ this.state.photo.metadata.captureDate.toLocaleTimeString()
                       : ''
                     }

@@ -1,14 +1,16 @@
 import React from 'react';
+
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import './Collections.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import Authenticator from "../Authenticator/Authenticator";
-import {Button, Row, Col, CardImg, CardImgOverlay, CardHeader, CardTitle, CardSubtitle,CardText, CardBody, CardColumns, Form, FormGroup, Label, Container, Card, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, Progress} from 'reactstrap';
+import {Button, Row, Col, CardImg, CardImgOverlay, CardHeader, CardTitle, CardSubtitle, CardText, CardBody, CardColumns, Form, FormGroup,
+  FormFeedback, Label, Container, Card, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, Progress, Input, FormText
+} from 'reactstrap';
 import "@reach/menu-button/styles.css";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPlus} from "@fortawesome/free-solid-svg-icons";
-import catlogo from '../../cat-profile.png';
 
 import { LinkContainer } from 'react-router-bootstrap';
 import cover from '../../No_cover.jpg';
@@ -27,7 +29,8 @@ class Collections extends React.Component {
         description: '',
         coverPhotoUri: ''
       },
-      dropdownOpen: null
+      dropdownOpen: null,
+      createCollectionError: {},
     };
   }
 
@@ -41,7 +44,10 @@ class Collections extends React.Component {
   onEnter = evt => {
     if(evt.key === 'Enter') {
       this.createCollection();
-      this.setState({collectionName: ''})
+      this.setState({
+        collectionName: '',
+        createCollectionError: {}
+      })
     }
   };
 
@@ -70,8 +76,34 @@ class Collections extends React.Component {
         name: this.state.collectionName
       })
     })
-      .then(res => this.updateCollections())
-      .catch(err => console.error(err));
+      .then(res => {
+          this.updateCollections();
+          console.log(res);
+      }
+      )
+      .catch(res => {
+        const error = res.response.error;
+        const details = res.response.details;
+        console.log(error);
+        switch(error){
+          case 'INPUT_FORMAT_ERROR':
+            break;
+          default:
+            this.setState({createCollectionError: {collectionName: `Error: "${error}". Please contact the devs for more info.`}});
+            return;
+        }
+        console.log(res.response);
+        console.log(details);
+        switch(details){
+          case 'NAME_FORMAT':
+            this.setState({createCollectionError: {collectionName: 'Invalid Collection Name'}});
+            break;
+          case 'NAME_MISSING':
+            this.setState({createCollectionError: {collectionName: 'Collection name missing'}});
+            break;
+          default:
+        }
+      });
   };
 
   deleteCollection = (username, uri) => {
@@ -96,10 +128,17 @@ class Collections extends React.Component {
             <Row>
               <Col>
                 <FormGroup>
-                  <input type='text'
+                  <Input type='text'
                          id="form-control"
                          value={this.state.collectionName}
-                         onChange={evt => this.setState({collectionName: evt.target.value})} onKeyDown={this.onEnter}/><br/>
+                         invalid={!!this.state.createCollectionError.collectionName}
+                         onChange={evt => this.setState({collectionName: evt.target.value})}
+                         onKeyDown={this.onEnter}/>
+                  <FormFeedback>
+                    {this.state.createCollectionError.collectionName}
+                  </FormFeedback>
+                  <FormText>Collection name cannot be empty or more than 50 characters</FormText>
+                  <br/>
                 </FormGroup>
               </Col>
               <Col>
