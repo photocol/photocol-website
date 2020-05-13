@@ -10,7 +10,8 @@ import "@reach/menu-button/styles.css";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPlus} from "@fortawesome/free-solid-svg-icons";
 import { LinkContainer } from 'react-router-bootstrap';
-import cover from '../../windows.jpg'; // https://slate.com/technology/2014/04/charles-o-rear-is-the-photographer-who-took-the-windows-xp-wallpaper-photo-in-napa-valley.html
+import cover from '../../windows.jpg';
+import {withRouter} from "react-router-dom"; // https://slate.com/technology/2014/04/charles-o-rear-is-the-photographer-who-took-the-windows-xp-wallpaper-photo-in-napa-valley.html
 
 class Collections extends React.Component {
   constructor(props) {
@@ -71,35 +72,33 @@ class Collections extends React.Component {
         isPublic: 0,
         name: this.state.collectionName
       })
-    })
-      .then(res => {
-          this.updateCollections();
-          console.log(res);
+    }).then(res => {
+      this.updateCollections();
+      const collectionUri = this.state.collectionName.trim().toLowerCase().replace(/ /g, '-').replace(/[^a-z0-9\-]/g, '');
+      this.props.history.push(`/collection/${this.props.username}/${collectionUri}`);
+    }).catch(res => {
+      const error = res.response.error;
+      const details = res.response.details;
+      console.log(error);
+      switch(error){
+        case 'INPUT_FORMAT_ERROR':
+          break;
+        default:
+          this.setState({createCollectionError: {collectionName: `Error: "${error}". Please contact the devs for more info.`}});
+          return;
       }
-      )
-      .catch(res => {
-        const error = res.response.error;
-        const details = res.response.details;
-        console.log(error);
-        switch(error){
-          case 'INPUT_FORMAT_ERROR':
-            break;
-          default:
-            this.setState({createCollectionError: {collectionName: `Error: "${error}". Please contact the devs for more info.`}});
-            return;
-        }
-        console.log(res.response);
-        console.log(details);
-        switch(details){
-          case 'NAME_FORMAT':
-            this.setState({createCollectionError: {collectionName: 'Invalid Collection Name'}});
-            break;
-          case 'NAME_MISSING':
-            this.setState({createCollectionError: {collectionName: 'Collection name missing'}});
-            break;
-          default:
-        }
-      });
+      console.log(res.response);
+      console.log(details);
+      switch(details){
+        case 'NAME_FORMAT':
+          this.setState({createCollectionError: {collectionName: 'Invalid Collection Name'}});
+          break;
+        case 'NAME_MISSING':
+          this.setState({createCollectionError: {collectionName: 'Collection name missing'}});
+          break;
+        default:
+      }
+    });
   };
 
   render = () => {
@@ -112,26 +111,20 @@ class Collections extends React.Component {
             Create Collection
           </ModalHeader>
           <ModalBody>
-            <Row>
-              <Col>
-                <FormGroup>
-                  <Input type='text'
-                         id="form-control"
-                         value={this.state.collectionName}
-                         invalid={!!this.state.createCollectionError.collectionName}
-                         onChange={evt => this.setState({collectionName: evt.target.value})}
-                         onKeyDown={this.onEnter}/>
-                  <FormFeedback>
-                    {this.state.createCollectionError.collectionName}
-                  </FormFeedback>
-                  <FormText>Collection name cannot be empty or more than 50 characters</FormText>
-                  <br/>
-                </FormGroup>
-              </Col>
-              <Col>
-                <Button outline color="info" onClick={this.createCollection}>Create </Button>
-              </Col>
-            </Row>
+            <div className={'d-flex flex-row'}>
+              <Input type='text'
+                     className="form-control mr-2"
+                     value={this.state.collectionName}
+                     placeholder={'Collection name'}
+                     invalid={!!this.state.createCollectionError.collectionName}
+                     onChange={evt => this.setState({collectionName: evt.target.value})}
+                     onKeyDown={this.onEnter} />
+              <Button outline color="info" onClick={this.createCollection}>Create </Button>
+            </div>
+            <FormFeedback>
+              {this.state.createCollectionError.collectionName}
+            </FormFeedback>
+            <FormText>Collection name cannot be empty or more than 50 characters</FormText>
           </ModalBody>
         </Modal>
     );
@@ -194,4 +187,4 @@ const mapStateToProps = state => ({
   username: state.user.username
 });
 
-export default connect(mapStateToProps)(Collections);
+export default withRouter(connect(mapStateToProps)(Collections));
