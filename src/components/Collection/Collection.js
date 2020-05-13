@@ -53,7 +53,7 @@ class Collection extends React.Component {
   }
 
   getCollection = () => {
-    this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}`)
+    this.acm.request(`/perma/collection/${this.state.username}/${this.state.collectionuri}`)
       .then(res => {
         this.setState({
           errorMsg: '',
@@ -65,7 +65,6 @@ class Collection extends React.Component {
             const profilePhoto = (await this.acm.request(`/user/profile/${aclEntry.username}`)).response.profilePhoto;
             return {...aclEntry, profilePhoto};
           }));
-          console.log(aclListWithProfilePhotos);
           this.setState({collection: {...this.state.collection, aclList: aclListWithProfilePhotos}});
         });
       })

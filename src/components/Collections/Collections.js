@@ -56,7 +56,7 @@ class Collections extends React.Component {
           })
         })
         .catch(err => console.error(err));
-  }
+  };
 
   componentDidMount = () => {
     this.updateCollections();
