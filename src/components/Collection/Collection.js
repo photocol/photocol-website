@@ -21,6 +21,7 @@ import {
 } from 'reactstrap';
 import PhotoSelectorList from "../PhotoSelectorList/PhotoSelectorList";
 import {ToastChef, Toaster} from "../../util/Toaster";
+import {connect} from "react-redux";
 
 class Collection extends React.Component {
     constructor(props) {
@@ -228,6 +229,9 @@ class Collection extends React.Component {
         </Jumbotron>
       );
 
+    // current user's role
+    let currentUserRole = (this.state.collection.aclList.find(aclEntry => aclEntry.username===this.props.username) || {role: 'ROLE_NONE'}).role;
+
     const editAclModalUser = (userAcl, index) => (
       <ListGroupItem className={'d-flex justify-content-between'} key={userAcl.username}>
         <div className={'d-flex flex-column justify-content-center'}>{userAcl.username}</div>
@@ -430,24 +434,34 @@ class Collection extends React.Component {
             <div className={'d-flex flex-row align-items-center'}>
               <span className="display-4 mr-3">{this.state.collection.name}</span>
               <span>
-                <Button className={'mr-2'}
-                        onClick={this.toggleEditModal}
-                        color={'info'}
-                        title={'Edit collection details'}>
-                  <FontAwesomeIcon icon={faEdit} fixedWidth={true} />
-                </Button>
-                <Button className={'mr-2'}
-                        title={'Add photos to collection'}
-                        color={'info'}
-                        onClick={this.toggleAddPhotosModal}>
-                  <FontAwesomeIcon icon={faFileUpload} fixedWidth={true} />
-                </Button>
-                <Button className={'mr-2'}
-                        title={'Select photos'}
-                        color={'info'}
-                        onClick={() => this.setState({isSelectMode: !this.state.isSelectMode})}>
-                  <FontAwesomeIcon icon={faObjectUngroup} fixedWidth={true} />
-                </Button>
+                {
+                  currentUserRole==='ROLE_OWNER' && (
+                    <Button className={'mr-2'}
+                            onClick={this.toggleEditModal}
+                            color={'info'}
+                            title={'Edit collection details'}>
+                      <FontAwesomeIcon icon={faEdit} fixedWidth={true} />
+                    </Button>
+                  )
+                }
+                {
+                  (currentUserRole==='ROLE_OWNER' || currentUserRole==='ROLE_EDITOR') && (
+                    <>
+                      <Button className={'mr-2'}
+                              title={'Add photos to collection'}
+                              color={'info'}
+                              onClick={this.toggleAddPhotosModal}>
+                        <FontAwesomeIcon icon={faFileUpload} fixedWidth={true} />
+                      </Button>
+                      <Button className={'mr-2'}
+                              title={'Select photos'}
+                              color={'info'}
+                              onClick={() => this.setState({isSelectMode: !this.state.isSelectMode})}>
+                        <FontAwesomeIcon icon={faObjectUngroup} fixedWidth={true} />
+                      </Button>
+                    </>
+                  )
+                }
                 {
                   this.state.isSelectMode && (
                     <Button className={'mr-2'}
@@ -475,7 +489,10 @@ class Collection extends React.Component {
 }
 
 Collection.propTypes = {};
-
 Collection.defaultProps = {};
 
-export default withRouter(Collection);
+const mapStateToProps = state => ({
+  username: state.user.username
+});
+
+export default connect(mapStateToProps)(withRouter(Collection));
