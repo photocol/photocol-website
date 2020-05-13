@@ -1,17 +1,15 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import './Collections.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
 import Authenticator from "../Authenticator/Authenticator";
-import {Button, Row, Col, CardImg, CardImgOverlay, CardHeader, CardTitle, CardSubtitle,CardText, CardBody, CardColumns, Form, FormGroup, Label, Container, Card, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Modal, ModalHeader, ModalBody, Progress} from 'reactstrap';
+import {Button, Row, Col, CardImg, CardTitle, CardSubtitle,CardText, CardBody, FormGroup, Container, Card, Modal,
+  ModalHeader, ModalBody} from 'reactstrap';
 import "@reach/menu-button/styles.css";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPlus} from "@fortawesome/free-solid-svg-icons";
-import catlogo from '../../cat-profile.png';
-
 import { LinkContainer } from 'react-router-bootstrap';
-import cover from '../../No_cover.jpg';
+import cover from '../../no_cover.svg'; // https://fontawesome.com/license
 
 class Collections extends React.Component {
   constructor(props) {
@@ -50,7 +48,6 @@ class Collections extends React.Component {
   updateCollections = () => {
     this.acm.request('/collection/currentuser')
         .then(res => {
-          console.log(res);
           this.setState({
             collections: res.response
           })
@@ -152,24 +149,6 @@ class Collections extends React.Component {
                                     {collection.description}
                                   </CardText>
                                 </CardBody>
-                                {/*<Dropdown*/}
-                                {/*  isOpen={this.state.dropdownOpen === collection.name} size="lg"*/}
-                                {/*  onClick = {() => this.dropdownClick(collection.name)}>*/}
-                                {/*  <DropdownToggle outline color="info">*/}
-
-                                {/*  </DropdownToggle>*/}
-                                {/*  <DropdownMenu>*/}
-                                {/*    <DropdownItem>*/}
-                                {/*      <Link to={`/collection/${collectionOwner}/${collection.uri}`}>Collection</Link>*/}
-                                {/*    </DropdownItem>*/}
-                                {/*    {*/}
-                                {/*      collectionOwner === this.props.username &&*/}
-                                {/*      (*/}
-                                {/*        <DropdownItem onClick={() => this.deleteCollection(collectionOwner, collection.uri)}>Delete</DropdownItem>*/}
-                                {/*      )*/}
-                                {/*    }*/}
-                                {/*  </DropdownMenu>*/}
-                                {/*</Dropdown>*/}
                               </Card>
                             </LinkContainer>
                           </Col>
