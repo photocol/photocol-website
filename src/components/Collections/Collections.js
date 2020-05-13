@@ -102,15 +102,6 @@ class Collections extends React.Component {
       });
   };
 
-  deleteCollection = (username, uri) => {
-    this.acm.request(`/collection/${username}/${uri}/delete`, {
-      method: 'POST'
-    })
-        .then(res => this.updateCollections())
-        .catch(res => console.error(res));
-  };
-
-
   render = () => {
     if(this.props.username==='not logged in')
       return (<Authenticator onUserAction={this.updateCollections} promptText={'Authenticate to see your collections'} />);

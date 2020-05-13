@@ -51,7 +51,8 @@ class Collection extends React.Component {
       toasts: [],
       changeCollectionNameError: {},
       tooLongDescriptionError: {},
-      isSelectingPhoto: false
+      isSelectingPhoto: false,
+      transferOwnershipTo: ''
     };
 
     this.acm = new ApiConnectionManager();
@@ -120,7 +121,9 @@ class Collection extends React.Component {
     const removedEntries = previous.aclList.filter(aclEntry =>
       !current.aclList.find(cAclEntry => aclEntry.username===cAclEntry.username))
       .map(aclEntry => ({...aclEntry, role: 'ROLE_NONE'}));
-    const aclListDiff = newEntries.concat(removedEntries);
+    let aclListDiff = newEntries.concat(removedEntries);
+    if(this.state.transferOwnershipTo)
+      aclListDiff = aclListDiff.map(aclEntry => aclEntry.username===this.state.transferOwnershipTo ? {...aclEntry, role: 'ROLE_OWNER'} : aclEntry);
 
     // get changes in name, description, coverPhotoUri
     // set to null if no change so to prevent unnecessary db updates when not necessary
@@ -142,7 +145,14 @@ class Collection extends React.Component {
       })
     })
       .then(res => {
-        // TODO: handle username or owner change
+        // collection uri will change if collection name or ownership changes
+        if(this.state.transferOwnershipTo || newName) {
+          const newOwner = this.state.transferOwnershipTo || current.aclList.find(aclEntry => aclEntry.role==='ROLE_OWNER').username;
+          const newUri = current.name.trim().toLowerCase().replace(/ /g, '-').replace(/[^a-z\-0-9]/g, '');
+          this.props.history.push(`/collection/${newOwner}/${newUri}`);
+          return;
+        }
+
         this.addToast('', 'Changes successfully saved', 'success');
         this.getCollection();
         this.toggleEditModal();
@@ -248,6 +258,17 @@ class Collection extends React.Component {
     });
   };
 
+  deleteCollection = () => {
+    this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}/delete`, {
+      method: 'POST'
+    })
+      .then(res => {
+        this.addToast('', 'Deleted collection', 'info');
+        this.props.history.push('/collections');
+      })
+      .catch(res => console.error(res));
+  };
+
   render = () => {
     if(this.state.notFound)
       return (
@@ -275,7 +296,6 @@ class Collection extends React.Component {
           <select value={userAcl.role}
                   className={'form-control w-auto mr-2'}
                   onChange={evt => this.updateAclEntryRole(index, evt.target.value)}>
-            <option value={'ROLE_OWNER'}>Owner</option>
             <option value={'ROLE_EDITOR'}>Editor</option>
             <option value={'ROLE_VIEWER'}>Viewer</option>
           </select>
@@ -305,7 +325,6 @@ class Collection extends React.Component {
           <select value={this.state.newAclEntryRole}
                   className={'form-control w-auto mr-2'}
                   onChange={evt => this.setState({newAclEntryRole: evt.target.value})}>
-            <option value={'ROLE_OWNER'}>Owner</option>
             <option value={'ROLE_EDITOR'}>Editor</option>
             <option value={'ROLE_VIEWER'}>Viewer</option>
           </select>
@@ -336,6 +355,13 @@ class Collection extends React.Component {
     })!==JSON.stringify(this.state.lastLoadedCollection);
 
     const selectedPhoto = this.state.collection.photos.find(photo => photo.isSelected);
+
+    const transferCollectionOwnershipJsx = this.state.collection.aclList
+      .filter(aclEntry => aclEntry.username!==this.props.username)
+      .map(aclEntry => (
+        <option value={aclEntry.username} key={aclEntry.username}>{aclEntry.username}</option>
+      ));
+
     const editAclModal = (
       <Modal isOpen={this.state.isEditing} toggle={this.cancelChangesAndExit} style={{maxWidth: 1000}}>
         <ModalHeader toggle={this.cancelChangesAndExit}>Edit collection</ModalHeader>
@@ -408,7 +434,7 @@ class Collection extends React.Component {
               <Card>
                 <CardHeader className={'cursor-pointer d-flex flex-row justify-content-between align-items-center'}
                             onClick={() => this.setState({isSelectingPhoto: !this.state.isSelectingPhoto})}>
-                  Select photos from this collection
+                  Select a cover photo
                   <Button outline
                           color={'success'}
                           disabled={!selectedPhoto}
@@ -431,11 +457,26 @@ class Collection extends React.Component {
                             style={{cursor: 'pointer'}}>Show user list</CardHeader>
                 <Collapse isOpen={this.state.isEditingAcl}>
                   <ListGroup flush>
-                    {this.state.collection.aclList.map(editAclModalUser)}
+                    {this.state.collection.aclList.filter(aclEntry => aclEntry.username!==this.props.username).map(editAclModalUser)}
                     {addAclModalUser}
                   </ListGroup>
                 </Collapse>
               </Card>
+            </FormGroup>
+            <FormGroup>
+              <Label>Transfer collection ownership</Label>
+              <select className={'form-control'}
+                      value={this.state.transferOwnershipTo}
+                      onChange={evt => this.setState({transferOwnershipTo: evt.target.value})}>
+                <option value={''}>Don't transfer ownership</option>
+                {transferCollectionOwnershipJsx}
+              </select>
+              <FormText>Warning: You will lose edit access to this collection, and the URI of this collection will change.</FormText>
+            </FormGroup>
+            <FormGroup>
+              <Label className={'d-block'}>Delete collection</Label>
+              <Button color={'danger'} outline onClick={this.deleteCollection}>Delete collection</Button>
+              <FormText>Warning: You cannot recover the collection once it is deleted, and all editors and viewers will also lose access.</FormText>
             </FormGroup>
           </Form>
         </ModalBody>
