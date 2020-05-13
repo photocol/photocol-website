@@ -38,12 +38,12 @@ class ToastChef {
         toasts: _this.state.toasts.concat([{ header: header, body: body, color: color || 'primary', key: key, isOpen: true }])
       });
 
-      // auto-remove after 5000ms
+      // auto-remove after 10000ms
       setTimeout(() => {
         _this.setState({
           toasts: _this.state.toasts.map(toast => toast.key===key ? {...toast, isOpen: false} : toast)
         });
-      }, 5000);
+      }, 10000);
     };
 
 

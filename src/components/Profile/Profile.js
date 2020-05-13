@@ -28,6 +28,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheck, faUserEdit} from "@fortawesome/free-solid-svg-icons";
 import PhotoSelectorList from "../PhotoSelectorList/PhotoSelectorList";
 import UserSearch from "../UserSearch/UserSearch";
+import defaultAvatar from '../../default_avatar.svg';
 
 class Profile extends React.Component {
 
@@ -189,7 +190,7 @@ class Profile extends React.Component {
     ));
 
     const selectedPhoto = this.state.photoList.find(photo => photo.isSelected);
-    const defaultPhoto = 'https://cdn.iconscout.com/icon/free/png-256/account-profile-avatar-man-circle-round-user-30452.png';
+    const defaultPhoto = defaultAvatar;
     const editUserModal = (
       <Modal isOpen={this.state.isEditing} toggle={this.cancelChanges} style={{maxWidth: 1000}}>
         <ModalHeader toggle={this.cancelChanges}>

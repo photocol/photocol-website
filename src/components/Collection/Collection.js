@@ -6,10 +6,11 @@ import UserSearch from "../UserSearch/UserSearch";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserSlash, faUserPlus, faEdit, faFileUpload, faObjectUngroup, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 import Photos from "../Photos/Photos";
-import catlogo from '../../cat-profile.png';
+import defaultAvatar from '../../default_avatar.svg';    // https://fontawesome.com/license
 import {
   Button, Form, FormGroup, Label, Input, Jumbotron, Container, Card, Collapse, Modal, ModalHeader, ModalBody,
-  ModalFooter, ListGroupItem, ListGroup, CardHeader, FormText } from 'reactstrap';
+  ModalFooter, ListGroupItem, ListGroup, CardHeader, FormText, CardImg
+} from 'reactstrap';
 import PhotoSelectorList from "../PhotoSelectorList/PhotoSelectorList";
 import {ToastChef, Toaster} from "../../util/Toaster";
 
@@ -31,7 +32,7 @@ class Collection extends React.Component {
         aclList: []
       },
       lastLoadedCollection: {}, // for use when updating component
-      errorMsg: '',
+      notFound: false,
       uploadPressed: false,
       isEditingAcl: false,
       isAddingPhotos: false,
@@ -53,9 +54,10 @@ class Collection extends React.Component {
   }
 
   getCollection = () => {
-    this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}`)
+    this.acm.request(`/perma/collection/${this.state.username}/${this.state.collectionuri}`)
       .then(res => {
         this.setState({
+          notFound: false,
           errorMsg: '',
           collection: res.response,
           lastLoadedCollection: JSON.parse(JSON.stringify(res.response))  // simple clone for checking against later
@@ -65,14 +67,12 @@ class Collection extends React.Component {
             const profilePhoto = (await this.acm.request(`/user/profile/${aclEntry.username}`)).response.profilePhoto;
             return {...aclEntry, profilePhoto};
           }));
-          console.log(aclListWithProfilePhotos);
           this.setState({collection: {...this.state.collection, aclList: aclListWithProfilePhotos}});
         });
       })
       .catch(err => {
-        if(!err.response)
-          return;
-        this.setState({errorMsg: err.response.error});
+        console.error(err);
+        this.setState({notFound: true});
       });
   };
 
@@ -210,13 +210,14 @@ class Collection extends React.Component {
   };
 
   render = () => {
-    // FIXME: negative EQ error handling
-    if(this.state.errorMsg)
+    if(this.state.notFound)
       return (
-        <div>
-          Received error from server: {this.state.errorMsg}.<br/>
-          <Link to='/collections'>Return to collections</Link>
-        </div>
+        <Jumbotron className={'bg-transparent text-center'}>
+          <Container>
+            <h1 className={'display-4 mb-2'}>Collection not found.</h1>
+            <p>Return <Link to={`/`}>home</Link> or to <Link to={`/collections`}>your collections</Link>.</p>
+          </Container>
+        </Jumbotron>
       );
 
     const editAclModalUser = (userAcl, index) => (
@@ -366,15 +367,18 @@ class Collection extends React.Component {
     );
 
     const userAclCard = (aclEntry, index) => (
-      <div key={aclEntry.username} className={'mr-2'}>
-        <Card outline color={aclEntry.role==='ROLE_OWNER'?'success':aclEntry.role==='ROLE_ENTRY'?'warning':'danger'}
-              style={{width: 50, height: 50}}>
-          <Link to={`/profile/${aclEntry.username}`} title={aclEntry.username}>
-            <img src={aclEntry.profilePhoto ? `${process.env.REACT_APP_SERVER_URL}/perma/${aclEntry.profilePhoto}` : catlogo}
-                 alt={aclEntry.username}
-                 style={{width: 50, height: 50}}/>
-          </Link>
-        </Card>
+      <div key={aclEntry.username} className={'mr-4'}>
+        <Link to={`/profile/${aclEntry.username}`} title={aclEntry.username}>
+          <Card outline className={'overflow-hidden ' + (aclEntry.role==='ROLE_OWNER'?'bg-success':aclEntry.role==='ROLE_ENTRY'?'bg-warning':'bg-danger')}>
+            <CardHeader className={'pb-0'} />
+            <CardImg src={aclEntry.profilePhoto ? `${process.env.REACT_APP_SERVER_URL}/perma/${aclEntry.profilePhoto}` : defaultAvatar}
+                     alt={aclEntry.username}
+                     style={{width: 64, height: 64}}
+                     className={'bg-light'}
+                     bottom />
+
+          </Card>
+        </Link>
       </div>
     );
 

@@ -8,7 +8,8 @@ import Authenticator from "../Authenticator/Authenticator";
 import { Button, Jumbotron, Container, ModalBody, Modal, Progress, ModalHeader } from 'reactstrap';
 import PhotoSelectorList from '../PhotoSelectorList/PhotoSelectorList';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {faBan, faCheck, faFileUpload, faObjectUngroup} from '@fortawesome/free-solid-svg-icons';
+import {faBan, faCheck, faCheckSquare, faFileUpload} from '@fortawesome/free-solid-svg-icons';
+import {ToastChef, Toaster} from "../../util/Toaster";
 
 class Photos extends React.Component {
   constructor(props) {
@@ -21,7 +22,8 @@ class Photos extends React.Component {
       uploadTotal: 0,
       uploadModal: false,
       isSelectMode: !!props.onSelect || false,
-      isSelectComponent: !!props.onSelect
+      isSelectComponent: !!props.onSelect,
+      toasts: []
     };
 
     this.history = props.history;
@@ -32,9 +34,11 @@ class Photos extends React.Component {
     this.isSelect && (this.onSelect = props.onSelect);
   }
 
-  componentDidMount() {
+  addToast = ToastChef.getAddToastFunction(this);
+
+  componentDidMount = () => {
     this.getPhotoList();
-  }
+  };
 
   confirmPhotoSelection = () => {
     this.onSelect(this.state.photoList.filter(photo => photo.isSelected));
@@ -63,10 +67,6 @@ class Photos extends React.Component {
       .catch(res => console.error(res));
   };
 
-  /* TODO: make the upload button a separate component
-     TODO: add an actual upload button and not automatically upload
-   */
-
   uploadPhoto = (evt) => {
     this.setState({uploadTotal : this.state.uploadTotal+evt.target.files.length});
     Array.from(evt.target.files).forEach(file =>
@@ -76,48 +76,68 @@ class Photos extends React.Component {
         body: file,
         headers: { 'Access-Control-Request-Method': 'PUT' }
       }).then(res => {
-        this.setState({uploadCount: this.state.uploadCount+1});
-        if(this.state.uploadCount === this.state.uploadTotal) {
-          this.setState({uploadTotal: 0});
-        }
+        this.setState({
+          uploadCount: this.state.uploadCount+1
+        }, () => {
+          if(this.state.uploadCount === this.state.uploadTotal) {
+            this.setState({uploadTotal: 0});
+            this.addToast('', 'Finished uploading photos.', 'info');
+            this.toggleUploadModal();
+          }
+        });
         this.getPhotoList();
       }).catch(err => {
-        console.log(err)
+        const error = err.response.error;
+        const details = err.response.details;
+        switch (error) {
+          case 'INPUT_FORMAT_ERROR':
+            if(details.split(' ')[0]==='IMAGE_FORMAT_ERROR')
+              this.addToast('Error', `${details.split(' ')[1]} upload failed: not an image.`, 'danger');
+            else
+              this.addToast('', error + ' ' + details, 'danger');
+            break;
+          default:
+            this.addToast('', error, 'danger');
+        }
+
+        this.setState({
+          uploadCount: this.state.uploadCount+1
+        }, () => {
+          if(this.state.uploadCount === this.state.uploadTotal) {
+            this.setState({uploadTotal: 0});
+            this.addToast('', 'Finished uploading photos.', 'info');
+            this.toggleUploadModal();
+          }
+        });
       }));
+  };
+
+  toggleSelectAll = () => {
+    // if any not selected, select all
+    const unSelected = this.state.photoList.find(photo => !photo.isSelected);
+    if(unSelected!==undefined) {
+      this.setState({
+        photoList: this.state.photoList.map(photo => ({...photo, isSelected: true}))
+      });
+      return;
+    }
+
+    // else all selected, so unselect all
+    this.setState({
+      photoList: this.state.photoList.map(photo => ({...photo, isSelected: false}))
+    });
   };
 
   render = () => {
     if(this.props.username==='not logged in')
-      return (<Authenticator onUserAction={this.getPhotoList}/>);
-
-    // how to show an image
-    // const photoJsx = (photo, index) => (
-    //   <li key={photo.uri}>
-    //     <input type="checkbox" id={"ph" + index}
-    //            checked={photo.selected}
-    //            onChange={evt => {
-    //              // act like checkbox in select mode
-    //              this.setState({
-    //                photoList: this.state.photoList.map((p, i) =>
-    //                  i !== index ? p : {...p, selected: evt.target.checked}
-    //                )
-    //              });
-    //            }}
-    //            disabled={!this.isSelect && !this.state.isSelected}/>
-    //     <label htmlFor={"ph" + index}
-    //            onClick={() => {
-    //              // act like link in non-select mode
-    //              if(!this.isSelect && !this.state.isSelected)
-    //                this.history.push(`/photo/${photo.uri}`)
-    //            }}>
-    //     </label>
-    //   </li>
-    // );
+      return (<Authenticator onUserAction={this.getPhotoList} promptText={'Authenticate to see your photos'} />);
 
     const selectedPhotos = this.state.photoList.filter(photo => photo.isSelected);
 
     return (
       <div className="Photos">
+        <Toaster toasts={this.state.toasts} onRemoveToast={ToastChef.getRemoveToastFunction(this)} />
+
         {/* file upload modal */}
         <Modal isOpen={this.state.uploadModal} toggle={this.toggleUploadModal}>
           <ModalHeader toggle={this.toggleUploadModal}>
@@ -126,7 +146,10 @@ class Photos extends React.Component {
           <ModalBody>
             {/* progress bar */}
             {this.state.uploadTotal
-              ? (<Progress animated color="success" value={this.state.uploadCount/this.state.uploadTotal * 100} />)
+              ? (<Progress animated
+                           color="primary"
+                           value={this.state.uploadCount/this.state.uploadTotal * 100}
+                           className={'mb-3'} />)
               : ""}
 
             {/* file upload input */}
@@ -175,7 +198,19 @@ class Photos extends React.Component {
                             color={'info'}
                             title={'Toggle selection mode'}
                             onClick={() => this.setState({isSelectMode: !this.state.isSelectMode})}>
-                      <FontAwesomeIcon icon={faObjectUngroup} />
+                      <FontAwesomeIcon icon={faCheck} />
+                    </Button>
+                  )
+                }
+                {/* select all button shows when selecting */}
+                {
+                  this.state.isSelectMode && (
+                    <Button outline
+                            className={'m-2'}
+                            color={'warning'}
+                            title={'Select all'}
+                            onClick={this.toggleSelectAll}>
+                      <FontAwesomeIcon icon={faCheckSquare} />
                     </Button>
                   )
                 }
@@ -202,64 +237,14 @@ class Photos extends React.Component {
         <PhotoSelectorList photoList={this.state.photoList}
                            selectEnabled={this.state.isSelectMode}
                            onSelectedChange={photoList => this.setState({photoList: photoList})} />
-      </div>
 
-      //   <Container>
-      //     <Row>
-      //       <Col>
-      //         <div className ="select">
-      //           <Button color="success" className={this.state.isSelected ? "ButtonOn" : ''}
-      //               onClick={
-      //                 () => {
-      //                   this.state.isSelected && this.state.photoList.forEach((photo) => photo.selected = false);
-      //                   this.setState({isSelected: !this.state.isSelected});
-      //                 }
-      //               }>
-      //             {this.state.isSelected ? "Cancel" : "Select Photos"}
-      //           </Button> &nbsp;&nbsp; &nbsp;
-      //
-      //           {!this.isSelect && this.state.isSelected && <Button color="success" onClick={this.deleteSelectedPhotos}>Delete Photos</Button>}
-      //           {
-      //             // for when used as selection component
-      //             this.isSelect && (<Button color="success" onClick={this.confirmPhotoSelection}>Upload</Button>)
-      //           }
-      //         </div>
-      //       </Col>
-      //       <Col>
-      //         <div className="custom-file">
-      //           <input className="custom-file-input"
-      //                id="customFile"
-      //                type="file"
-      //                onChange={this.uploadPhoto}
-      //                multiple/>
-      //           <label className="custom-file-label" htmlFor="customFile">Upload file</label>
-      //         </div>
-      //       </Col>
-      //     </Row>
-      //     <br/>
-      //     <Row>
-      //       <Col>
-      //         <div>
-      //           {this.state.uploadTotal ? (<Progress animated color="success"
-      //                            value={this.state.uploadCount/this.state.uploadTotal * 100} />) : ""}
-      //         </div>
-      //       </Col>
-      //     </Row>
-      //     <br/>
-      //     {
-      //       // listing images -- fun code is here.
-      //       this.state.isSelected ? <Gallery photos={this.state.photoList}/> : <Gallery photos={this.state.photoList}/>
-      //       // this.state.photoList.map((photo, index) => {
-      //       //   photoJsx(photo, index);
-      //       //   console.log(photo);
-      //       // })
-      //     }
-      //   </Container>
-      //
-      //
-      //
-      //
-      // </div>
+        {/* if no images */}
+        {this.state.photoList.length===0 && (
+          <Container className={'mt-3'}>
+            <p>You have no photos here! Get started by clicking the upload button in blue.</p>
+          </Container>
+        )}
+      </div>
     );
   };
 }
