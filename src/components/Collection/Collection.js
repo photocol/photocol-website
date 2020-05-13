@@ -11,7 +11,7 @@ import {
   faFileUpload,
   faObjectUngroup,
   faMinusSquare,
-  faCircle, faStar, faGlasses, faEye, faCheck
+  faCircle, faStar, faEye, faCheck
 } from '@fortawesome/free-solid-svg-icons';
 import Photos from "../Photos/Photos";
 import defaultAvatar from '../../noprofile.png';    // https://fontawesome.com/license
@@ -22,6 +22,7 @@ import {
 import PhotoSelectorList from "../PhotoSelectorList/PhotoSelectorList";
 import {ToastChef, Toaster} from "../../util/Toaster";
 import {connect} from "react-redux";
+import Authenticator from "../Authenticator/Authenticator";
 
 class Collection extends React.Component {
     constructor(props) {
@@ -65,6 +66,18 @@ class Collection extends React.Component {
   componentDidMount() {
     this.getCollection();
   }
+
+  componentDidUpdate = (prevProps, prevState) => {
+     if(this.props.username!==prevProps.username) {
+       this.getCollection();
+       return;
+     }
+
+     const { username, collectionuri } = this.props.match.params;
+     if(prevState.username!==username || prevState.collectionuri!=collectionuri) {
+       this.setState({username, collectionuri}, this.getCollection);
+     }
+  };
 
   getCollection = () => {
     this.acm.request(`/perma/collection/${this.state.username}/${this.state.collectionuri}`)
@@ -122,8 +135,18 @@ class Collection extends React.Component {
       !current.aclList.find(cAclEntry => aclEntry.username===cAclEntry.username))
       .map(aclEntry => ({...aclEntry, role: 'ROLE_NONE'}));
     let aclListDiff = newEntries.concat(removedEntries);
-    if(this.state.transferOwnershipTo)
-      aclListDiff = aclListDiff.map(aclEntry => aclEntry.username===this.state.transferOwnershipTo ? {...aclEntry, role: 'ROLE_OWNER'} : aclEntry);
+    if(this.state.transferOwnershipTo) {
+      let found = false;
+      for(let aclEntry of aclListDiff) {
+        if(aclEntry.username===this.state.transferOwnershipTo) {
+          aclEntry.role = 'ROLE_OWNER';
+          found = true;
+        }
+      }
+
+      if(!found)
+        aclListDiff.push({username: this.state.transferOwnershipTo, role: 'ROLE_OWNER'});
+    }
 
     // get changes in name, description, coverPhotoUri
     // set to null if no change so to prevent unnecessary db updates when not necessary
@@ -145,11 +168,16 @@ class Collection extends React.Component {
       })
     })
       .then(res => {
+        const transferOwner = this.state.transferOwnershipTo;
+        this.setState({transferOwnershipTo: ''});
+
         // collection uri will change if collection name or ownership changes
-        if(this.state.transferOwnershipTo || newName) {
-          const newOwner = this.state.transferOwnershipTo || current.aclList.find(aclEntry => aclEntry.role==='ROLE_OWNER').username;
+        if(transferOwner || newName) {
+          const newOwner = transferOwner || current.aclList.find(aclEntry => aclEntry.role==='ROLE_OWNER').username;
           const newUri = current.name.trim().toLowerCase().replace(/ /g, '-').replace(/[^a-z\-0-9]/g, '');
+          console.log(newOwner, newUri);
           this.props.history.push(`/collection/${newOwner}/${newUri}`);
+          this.toggleEditModal();
           return;
         }
 
@@ -178,7 +206,7 @@ class Collection extends React.Component {
           case 'NAME_MISSING':
             this.setState({changeCollectionNameError: {name: 'Collection name missing'}});
             break;
-          case 'NAME_MISSING':
+          case 'DESCRIPTION_LENGTH':
             this.setState({tooLongDescriptionError: {description: 'Description word limit is exceeded'}});
             break;
           default:
@@ -275,7 +303,11 @@ class Collection extends React.Component {
         <Jumbotron className={'bg-transparent text-center'}>
           <Container>
             <h1 className={'display-4 mb-2'}>Collection not found.</h1>
-            <p>Return <Link to={`/`}>home</Link> or to <Link to={`/collections`}>your collections</Link>.</p>
+            <p>
+              Return <Link to={`/`}>home</Link>{this.props.username==='not logged in' ? '.' : <> or to <Link to={`/collections`}>your collections</Link>.</>}
+              {this.props.username==='not logged in' && <> You may need to log in or sign up to view this collection.</>}
+            </p>
+            {this.props.username==='not logged in' && <Authenticator promptText={' '} />}
           </Container>
         </Jumbotron>
       );
@@ -352,7 +384,7 @@ class Collection extends React.Component {
       ...this.state.collection,
       aclList: this.state.collection.aclList.map(aclEntry => ({...aclEntry, profilePhoto: undefined})),
       photos: this.state.collection.photos.map(photo => ({...photo, isSelected: undefined}))
-    })!==JSON.stringify(this.state.lastLoadedCollection);
+    })!==JSON.stringify(this.state.lastLoadedCollection) || this.state.transferOwnershipTo;
 
     const selectedPhoto = this.state.collection.photos.find(photo => photo.isSelected);
 

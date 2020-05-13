@@ -133,7 +133,7 @@ class Authenticator extends React.Component {
 
   render = () => {
     const loginJsx = (
-      <Form inline>
+      <Form inline className={'text-left'}>
         <FormGroup className='mr-2 flex-grow-1'>
           <Input type="text"
                  className='flex-grow-1'
@@ -161,7 +161,7 @@ class Authenticator extends React.Component {
       </Form>
     );
     const signupJsx = (
-      <Form>
+      <Form className={'text-left'}>
         <FormGroup>
           <Label htmlFor="form-username">Username</Label>
           <Input type="text"
