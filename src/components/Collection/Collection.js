@@ -11,7 +11,7 @@ import {
   faFileUpload,
   faObjectUngroup,
   faMinusSquare,
-  faCircle, faStar, faGlasses, faEye, faCheck
+  faCircle, faStar, faEye, faCheck
 } from '@fortawesome/free-solid-svg-icons';
 import Photos from "../Photos/Photos";
 import defaultAvatar from '../../noprofile.png';    // https://fontawesome.com/license
@@ -22,6 +22,7 @@ import {
 import PhotoSelectorList from "../PhotoSelectorList/PhotoSelectorList";
 import {ToastChef, Toaster} from "../../util/Toaster";
 import {connect} from "react-redux";
+import Authenticator from "../Authenticator/Authenticator";
 import cover from "../../windows.jpg";
 
 class Collection extends React.Component {
@@ -52,7 +53,8 @@ class Collection extends React.Component {
       toasts: [],
       changeCollectionNameError: {},
       tooLongDescriptionError: {},
-      isSelectingPhoto: false
+      isSelectingPhoto: false,
+      transferOwnershipTo: ''
     };
 
     this.acm = new ApiConnectionManager();
@@ -65,6 +67,18 @@ class Collection extends React.Component {
   componentDidMount() {
     this.getCollection();
   }
+
+  componentDidUpdate = (prevProps, prevState) => {
+     if(this.props.username!==prevProps.username) {
+       this.getCollection();
+       return;
+     }
+
+     const { username, collectionuri } = this.props.match.params;
+     if(prevState.username!==username || prevState.collectionuri!=collectionuri) {
+       this.setState({username, collectionuri}, this.getCollection);
+     }
+  };
 
   getCollection = () => {
     this.acm.request(`/perma/collection/${this.state.username}/${this.state.collectionuri}`)
@@ -121,7 +135,19 @@ class Collection extends React.Component {
     const removedEntries = previous.aclList.filter(aclEntry =>
       !current.aclList.find(cAclEntry => aclEntry.username===cAclEntry.username))
       .map(aclEntry => ({...aclEntry, role: 'ROLE_NONE'}));
-    const aclListDiff = newEntries.concat(removedEntries);
+    let aclListDiff = newEntries.concat(removedEntries);
+    if(this.state.transferOwnershipTo) {
+      let found = false;
+      for(let aclEntry of aclListDiff) {
+        if(aclEntry.username===this.state.transferOwnershipTo) {
+          aclEntry.role = 'ROLE_OWNER';
+          found = true;
+        }
+      }
+
+      if(!found)
+        aclListDiff.push({username: this.state.transferOwnershipTo, role: 'ROLE_OWNER'});
+    }
 
     // get changes in name, description, coverPhotoUri
     // set to null if no change so to prevent unnecessary db updates when not necessary
@@ -143,7 +169,19 @@ class Collection extends React.Component {
       })
     })
       .then(res => {
-        // TODO: handle username or owner change
+        const transferOwner = this.state.transferOwnershipTo;
+        this.setState({transferOwnershipTo: ''});
+
+        // collection uri will change if collection name or ownership changes
+        if(transferOwner || newName) {
+          const newOwner = transferOwner || current.aclList.find(aclEntry => aclEntry.role==='ROLE_OWNER').username;
+          const newUri = current.name.trim().toLowerCase().replace(/ /g, '-').replace(/[^a-z\-0-9]/g, '');
+          console.log(newOwner, newUri);
+          this.props.history.push(`/collection/${newOwner}/${newUri}`);
+          this.toggleEditModal();
+          return;
+        }
+
         this.addToast('', 'Changes successfully saved', 'success');
         this.getCollection();
         this.toggleEditModal();
@@ -169,7 +207,7 @@ class Collection extends React.Component {
           case 'NAME_MISSING':
             this.setState({changeCollectionNameError: {name: 'Collection name missing'}});
             break;
-          case 'NAME_MISSING':
+          case 'DESCRIPTION_LENGTH':
             this.setState({tooLongDescriptionError: {description: 'Description word limit is exceeded'}});
             break;
           default:
@@ -249,13 +287,28 @@ class Collection extends React.Component {
     });
   };
 
+  deleteCollection = () => {
+    this.acm.request(`/collection/${this.state.username}/${this.state.collectionuri}/delete`, {
+      method: 'POST'
+    })
+      .then(res => {
+        this.addToast('', 'Deleted collection', 'info');
+        this.props.history.push('/collections');
+      })
+      .catch(res => console.error(res));
+  };
+
   render = () => {
     if(this.state.notFound)
       return (
         <Jumbotron className={'bg-transparent text-center'}>
           <Container>
             <h1 className={'display-4 mb-2'}>Collection not found.</h1>
-            <p>Return <Link to={`/`}>home</Link> or to <Link to={`/collections`}>your collections</Link>.</p>
+            <p>
+              Return <Link to={`/`}>home</Link>{this.props.username==='not logged in' ? '.' : <> or to <Link to={`/collections`}>your collections</Link>.</>}
+              {this.props.username==='not logged in' && <> You may need to log in or sign up to view this collection.</>}
+            </p>
+            {this.props.username==='not logged in' && <Authenticator promptText={' '} />}
           </Container>
         </Jumbotron>
       );
@@ -276,7 +329,6 @@ class Collection extends React.Component {
           <select value={userAcl.role}
                   className={'form-control w-auto mr-2'}
                   onChange={evt => this.updateAclEntryRole(index, evt.target.value)}>
-            <option value={'ROLE_OWNER'}>Owner</option>
             <option value={'ROLE_EDITOR'}>Editor</option>
             <option value={'ROLE_VIEWER'}>Viewer</option>
           </select>
@@ -306,7 +358,6 @@ class Collection extends React.Component {
           <select value={this.state.newAclEntryRole}
                   className={'form-control w-auto mr-2'}
                   onChange={evt => this.setState({newAclEntryRole: evt.target.value})}>
-            <option value={'ROLE_OWNER'}>Owner</option>
             <option value={'ROLE_EDITOR'}>Editor</option>
             <option value={'ROLE_VIEWER'}>Viewer</option>
           </select>
@@ -334,9 +385,16 @@ class Collection extends React.Component {
       ...this.state.collection,
       aclList: this.state.collection.aclList.map(aclEntry => ({...aclEntry, profilePhoto: undefined})),
       photos: this.state.collection.photos.map(photo => ({...photo, isSelected: undefined}))
-    })!==JSON.stringify(this.state.lastLoadedCollection);
+    })!==JSON.stringify(this.state.lastLoadedCollection) || this.state.transferOwnershipTo;
 
     const selectedPhoto = this.state.collection.photos.find(photo => photo.isSelected);
+
+    const transferCollectionOwnershipJsx = this.state.collection.aclList
+      .filter(aclEntry => aclEntry.username!==this.props.username)
+      .map(aclEntry => (
+        <option value={aclEntry.username} key={aclEntry.username}>{aclEntry.username}</option>
+      ));
+
     const editAclModal = (
       <Modal isOpen={this.state.isEditing} toggle={this.cancelChangesAndExit} style={{maxWidth: 1000}}>
         <ModalHeader toggle={this.cancelChangesAndExit}>Edit collection</ModalHeader>
@@ -409,7 +467,7 @@ class Collection extends React.Component {
               <Card>
                 <CardHeader className={'cursor-pointer d-flex flex-row justify-content-between align-items-center'}
                             onClick={() => this.setState({isSelectingPhoto: !this.state.isSelectingPhoto})}>
-                  Select photos from this collection
+                  Select a cover photo
                   <Button outline
                           color={'success'}
                           disabled={!selectedPhoto}
@@ -432,11 +490,26 @@ class Collection extends React.Component {
                             style={{cursor: 'pointer'}}>Show user list</CardHeader>
                 <Collapse isOpen={this.state.isEditingAcl}>
                   <ListGroup flush>
-                    {this.state.collection.aclList.map(editAclModalUser)}
+                    {this.state.collection.aclList.filter(aclEntry => aclEntry.username!==this.props.username).map(editAclModalUser)}
                     {addAclModalUser}
                   </ListGroup>
                 </Collapse>
               </Card>
+            </FormGroup>
+            <FormGroup>
+              <Label>Transfer collection ownership</Label>
+              <select className={'form-control'}
+                      value={this.state.transferOwnershipTo}
+                      onChange={evt => this.setState({transferOwnershipTo: evt.target.value})}>
+                <option value={''}>Don't transfer ownership</option>
+                {transferCollectionOwnershipJsx}
+              </select>
+              <FormText>Warning: You will lose edit access to this collection, and the URI of this collection will change.</FormText>
+            </FormGroup>
+            <FormGroup>
+              <Label className={'d-block'}>Delete collection</Label>
+              <Button color={'danger'} outline onClick={this.deleteCollection}>Delete collection</Button>
+              <FormText>Warning: You cannot recover the collection once it is deleted, and all editors and viewers will also lose access.</FormText>
             </FormGroup>
           </Form>
         </ModalBody>
