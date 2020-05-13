@@ -2,7 +2,8 @@
     width: 100%;
 }
 .Photos {
-    background-color: aliceblue;
+    /*background-color: aliceblue;*/
+    background-color: white;
 }
 
 .Buttons {
@@ -11,6 +12,20 @@
 
 .ButtonOn {
     background-color: #1B73E8;
+}
+
+div.fill-screen {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 100px;
+    bottom: 0;
+    text-align: center;
+}
+
+.photo333 {
+    max-width: 99%;
+    max-height: 99%;
 }
 
 .photos {
@@ -41,8 +56,8 @@ label>.photo {
     display: block
 }
 
-label {
-    border: 1px solid #000;
+.Photo label {
+    /*border: 1px solid #000;*/
     /*padding: 10px;*/
     display: block;
     position: relative;

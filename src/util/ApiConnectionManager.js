@@ -1,8 +1,5 @@
 // this helper class simply makes requests to the API
 // higher-level logic and store manipulation is implemented in other classes, e.g. LoginManager
-import { env } from "./Environment";
-
-// make requests to the API
 class ApiConnectionManager {
   /**
    * Generic request helper. 400+ status codes are sent to reject. Response (and error)
@@ -12,7 +9,7 @@ class ApiConnectionManager {
    */
   request(uri, options) {
     return new Promise((resolve, reject) => {
-      fetch(env.serverUrl + uri, {
+      fetch(process.env.REACT_APP_SERVER_URL + uri, {
         credentials: 'include',
         ...options
       }).then(async res => {

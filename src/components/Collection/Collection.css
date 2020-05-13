@@ -1,9 +1,18 @@
 .Collection {}
 
 .collection-photo-container {
-    background-color: lightgrey;
+    background-color: white;
 }
 .collection-photo-container > img {
     max-width: 500px;
     max-height: 500px;
+}
+.header{
+    background-color:white;
+}
+a2 {
+    text-decoration: none;
+    position: relative;
+    display: block;
+    color: black;
 }

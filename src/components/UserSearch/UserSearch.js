@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './UserSearch.css';
 import ApiConnectionManager from "../../util/ApiConnectionManager";
+import { Dropdown, DropdownToggle, DropdownItem, DropdownMenu, Input } from 'reactstrap';
 
 class UserSearch extends React.Component {
   constructor(props) {
@@ -9,18 +10,22 @@ class UserSearch extends React.Component {
 
     this.acm = new ApiConnectionManager();
     this.state = {
-      queryString: '',
       searchResults: []
     };
   }
 
+  componentDidUpdate = (prevProps, prevState) => {
+    if(this.props.searchQuery!==prevProps.searchQuery)
+      this.searchUsers();
+  };
+
   searchUsers = () => {
-    if(this.state.queryString.length===0) {
+    if(this.props.searchQuery.length===0) {
       this.setState({searchResults: []});
       return;
     }
 
-    this.acm.request(`/search/user/${this.state.queryString}`)
+    this.acm.request(`/search/user/${this.props.searchQuery}`)
       .then(res => {
         this.setState({searchResults: res.response.filter(this.props.userFilter)});
       })
@@ -34,41 +39,45 @@ class UserSearch extends React.Component {
     });
   };
 
+  handleSelect = result => {
+    this.props.onUserSelect(result);
+  };
+
   render = () => {
     return (
-      <div>
-        <input type='text'
-               value={this.state.queries}
-               onChange={evt => {
-                 this.setState({queryString: evt.target.value}, this.searchUsers)
-               }} />
-        <ul>
+      <Dropdown isOpen={this.state.searchResults.length>0} toggle={() => {}} {...this.props}>
+        <DropdownToggle className={'bg-transparent p-0 border-0'}>
+          <Input type='text'
+                 value={this.props.searchQuery}
+                 placeholder={this.props.promptText}
+                 onChange={this.props.onChange} />
+        </DropdownToggle>
+        <DropdownMenu>
           {
-            this.state.searchResults.map(result =>
-              <div key={result}>
-                {result}
-                <button onClick={() => this.props.onUserSelect(result)}>
-                  {this.props.selectText}
-                </button>
-              </div>
-            )
+            this.state.searchResults.map(result => (
+              <DropdownItem key={result} onClick={() => this.handleSelect(result)}>{result}</DropdownItem>
+            ))
           }
-        </ul>
-      </div>
+        </DropdownMenu>
+      </Dropdown>
     );
   };
 }
 
 UserSearch.propTypes = {
   onUserSelect: PropTypes.func,
-  buttonText: PropTypes.string,
-  userFilter: PropTypes.func
+  promptText: PropTypes.string,
+  userFilter: PropTypes.func,
+  searchQuery: PropTypes.string,
+  onChange: PropTypes.func
 };
 
 UserSearch.defaultProps = {
   onUserSelect: () => {},
-  buttonText: 'Select',
-  userFilter: () => true
+  promptText: 'Select user',
+  userFilter: () => true,
+  searchQuery: '',
+  onChange: () => {}
 };
 
 export default UserSearch;

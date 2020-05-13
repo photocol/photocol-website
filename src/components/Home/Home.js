@@ -1,17 +1,18 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import './Home.css';
+import { Container, Jumbotron } from 'reactstrap';
+import welcome from "../../signs.svg"; //Icons made by <a href="http://www.freepik.com/" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
 
 const Home = () => (
-  <div className="Home">
-    <h1>Welcome to Photocol!</h1>
-    <p>A work in progress</p>
-    <p>by JLRLTYVZ</p>
-  </div>
+  <Container className="Home mt-5">
+    <Jumbotron fluid className={'text-center bg-transparent'}>
+      <img className="d-block mx-auto" src={welcome} style={{height: '20rem'}}/>
+      <h2>to</h2>
+      <h1>  Photocol!</h1>
+      <p>by JLRLTYVZ</p>
+    </Jumbotron>
+
+  </Container>
 );
-
-Home.propTypes = {};
-
-Home.defaultProps = {};
 
 export default Home;
