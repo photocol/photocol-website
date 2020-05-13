@@ -455,15 +455,21 @@ class Collection extends React.Component {
             <FormGroup>
               <Label className={'d-block'}
                      onClick={() => this.setState({isSelectingPhoto: !this.state.isSelectingPhoto})}>Choose cover image</Label>
-              <Card className={'my-2 d-inline-block'}>
-                <img src={this.state.collection.coverPhotoUri ? `${process.env.REACT_APP_SERVER_URL}/perma/${this.state.collection.coverPhotoUri}` : cover}
-                     alt={this.state.collection.coverPhotoUri || 'no collection photo selected'}
-                     style={{maxWidth:100, maxHeight: 100}}/>
-              </Card>
-              <Button color={'danger'}
-                      outline
-                      className={'ml-2'}
-                      onClick={() => this.setState({collection: {...this.state.collection, coverPhotoUri: ''}})}>Remove cover photo</Button>
+              {
+                this.state.collection.coverPhotoUri ? (
+                  <>
+                    <Card className={'my-2 d-inline-block'}>
+                      <img src={`${process.env.REACT_APP_SERVER_URL}/perma/${this.state.collection.coverPhotoUri}`}
+                           alt={this.state.collection.coverPhotoUri}
+                           style={{maxWidth:100, maxHeight: 100}}/>
+                    </Card>
+                    <Button color={'danger'}
+                            outline
+                            className={'ml-2'}
+                            onClick={() => this.setState({collection: {...this.state.collection, coverPhotoUri: ''}})}>Remove cover photo</Button>
+                  </>
+                ) : <p>No cover photo set.</p>
+              }
               <Card>
                 <CardHeader className={'cursor-pointer d-flex flex-row justify-content-between align-items-center'}
                             onClick={() => this.setState({isSelectingPhoto: !this.state.isSelectingPhoto})}>
