@@ -176,7 +176,7 @@ class Photos extends React.Component {
                         color={'primary'}
                         onClick={this.toggleUploadModal}
                         title={'Upload photos'}>
-                  <FontAwesomeIcon icon={faFileUpload} />
+                  <FontAwesomeIcon fw icon={faFileUpload} /> Upload
                 </Button>
                 {/* confirm selection button shows when a select component */}
                 {
@@ -186,7 +186,7 @@ class Photos extends React.Component {
                             color={'success'}
                             title={'Confirm selection'}
                             onClick={this.confirmPhotoSelection}>
-                      <FontAwesomeIcon icon={faCheck} />
+                      <FontAwesomeIcon fw icon={faCheck} />
                     </Button>
                   )
                 }
@@ -198,7 +198,7 @@ class Photos extends React.Component {
                             color={'info'}
                             title={'Toggle selection mode'}
                             onClick={() => this.setState({isSelectMode: !this.state.isSelectMode})}>
-                      <FontAwesomeIcon icon={faCheck} />
+                      <FontAwesomeIcon fw icon={faCheck} /> Select
                     </Button>
                   )
                 }
@@ -210,7 +210,7 @@ class Photos extends React.Component {
                             color={'warning'}
                             title={'Select all'}
                             onClick={this.toggleSelectAll}>
-                      <FontAwesomeIcon icon={faCheckSquare} />
+                      <FontAwesomeIcon fw icon={faCheckSquare} /> Select All
                     </Button>
                   )
                 }
@@ -223,7 +223,7 @@ class Photos extends React.Component {
                             title={'Delete selected photos'}
                             onClick={this.deleteSelectedPhotos}
                             disabled={selectedPhotos.length===0}>
-                      <FontAwesomeIcon icon={faBan} />
+                      <FontAwesomeIcon fw icon={faBan} /> Delete
                     </Button>
                   )
                 }

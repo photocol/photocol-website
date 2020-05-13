@@ -28,7 +28,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCheck, faUserEdit} from "@fortawesome/free-solid-svg-icons";
 import PhotoSelectorList from "../PhotoSelectorList/PhotoSelectorList";
 import UserSearch from "../UserSearch/UserSearch";
-import defaultAvatar from '../../noprofile.png';
+import defaultAvatar from '../../noprofile.png'; //https://images.app.goo.gl/pKRHyETx3LP67cVj9
 import cover from "../../windows.jpg";
 
 class Profile extends React.Component {
@@ -265,7 +265,7 @@ class Profile extends React.Component {
             <p>{this.state.user.email}</p>
             {this.props.username!=='not logged in' && this.props.username===this.state.user.username && (
                 <Button outline title={'Edit user profile'} onClick={this.toggleIsEditing}>
-                  <FontAwesomeIcon icon={faUserEdit} />
+                  <FontAwesomeIcon icon={faUserEdit} /> Edit
                 </Button>
               )
             }
