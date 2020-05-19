@@ -216,12 +216,12 @@ class Collection extends React.Component {
 
   };
 
-  updateAclEntryRole = (index, newRole) => {
+  updateAclEntryRole = (username, newRole) => {
     this.setState({
       collection: {
         ...this.state.collection,
-        aclList: this.state.collection.aclList.map((aclEntry, i) =>
-          i!==index
+        aclList: this.state.collection.aclList.map(aclEntry =>
+          aclEntry.username!==username
             ? aclEntry
             : {...aclEntry, role: newRole}
         )
@@ -345,7 +345,7 @@ class Collection extends React.Component {
           </div>
           <select value={userAcl.role}
                   className={'form-control w-auto mr-2'}
-                  onChange={evt => this.updateAclEntryRole(index, evt.target.value)}>
+                  onChange={evt => this.updateAclEntryRole(userAcl.username, evt.target.value)}>
             <option value={'ROLE_EDITOR'}>Editor</option>
             <option value={'ROLE_VIEWER'}>Viewer</option>
           </select>
