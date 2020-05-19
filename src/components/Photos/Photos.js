@@ -80,7 +80,7 @@ class Photos extends React.Component {
           uploadCount: this.state.uploadCount+1
         }, () => {
           if(this.state.uploadCount === this.state.uploadTotal) {
-            this.setState({uploadTotal: 0});
+            this.setState({uploadTotal: 0, uploadCount: 0});
             this.addToast('', 'Finished uploading photos.', 'info');
             this.toggleUploadModal();
           }
@@ -104,7 +104,7 @@ class Photos extends React.Component {
           uploadCount: this.state.uploadCount+1
         }, () => {
           if(this.state.uploadCount === this.state.uploadTotal) {
-            this.setState({uploadTotal: 0});
+            this.setState({uploadTotal: 0, uploadCount: 0});
             this.addToast('', 'Finished uploading photos.', 'info');
             this.toggleUploadModal();
           }
